@@ -1,0 +1,3652 @@
+<title>Mica Assess</title>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Committed single visual world: a dark field instrument. The canvas is the
+     page, so there is no light ground to design for - every colour is painted. */
+  :root{
+    --ground:#0A0D11;
+    --surface:#141A21;
+    --surface-2:#1C242E;
+    --line:#2A3441;
+    --text:#E6EBF1;
+    --muted:#8795A4;
+    --dot:#93A2B2;
+    --accent:#F0A63C;
+    --accent-ink:#241705;
+    --done:#4FB6A0;
+    --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--ground);color:var(--text);
+    font-family:var(--sans);overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior:none;
+  }
+  #stage{position:fixed;inset:0;touch-action:none;display:block;cursor:grab}
+
+  .label{
+    font-family:var(--mono);font-size:10px;font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ---- top bar ---- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:3;
+    display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+    padding:max(14px,env(safe-area-inset-top)) 18px 22px;
+    pointer-events:none;
+    background:linear-gradient(to bottom,rgba(10,13,17,.92),rgba(10,13,17,0));
+  }
+  .brand{display:flex;flex-direction:column;gap:3px}
+  .brand b{font-size:14px;font-weight:600;letter-spacing:-.01em}
+  .progress{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .progress .count{font-family:var(--mono);font-size:12px;color:var(--text);font-variant-numeric:tabular-nums}
+  .bar{width:132px;height:2px;background:var(--line);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--done);transition:width .35s ease}
+
+  /* ---- bottom dock ---- */
+  .dock{
+    position:fixed;left:0;right:0;bottom:0;z-index:3;
+    padding:16px 16px max(16px,env(safe-area-inset-bottom));
+    display:flex;justify-content:center;
+  }
+  .panel{
+    width:100%;max-width:560px;
+    background:rgba(20,26,33,.94);
+    border:1px solid var(--line);
+    backdrop-filter:blur(14px);
+    padding:16px;
+  }
+
+  .row{display:flex;align-items:center;gap:12px}
+  .row.wrap{flex-wrap:wrap}
+  .grow{flex:1;min-width:0}
+
+  /* segmented control */
+  .seg{display:flex;border:1px solid var(--line)}
+  .seg button{
+    flex:1;appearance:none;background:transparent;border:0;color:var(--muted);
+    font-family:var(--mono);font-size:12px;letter-spacing:.06em;
+    padding:9px 14px;cursor:pointer;min-height:40px;
+  }
+  .seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--text)}
+  .seg button+button{border-left:1px solid var(--line)}
+
+  /* sliders */
+  .field{display:flex;flex-direction:column;gap:7px;flex:1;min-width:130px}
+  .field .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .field .val{font-family:var(--mono);font-size:12px;color:var(--text);font-variant-numeric:tabular-nums}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:22px;
+    background:transparent;cursor:pointer;margin:0;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line)}
+  input[type=range]::-moz-range-track{height:2px;background:var(--line)}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+    background:var(--text);margin-top:-9px;border:0;
+  }
+  input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--text);border:0}
+
+  .step-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line);
+  }
+  .note{margin:0;font-size:12px;line-height:1.4;color:var(--muted)}
+  .note.warn{color:var(--accent)}
+  #summary .note{margin-top:6px}
+
+  /* selection panel */
+  .sel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .sel-name{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.15;margin:2px 0 0}
+  .sel-name .storey{color:var(--muted);font-weight:400}
+  .tag{
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    padding:5px 8px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;
+  }
+  .tag.done{border-color:var(--done);color:var(--done)}
+  .tag.warn{border-color:var(--accent);color:var(--accent)}
+  .btn:disabled{opacity:.45;cursor:default}
+
+  .measure{
+    display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-top:12px;
+    padding-top:12px;border-top:1px solid var(--line);
+  }
+  .measure .field{min-width:120px}
+  .mm{display:flex;align-items:center;gap:8px}
+  .mm input{
+    width:72px;background:var(--ground);border:1px solid var(--line);color:var(--text);
+    font-family:var(--mono);font-size:14px;padding:9px 10px;min-height:40px;
+    font-variant-numeric:tabular-nums;
+  }
+  .mm input:disabled{opacity:.4}
+  .mm input::-webkit-outer-spin-button,.mm input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .mm input[type=number]{-moz-appearance:textfield;appearance:textfield}
+  .measure .field textarea{margin-top:4px}
+  .mm span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .pattern{display:flex;border:1px solid var(--line)}
+  .pattern button{
+    appearance:none;background:transparent;border:0;color:var(--muted);
+    font-family:var(--mono);font-size:11px;letter-spacing:.04em;
+    padding:9px 11px;cursor:pointer;min-height:40px;
+  }
+  .pattern button[aria-pressed="true"]{background:var(--surface-2);color:var(--text)}
+  .pattern button+button{border-left:1px solid var(--line)}
+  .pattern button.hit[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+  .defects{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+  .defects button{
+    appearance:none;background:transparent;border:1px solid var(--line);color:var(--muted);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;
+    padding:8px 10px;cursor:pointer;min-height:36px;
+  }
+  .defects button[aria-pressed="true"]{background:var(--surface-2);color:var(--text);border-color:#3A4756}
+  .defects button.severe[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+
+  .threshold{
+    margin-top:18px;padding:14px 16px;border:1px solid var(--line);
+    display:flex;align-items:baseline;gap:12px;
+  }
+  .threshold.meets{border-color:var(--accent)}
+  .threshold b{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    white-space:nowrap;color:var(--muted);
+  }
+  .threshold.meets b{color:var(--accent)}
+  .threshold span{font-size:13px;color:#5A6470}
+  .doc-crack{
+    font-family:var(--mono);font-size:11px;color:#717B86;margin:2px 0 0;
+  }
+  .doc-crack.hit{color:#8a5a12}
+
+  textarea{
+    width:100%;background:var(--ground);border:1px solid var(--line);color:var(--text);
+    font-family:var(--sans);font-size:14px;line-height:1.45;padding:10px 12px;resize:none;
+    min-height:62px;margin-top:12px;
+  }
+  textarea::placeholder{color:#5C6875}
+  textarea:focus-visible,input[type=range]:focus-visible,button:focus-visible{
+    outline:2px solid var(--accent);outline-offset:2px;
+  }
+
+  .btn{
+    appearance:none;border:1px solid var(--line);background:var(--surface-2);color:var(--text);
+    font-family:var(--sans);font-size:14px;font-weight:500;
+    padding:11px 16px;min-height:44px;cursor:pointer;
+  }
+  .btn:hover{border-color:#3A4756}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+  .btn.ghost{background:transparent;color:var(--muted)}
+
+  .thumbs{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:2px}
+  .thumbs:empty{display:none}
+  .thumb{
+    margin:0;position:relative;flex:0 0 auto;width:74px;height:74px;
+    border:1px solid var(--line);overflow:hidden;background:var(--ground);
+  }
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb figcaption{
+    position:absolute;left:0;right:0;bottom:0;
+    font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+    text-align:center;padding:2px 0;background:rgba(10,13,17,.82);color:var(--muted);
+  }
+  .thumb.confirmed figcaption{color:var(--done)}
+  .thumb.uploading figcaption{color:var(--accent)}
+  .thumb.failed figcaption{color:var(--accent)}
+
+  .conn{
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);
+  }
+  .conn.off{color:var(--accent)}
+
+  .recentre{
+    position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:4;
+    background:rgba(20,26,33,.94);backdrop-filter:blur(14px);
+    padding:10px 13px;min-height:40px;font-size:13px;
+  }
+
+  /* ---- the day: welcome, council cases, and the route between them ---- */
+  .today{
+    position:fixed;inset:0;z-index:5;overflow-y:auto;
+    background:var(--ground);
+    padding:24px 16px 72px;
+  }
+  .today-wrap{max-width:600px;margin:0 auto}
+  .greet{
+    font-size:clamp(24px,5vw,32px);font-weight:600;letter-spacing:-.02em;
+    margin:10px 0 0;line-height:1.15;
+  }
+  .day-summary{margin:8px 0 0;color:var(--muted);font-size:14.5px}
+  .tiles{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    border:1px solid var(--line);margin-top:20px;
+  }
+  .tile{padding:14px;border-right:1px solid var(--line)}
+  .tile:last-child{border-right:0}
+  .tile b{
+    display:block;font-family:var(--mono);font-size:24px;font-weight:500;
+    font-variant-numeric:tabular-nums;
+  }
+  .tile span{
+    display:block;margin-top:4px;font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  }
+  .tile.ready b{color:var(--done)}
+  .tile.part b{color:var(--accent)}
+  .offline-note{margin:12px 0 0;font-size:12.5px;color:var(--muted)}
+
+  .day-block{
+    margin-top:22px;background:rgba(20,26,33,.94);
+    border:1px solid var(--line);padding:16px;
+  }
+  .day-list{display:flex;flex-direction:column;gap:2px;margin-top:12px}
+  .day-list:empty{display:none}
+  .day-item{
+    display:grid;grid-template-columns:26px 1fr auto auto;gap:12px;align-items:center;
+    background:var(--surface-2);padding:12px;cursor:pointer;
+    border:1px solid transparent;text-align:left;color:var(--text);
+    font-family:var(--sans);font-size:14px;appearance:none;width:100%;
+  }
+  .day-item:hover{border-color:var(--line)}
+  .day-item.active{border-color:var(--accent)}
+  .day-item .n{
+    font-family:var(--mono);font-size:11px;color:var(--accent);
+    font-variant-numeric:tabular-nums;
+  }
+  .day-item .addr{font-weight:500;min-width:0}
+  .day-item .addr small{
+    display:block;font-weight:400;color:var(--muted);
+    font-size:11px;font-family:var(--mono);letter-spacing:.02em;margin-top:3px;
+  }
+  .day-item .del{
+    appearance:none;background:transparent;border:0;color:#5F6C7A;
+    font-size:16px;line-height:1;padding:8px;cursor:pointer;
+  }
+  .day-item .del:hover{color:var(--accent)}
+  .case-status{
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    white-space:nowrap;color:var(--muted);
+  }
+  .case-status.in_progress{color:var(--accent)}
+  .case-status.processing{color:var(--accent)}
+  .case-status.ready{color:var(--done)}
+  .case-status.signed_off{color:var(--done)}
+  .case-options{
+    display:flex;gap:8px;flex-wrap:wrap;
+    background:var(--surface);border:1px solid var(--line);border-top:0;
+    padding:10px 12px;
+  }
+  .detail{
+    position:fixed;inset:0;z-index:7;overflow-y:auto;
+    background:rgba(10,13,17,.97);padding:24px 16px 72px;
+  }
+  .detail-wrap{
+    max-width:600px;margin:0 auto;
+    background:rgba(20,26,33,.96);border:1px solid var(--line);padding:16px;
+  }
+  .detail dl{display:flex;flex-wrap:wrap;gap:10px 28px;margin:14px 0 0}
+  .detail dl div{display:flex;flex-direction:column;gap:2px}
+  .detail dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#5F6C7A}
+  .detail dd{margin:0;font-family:var(--mono);font-size:13px}
+  .audit{margin:16px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+  .audit ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .audit li{display:grid;grid-template-columns:auto 1fr;gap:12px;font-size:12.5px}
+  .audit time{font-family:var(--mono);font-size:11px;color:#5F6C7A;white-space:nowrap}
+  .audit .empty{color:var(--muted);font-size:12.5px;margin:10px 0 0}
+
+  .samples{
+    position:fixed;inset:0;z-index:7;overflow-y:auto;
+    background:rgba(10,13,17,.97);padding:24px 16px 72px;
+  }
+  .samples-wrap{max-width:600px;margin:0 auto;
+    background:rgba(20,26,33,.96);border:1px solid var(--line);padding:16px}
+  .smp{background:var(--surface-2);border:1px solid var(--line);padding:13px;margin-top:10px}
+  .smp.void{opacity:.55}
+  .smp-stat.void{color:var(--muted);text-decoration:line-through}
+  .smp-void{margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .reopen{gap:8px}
+  .reopen input{
+    flex:1;background:var(--ground);border:1px solid var(--line);color:var(--text);
+    font-family:var(--sans);font-size:14px;padding:9px 12px;min-height:40px;
+  }
+  .smp-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .smp-head b{font-size:14.5px;letter-spacing:-.01em}
+  .smp-head small{display:block;color:var(--muted);font-family:var(--mono);font-size:11px;margin-top:2px}
+  .smp-stat{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    white-space:nowrap;color:var(--muted)}
+  .smp-stat.sent,.smp-stat.testing{color:var(--accent)}
+  .smp-stat.result{color:var(--done)}
+  .smp-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+  .smp-fields label{display:flex;flex-direction:column;gap:4px;font-family:var(--mono);
+    font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .smp-fields input,.smp-fields select{
+    background:var(--ground);border:1px solid var(--line);color:var(--text);
+    font-family:var(--sans);font-size:13.5px;padding:8px 9px;min-height:38px;
+  }
+  .smp-fields input:focus-visible,.smp-fields select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .smp-actions{display:flex;gap:8px;margin-top:11px}
+  .smp .risk-flag{font-family:var(--mono);font-size:11px;color:var(--done);margin-top:9px}
+  .smp .risk-flag.over{color:var(--accent)}
+  .add-sample{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);
+    display:flex;flex-direction:column;gap:8px}
+  .add-sample select{background:var(--ground);border:1px solid var(--line);color:var(--text);
+    font-family:var(--sans);font-size:14px;padding:9px 10px;min-height:40px}
+  .room-fields{margin-top:11px;display:flex;flex-direction:column;gap:10px}
+  .room-fields .row{gap:14px;align-items:flex-end;flex-wrap:wrap}
+  .room-fields textarea{margin-top:0}
+  .add-sample input{background:var(--ground);border:1px solid var(--line);color:var(--text);
+    font-family:var(--sans);font-size:14px;padding:11px 12px;min-height:44px}
+
+  .paste-mail{
+    width:100%;background:var(--ground);border:1px solid var(--line);color:var(--text);
+    font-family:var(--sans);font-size:13.5px;line-height:1.5;padding:11px 12px;
+    min-height:88px;resize:vertical;margin-top:10px;
+  }
+  .paste-mail::placeholder{color:#5C6875}
+
+  /* ---- the report: a paper document over the dark instrument. The contrast
+     is the point - this is the output, everything else is the tool. ---- */
+  .report{
+    position:fixed;inset:0;z-index:6;overflow-y:auto;
+    background:rgba(10,13,17,.97);
+    padding:24px 16px 72px;
+  }
+  .sheet-bar{
+    max-width:800px;margin:0 auto 14px;
+    display:flex;justify-content:space-between;gap:10px;
+  }
+  .sheet{
+    max-width:800px;margin:0 auto;
+    background:#FBFBF9;color:#1C232B;
+    padding:clamp(28px,6vw,60px);
+    line-height:1.6;
+  }
+  .doc-eyebrow{
+    margin:0;font-family:var(--mono);font-size:10px;font-weight:500;
+    letter-spacing:.16em;text-transform:uppercase;color:#8A94A0;
+  }
+  .doc-title{
+    margin:10px 0 0;font-size:clamp(22px,4vw,30px);font-weight:600;
+    letter-spacing:-.02em;line-height:1.2;min-height:1.2em;
+  }
+  .doc-facts{
+    display:flex;flex-wrap:wrap;gap:8px 32px;margin:22px 0 0;
+    padding:16px 0;border-top:1px solid #E3E1DC;border-bottom:1px solid #E3E1DC;
+  }
+  .doc-facts div{display:flex;flex-direction:column;gap:2px}
+  .doc-facts dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#8A94A0}
+  .doc-facts dd{margin:0;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+  .doc-section{margin-top:36px}
+  .doc-section>h2{
+    margin:0 0 14px;font-family:var(--mono);font-size:11px;font-weight:500;
+    letter-spacing:.16em;text-transform:uppercase;color:#5A6470;
+    border:0;padding:0;
+  }
+  .doc-edit{
+    min-height:52px;font-size:15px;line-height:1.65;
+    padding:2px 0;
+  }
+  .doc-edit:empty::before{content:attr(data-placeholder);color:#A8B0B9}
+  .doc-edit:focus-visible,.doc-title:focus-visible{
+    outline:2px solid var(--accent);outline-offset:4px;
+  }
+  .doc-wall{padding:20px 0;border-top:1px solid #ECEAE5}
+  .doc-wall:first-child{border-top:0;padding-top:0}
+  .doc-wall-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px}
+  .doc-wall-head h3{margin:0;font-size:16.5px;font-weight:600;letter-spacing:-.01em}
+  .doc-wall-head h3 small{font-weight:400;color:#717B86;font-size:13px;margin-left:6px}
+  .doc-wall-head .facing{font-family:var(--mono);font-size:11px;color:#717B86;white-space:nowrap}
+  .doc-wall .uncaptured{color:#A8B0B9;font-size:14px;font-style:italic}
+  .doc-photos{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:8px;margin:12px 0 4px;
+  }
+  .doc-photos img{
+    width:100%;aspect-ratio:4/3;object-fit:cover;display:block;
+    background:#ECEAE5;
+  }
+  .doc-footnote{
+    margin:44px 0 0;padding-top:14px;border-top:1px solid #E3E1DC;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:#8A94A0;
+  }
+
+  @media print{
+    body{overflow:visible;background:#fff}
+    #stage,header,.dock,.recentre,.hint,.sheet-bar{display:none!important}
+    .report{position:static;overflow:visible;background:#fff;padding:0}
+    .sheet{max-width:none;padding:0}
+    .doc-wall{break-inside:avoid}
+    .doc-edit:empty::before,.doc-title:empty::before{content:''}
+  }
+
+  /* hint */
+  .hint{
+    position:fixed;left:50%;top:calc(50% + 138px);transform:translateX(-50%);z-index:2;
+    margin:0;
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);white-space:nowrap;pointer-events:none;
+    transition:opacity .5s ease;
+  }
+  .hint[hidden]{display:block!important;opacity:0}
+
+  @media (max-width:420px){
+    .sel-name{font-size:19px}
+    .panel{padding:14px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important}
+  }
+</style>
+
+<canvas id="stage"></canvas>
+
+<header>
+  <div class="brand">
+    <b>Mica Assess</b>
+    <span class="label">DCB assessment</span>
+  </div>
+  <div class="progress">
+    <span class="count" id="count">0 / 8 walls</span>
+    <span class="bar"><i id="barfill"></i></span>
+    <span class="conn" id="conn">All synced</span>
+  </div>
+</header>
+
+<p class="hint" id="hint">Drag to turn &nbsp;·&nbsp; Tap a wall</p>
+
+<button class="btn recentre" id="recentre" type="button">Recentre</button>
+
+<div class="today" id="today" hidden>
+  <div class="today-wrap">
+    <p class="label" id="dayDate"></p>
+    <h1 class="greet" id="greet">Good morning</h1>
+    <p class="day-summary" id="daySummary"></p>
+
+    <div class="tiles">
+      <div class="tile"><b id="tCapture">0</b><span>To capture</span></div>
+      <div class="tile part"><b id="tPart">0</b><span>Part-captured</span></div>
+      <div class="tile ready"><b id="tReady">0</b><span>Ready to review</span></div>
+    </div>
+    <p class="offline-note">Works with no signal — everything is saved on this tablet until it can sync.</p>
+
+    <button class="btn primary" id="resumeLast" type="button" hidden style="width:100%;margin-top:18px"></button>
+
+    <div class="day-block">
+      <div class="step-head" style="margin-bottom:0">
+        <span class="label">Today's list</span>
+        <span class="val" id="dayCount">0 cases</span>
+      </div>
+      <div class="day-list" id="dayList"></div>
+      <div class="row" style="gap:8px;margin-top:14px">
+        <button class="btn primary grow" id="planRoute" type="button">Plan route</button>
+        <button class="btn" id="openMaps" type="button" disabled>Open in Maps</button>
+      </div>
+    </div>
+
+    <div class="day-block">
+      <div class="step-head" style="margin-bottom:0">
+        <span class="label">From the council email</span>
+      </div>
+      <p class="note" style="margin-top:10px">Assessments arrive by email from the County Council.
+        Paste the email and the Case No., address and Eircode are picked out — there is no other way to start one.</p>
+      <textarea class="paste-mail" id="mailPaste" placeholder="Paste the council email here…" aria-label="Council email text"></textarea>
+      <p class="note" id="routeNote" style="margin-top:8px"></p>
+      <div class="row" style="margin-top:8px">
+        <button class="btn grow" id="importMail" type="button">Add cases from email</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="samples" id="rooms" hidden>
+  <div class="samples-wrap">
+    <div class="step-head">
+      <span class="label">Internal rooms</span>
+      <span class="val" id="roomCase"></span>
+    </div>
+    <p class="note">Inside the house, one room at a time, with the same checklist as the elevations. The building group is still decided by the external walls.</p>
+    <div id="roomList"></div>
+    <p class="note" id="roomNote" style="margin-top:10px"></p>
+    <div class="add-sample" id="roomAdd">
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <select id="roomName" aria-label="Room" style="flex:1 1 160px">
+          <option value="Kitchen">Kitchen</option>
+          <option value="Living room">Living room</option>
+          <option value="Hall">Hall</option>
+          <option value="Utility">Utility</option>
+          <option value="Bathroom">Bathroom</option>
+          <option value="Bedroom 1">Bedroom 1</option>
+          <option value="Bedroom 2">Bedroom 2</option>
+          <option value="Bedroom 3">Bedroom 3</option>
+          <option value="Landing">Landing</option>
+          <option value="Other">Other…</option>
+        </select>
+        <input type="text" id="roomOther" placeholder="Room name" aria-label="Room name" style="flex:1 1 160px" hidden>
+        <div class="seg" id="roomStorey" role="group" aria-label="Storey">
+          <button type="button" data-storey="0" aria-pressed="true">Ground</button>
+          <button type="button" data-storey="1" aria-pressed="false">First</button>
+        </div>
+      </div>
+      <div class="row" style="gap:8px;margin-top:8px">
+        <button class="btn grow" id="roomAddBtn" type="button">Add room</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn grow" id="roomClose" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="samples" id="samples" hidden>
+  <div class="samples-wrap">
+    <div class="step-head">
+      <span class="label">Samples &amp; lab results</span>
+      <span class="val" id="smpCase"></span>
+    </div>
+    <p class="note">Cores taken on site, tracked to the lab and back. Test Suite A (I.S. 465:2026, 7.2): simplified petrography and total sulfur; the lab classifies each sample under Table 2.</p>
+    <div id="smpList"></div>
+    <p class="note" id="smpNote" style="margin-top:10px"></p>
+    <input type="file" id="smpPhoto" accept="image/*" capture="environment" hidden>
+    <div class="add-sample">
+      <input type="text" id="smpLoc" placeholder="Rising wall, below ground" aria-label="Sample location">
+      <div class="row" style="gap:8px">
+        <button class="btn grow" id="smpAdd" type="button">Add rising-wall sample</button>
+        <button class="btn" id="smpExample" type="button">Add example result</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn grow" id="smpClose" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="detail" id="detail" hidden>
+  <div class="detail-wrap">
+    <div class="step-head">
+      <span class="label">Case details</span>
+      <span class="case-status" id="detStatus"></span>
+    </div>
+    <h2 style="margin:0;font-size:19px;font-weight:600;letter-spacing:-.01em;border:0;padding:0;text-transform:none;font-family:var(--sans);color:var(--text)" id="detAddress"></h2>
+    <dl>
+      <div><dt>Case No.</dt><dd id="detCase"></dd></div>
+      <div><dt>Homeowner</dt><dd id="detOwner"></dd></div>
+      <div><dt>Eircode</dt><dd id="detEir"></dd></div>
+      <div><dt>County</dt><dd id="detCounty"></dd></div>
+      <div><dt>Sent by council</dt><dd id="detSent"></dd></div>
+      <div><dt>Sent by</dt><dd id="detFrom"></dd></div>
+      <div><dt>Walls captured</dt><dd id="detWalls"></dd></div>
+      <div><dt>Samples</dt><dd id="detSamples"></dd></div>
+      <div><dt>Map location</dt><dd id="detGeo"></dd></div>
+    </dl>
+    <div class="audit">
+      <span class="label">Audit trail</span>
+      <ol id="auditList"></ol>
+      <p class="empty" id="auditEmpty" hidden>Nothing recorded yet.</p>
+    </div>
+    <div class="row" style="margin-top:16px">
+      <button class="btn grow" id="closeDetail" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="report" id="report" hidden>
+  <div class="sheet-bar">
+    <button class="btn" id="closeReport" type="button">Back</button>
+    <button class="btn" id="signOff" type="button">Sign off</button>
+    <button class="btn primary" id="printReport" type="button">Export PDF</button>
+  </div>
+  <div class="sheet-bar reopen" id="reopenBox" hidden>
+    <input type="text" id="reopenReason" placeholder="Why is this being reopened?" aria-label="Reason for reopening" maxlength="160">
+    <button class="btn" id="reopenConfirm" type="button">Reopen</button>
+    <button class="btn ghost" id="reopenCancel" type="button">Cancel</button>
+  </div>
+  <article class="sheet">
+    <p class="doc-eyebrow">Building Condition Assessment · Prototype draft</p>
+    <h1 class="doc-title" id="docAddress" contenteditable="true" data-placeholder="Property address"></h1>
+    <dl class="doc-facts">
+      <div><dt>Date</dt><dd id="docDate"></dd></div>
+      <div><dt>Front faces</dt><dd id="docBearing"></dd></div>
+      <div><dt>Footprint</dt><dd id="docSize"></dd></div>
+      <div><dt>Storeys</dt><dd id="docStoreys"></dd></div>
+      <div><dt>Reference</dt><dd id="docRef"></dd></div>
+    </dl>
+    <div class="threshold" id="docThreshold"><b id="docThreshBadge"></b><span id="docThreshText"></span></div>
+    <section class="doc-section">
+      <h2>Categorisation</h2>
+      <p class="doc-crack" id="docSuggest" style="margin:0 0 12px"></p>
+      <label style="display:flex;gap:8px;align-items:center;margin:0 0 12px;font-size:13.5px;color:#5A6470">
+        <input type="checkbox" id="docStructural"> Structural stability concern (assigns Group 4)
+      </label>
+      <div class="measure" style="border-top:0;padding-top:0">
+        <div class="field" style="flex:1 1 auto">
+          <span class="label">Damage group (I.S. 465)</span>
+          <div class="pattern" id="docGroup" role="group" aria-label="Damage group">
+            <button type="button" data-group="" aria-pressed="true">—</button>
+            <button type="button" data-group="1">Group 1</button>
+            <button type="button" data-group="2">Group 2</button>
+            <button type="button" data-group="3">Group 3</button>
+            <button type="button" data-group="4">Group 4</button>
+          </div>
+        </div>
+        <div class="field" style="flex:1 1 auto">
+          <span class="label">Remediation option</span>
+          <div class="pattern" id="docOption" role="group" aria-label="Remediation option">
+            <button type="button" data-option="" aria-pressed="true">—</button>
+            <button type="button" data-option="1">1</button>
+            <button type="button" data-option="2">2</button>
+            <button type="button" data-option="3">3</button>
+            <button type="button" data-option="4">4</button>
+            <button type="button" data-option="5">5</button>
+          </div>
+        </div>
+      </div>
+      <p class="doc-crack" id="docOptionText" style="margin-top:8px"></p>
+    </section>
+    <section class="doc-section">
+      <h2>Summary</h2>
+      <div class="doc-edit" id="docSummary" contenteditable="true" data-placeholder="Overall condition. The AI will draft this from the photos and comments once a provider is chosen; until then it is written here, and it stays editable either way."></div>
+    </section>
+    <section class="doc-section">
+      <h2>Elevations</h2>
+      <div id="docWalls"></div>
+    </section>
+    <section class="doc-section" id="docRoomsSection" hidden>
+      <h2>Internal rooms</h2>
+      <div id="docRooms"></div>
+    </section>
+    <p class="doc-footnote">Prototype draft · not a certified assessment.</p>
+  </article>
+</div>
+
+<div class="dock" id="dock">
+  <div class="panel">
+
+    <div id="stepOrient">
+      <div class="step-head">
+        <span class="label">Step 1 of 2 · Orientation</span>
+        <span class="val" id="bVal">North · 0°</span>
+      </div>
+      <p class="note">Stand outside facing the front door, then tap Use compass.
+        Every wall is named from this.</p>
+      <div class="row" style="gap:10px;margin-top:12px">
+        <input type="range" id="bRange" class="grow" min="0" max="359" step="1" value="0" aria-label="Bearing the front of the house faces, in degrees">
+        <button class="btn" id="useCompass" type="button">Use compass</button>
+      </div>
+      <p class="note" id="compassNote" style="margin-top:9px">No compass on the tablet? Set the bearing with the slider.</p>
+      <div class="row" style="gap:8px;margin-top:14px">
+        <button class="btn ghost" id="orientToday" type="button">Today</button>
+        <button class="btn primary grow" id="toHouse" type="button">Next · the house</button>
+      </div>
+    </div>
+
+    <div id="stepHouse" hidden>
+      <div class="step-head">
+        <span class="label">Step 2 of 2 · The house</span>
+        <span class="val" id="houseMeta">Front faces North</span>
+      </div>
+      <div class="row wrap" style="gap:16px">
+        <div class="field" style="flex:1 1 100%">
+          <span class="label">Type</span>
+          <div class="seg" id="typeSeg" role="group" aria-label="House type">
+            <button type="button" data-htype="detached" aria-pressed="true">Detached</button>
+            <button type="button" data-htype="semi" aria-pressed="false">Semi-D</button>
+            <button type="button" data-htype="terrace" aria-pressed="false">Terraced</button>
+            <button type="button" data-htype="apartment" aria-pressed="false">Apartment</button>
+          </div>
+        </div>
+        <div class="field" id="sideField" style="flex:1 1 100%" hidden>
+          <span class="label">Shared wall</span>
+          <div class="seg" id="sideSeg" role="group" aria-label="Which gable is shared">
+            <button type="button" data-side="left" aria-pressed="true">Left gable</button>
+            <button type="button" data-side="right" aria-pressed="false">Right gable</button>
+          </div>
+        </div>
+        <div class="field" style="max-width:150px;flex:0 0 auto">
+          <span class="label">Storeys</span>
+          <div class="seg" id="storeySeg" role="group" aria-label="Storeys">
+            <button type="button" data-storeys="1" aria-pressed="false">1</button>
+            <button type="button" data-storeys="2" aria-pressed="true">2</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="top"><span class="label">Width</span><span class="val" id="wVal">9.0 m</span></div>
+          <input type="range" id="wRange" min="6" max="14" step="0.5" value="9" aria-label="Width in metres">
+        </div>
+        <div class="field">
+          <div class="top"><span class="label">Depth</span><span class="val" id="dVal">8.0 m</span></div>
+          <input type="range" id="dRange" min="5" max="12" step="0.5" value="8" aria-label="Depth in metres">
+        </div>
+      </div>
+      <div class="row" style="gap:8px;margin-top:16px">
+        <button class="btn" id="backOrient" type="button">Back</button>
+        <button class="btn primary grow" id="toCapture" type="button">Start capture</button>
+      </div>
+    </div>
+
+    <div id="summary" hidden>
+      <div class="sel-head">
+        <div class="grow">
+          <span class="label">Tap a wall to capture it</span>
+          <h1 class="sel-name" id="sumTitle">0 of 8 walls done</h1>
+          <p class="note" id="sumMeta">9.0 × 8.0 m · 2 storeys · front faces North</p>
+        </div>
+        <div class="row" style="gap:8px">
+          <button class="btn ghost" id="openToday" type="button">Today</button>
+          <button class="btn ghost" id="openSamples" type="button">Samples</button>
+          <button class="btn ghost" id="openRooms" type="button">Rooms</button>
+          <button class="btn ghost" id="editSetup" type="button">Setup</button>
+          <button class="btn primary" id="openReport" type="button">Report</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="picked" hidden>
+      <div class="sel-head">
+        <div class="grow">
+          <span class="label" id="pickFaces">Tapped wall</span>
+          <h1 class="sel-name" id="pickName">Front <span class="storey">· Ground</span></h1>
+        </div>
+        <span class="tag" id="pickTag">0 photos</span>
+      </div>
+      <div class="row" style="gap:8px;margin-top:12px">
+        <button class="btn primary grow" id="assessWall" type="button">Assess this wall</button>
+        <button class="btn ghost" id="unpickWall" type="button">Back</button>
+      </div>
+    </div>
+
+    <div id="selection" hidden>
+      <div class="sel-head">
+        <div class="grow">
+          <span class="label" id="selFaces">Selected wall</span>
+          <h1 class="sel-name" id="selName">Front <span class="storey">· Ground</span></h1>
+        </div>
+        <span class="tag" id="selTag">0 photos</span>
+      </div>
+      <div class="measure">
+        <div class="field" style="flex:0 0 auto">
+          <span class="label">Is there a visible crack?</span>
+          <div class="seg" id="crackSeg" role="group" aria-label="Is there a visible crack?">
+            <button type="button" data-crack="yes" aria-pressed="false">Yes</button>
+            <button type="button" data-crack="no" aria-pressed="false">No</button>
+          </div>
+        </div>
+        <div class="field" style="flex:0 0 auto" id="crackField">
+          <span class="label">Widest crack</span>
+          <div class="mm">
+            <input type="number" id="selCrack" min="0" max="50" step="0.5" inputmode="decimal" aria-label="Widest crack width in millimetres" disabled>
+            <span>mm</span>
+          </div>
+        </div>
+        <div class="field" style="flex:1 1 100%">
+          <span class="label">Defects seen (I.S. 465 Fig. 2)</span>
+          <div class="defects" id="selDefects" role="group" aria-label="Defects seen"></div>
+        </div>
+        <div class="field" style="flex:1 1 100%">
+          <span class="label">Comment</span>
+          <textarea id="selNote" placeholder="Stepped cracking following mortar joints, worst at the eaves…" aria-label="Comment on this wall"></textarea>
+        </div>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" multiple hidden>
+      <p class="note warn" id="selLocked" style="margin-top:10px" hidden>Signed off \u2014 view only. Reopen from the report to make changes.</p>
+      <div class="row" style="gap:8px;margin-top:12px">
+        <button class="btn primary grow" id="addPhoto" type="button">Add photo</button>
+        <button class="btn" id="takeSample" type="button">Take sample</button>
+        <button class="btn" id="saveWall" type="button">Save</button>
+        <button class="btn ghost" id="closeWall" type="button">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const cv = document.getElementById('stage');
+  const ctx = cv.getContext('2d', { alpha:false });
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- palette, read once from the CSS tokens ----------
+  const css = getComputedStyle(document.documentElement);
+  function rgb(name, fallback){
+    const m = css.getPropertyValue(name).trim().match(/^#([0-9a-f]{6})$/i);
+    if(!m) return fallback;
+    const v = parseInt(m[1], 16);
+    return [v>>16 & 255, v>>8 & 255, v & 255];
+  }
+  // 0 base dot, 1 selected, 2 captured, 3 roof and ground ring
+  const COLORS = [
+    rgb('--dot',    [147,162,178]),
+    rgb('--accent', [240,166,60]),
+    rgb('--done',   [79,182,160]),
+    [90,104,120]
+  ];
+  const ALPHAS = 7;
+  const swatch = COLORS.map(c => {
+    const out = [];
+    for(let a=0;a<ALPHAS;a++){
+      const t = 0.10 + (a/(ALPHAS-1))*0.90;
+      out.push('rgba('+c[0]+','+c[1]+','+c[2]+','+t.toFixed(3)+')');
+    }
+    return out;
+  });
+  const buckets = [];
+  for(let i=0;i<COLORS.length*ALPHAS;i++) buckets.push([]);
+
+  // ---------- state ----------
+  const STOREY_H = 2.6, ROOF_H = 2.2, RING_SENTINEL = 65535;
+  const DOOR_HALF = 0.48, DOOR_H = 2.05;
+
+  // How face-on a wall must be before it can be tapped. 1 is dead square, 0 is
+  // edge-on. At 0.35 (about 20 degrees off edge-on) standing square to the
+  // front makes the side walls unreachable, so you cannot select one through
+  // the house. A corner-on view leaves both walls either side selectable.
+  const SELECT_FACING_MIN = 0.35;
+  const cfg = { W:9, D:8, storeys:2, bearing:0, assessmentId:'',
+                address:'', summary:'', houseType:'detached', sharedSide:'left',
+                group:'', option:'', structural:false };
+
+  // Where the API lives. Set it once per tablet by opening the app with
+  //   ?api=http://192.168.1.20:8000/api
+  // and it is remembered. With nothing set the queue runs in demo mode, which
+  // is what the hosted preview does - it is not allowed to call a local server.
+  const API_BASE = (function(){
+    try{
+      const q = new URLSearchParams(location.search).get('api');
+      if(q !== null){
+        q ? localStorage.setItem('api-base', q.replace(/\/$/, ''))
+          : localStorage.removeItem('api-base');
+      }
+      return localStorage.getItem('api-base') || '';
+    }catch(e){ return ''; }
+  })();
+  const captures = Object.create(null);          // panelId -> {photos, note}
+  // Internal rooms: device-issued slug, name, storey, and the same findings
+  // as a wall minus photos (the server has no room photo endpoint yet).
+  let rooms = [];
+  let panels = [], facing = new Float32Array(0), groundY = 0;
+  let live = new Uint8Array(0);            // per panel: currently selectable
+  let edges = [], door = null;
+  let pts = null, nPts = 0;
+  // Radians the camera may rise above level. Zero locks it to a level
+  // turntable, which keeps every wall an unforeshortened, easily tapped
+  // rectangle. Raise it to reintroduce the overhead view.
+  const PITCH_ABOVE = 0;
+  // Yaw that puts the front wall square to the camera. The opening view is
+  // offset from it, so you arrive looking at the door and one gable.
+  const FRONT_YAW = Math.PI;
+  let yaw = FRONT_YAW - 0.62, pitch = -PITCH_ABOVE*0.35;
+  let targetYaw = yaw, targetPitch = pitch;
+  let camDist = 24, focal = 900, cx = 0, cy = 0;
+  let selected = null, hovered = null;
+  let stage = 'orient';                    // day -> orient -> house -> capture
+  let agitation = 0, pointerX = -9999, pointerY = -9999, pointerActive = false;
+  let dpr = 1, W = 0, H = 0;
+
+  // A wall is done when it has been photographed, commented on, and the
+  // crack question answered either way. A photo without a word is not an
+  // assessment; a wall with the I.S. 465 question unanswered is not either.
+  function wallDone(c){
+    return !!(c && c.photos.length && c.note && c.note.trim()
+              && typeof c.crack === 'boolean');
+  }
+  function wallMissing(c){
+    const m = [];
+    if(!c || !c.photos.length) m.push('photo');
+    if(!c || !(c.note && c.note.trim())) m.push('comment');
+    if(!c || typeof c.crack !== 'boolean') m.push('crack answer');
+    return m;
+  }
+  function wallTouched(c){
+    return !!(c && (c.photos.length || (c.note && c.note.trim())));
+  }
+  // I.S. 465 Figure 2: pattern cracking (combined) at 1mm or wider on at
+  // least one elevation. The assessor's measurement, not ours - we only carry
+  // it and report what it implies.
+  // Figure 2 key. firstFive drives Group 2/3; severe drives Group 4.
+  const DEFECTS = [
+    { k:'web',          label:'Web-like cracking',        first:true },
+    { k:'pattern',      label:'Pattern-like cracking',    first:true },
+    { k:'disintegrated',label:'Disintegrated blocks',     first:true, severe:true },
+    { k:'bowing',       label:'Outward bowing',           first:true, severe:true },
+    { k:'vcorner',      label:'Vertical crack near corner', first:true, severe:true },
+    { k:'reveal',       label:'Displacement at reveals',  severe:true },
+    { k:'render',       label:'Render blown / missing' },
+    { k:'horizontal',   label:'Horizontal cracks' }
+  ];
+  const DEFECT_LABEL = {}; DEFECTS.forEach(function(d){ DEFECT_LABEL[d.k] = d.label; });
+  function hasDefect(c, k){ return !!(c && c.defects && c.defects.indexOf(k) !== -1); }
+
+  // A wall meets the scheme entry threshold at pattern-like cracking >= 1 mm
+  // (the Group 2 -> Group 3 boundary).
+  function wallMeetsThreshold(c){
+    return !!(c && hasDefect(c, 'pattern') && (+c.crackMm || 0) >= 1);
+  }
+
+  // Suggested building group from Table 1, computed across the walls. The
+  // engineer sets the final group; this only proposes.
+  function suggestGroup(){
+    const walls = panels.filter(function(p){ return p.pick; });
+    let anyDefect = false, hasFirstFive = false, patternOver1 = false;
+    const severe = {};
+    walls.forEach(function(pn){
+      const c = captures[pn.id]; if(!c) return;
+      if((c.defects && c.defects.length) || (+c.crackMm || 0) > 0) anyDefect = true;
+      DEFECTS.forEach(function(d){
+        if(hasDefect(c, d.k)){
+          if(d.first) hasFirstFive = true;
+          if(d.severe) severe[d.k] = true;
+        }
+      });
+      if(hasDefect(c, 'pattern') && (+c.crackMm || 0) >= 1) patternOver1 = true;
+    });
+    if(cfg.structural) return { g:'4', why:'structural stability concern (5.4.2)' };
+    if(!anyDefect) return { g:'1', why:'no evidence of deterioration or cracking' };
+    if(patternOver1 && Object.keys(severe).length >= 2)
+      return { g:'4', why:'pattern cracking >=1 mm with two or more severe defects' };
+    if(patternOver1) return { g:'3', why:'pattern-like cracking >=1 mm on at least one elevation' };
+    if(hasFirstFive) return { g:'2', why:'a Fig. 2 defect present; pattern cracking under 1 mm' };
+    return { g:'2', why:'damage present below the Group 3 threshold' };
+  }
+  function assessmentMeetsThreshold(){
+    const walls = panels.filter(function(p){ return p.pick; });
+    for(let i=0;i<walls.length;i++){
+      if(wallMeetsThreshold(captures[walls[i].id])) return true;
+    }
+    return false;
+  }
+
+  function allWallsDone(){
+    const walls = panels.filter(function(p){ return p.pick; });
+    if(!walls.length) return false;
+    for(let i=0;i<walls.length;i++){
+      if(!wallDone(captures[walls[i].id])) return false;
+    }
+    return true;
+  }
+
+  // ---------- persistence (best effort; a private window can throw) ----------
+  const KEY = 'elevation-picker-v1';
+  function save(){
+    if(!day.activeId) return;
+    try{ localStorage.setItem(recKey(day.activeId), JSON.stringify({cfg:cfg, captures:captures, rooms:rooms})); }catch(e){}
+  }
+  function load(id){
+    // reset first - a record may be partial, and stale state must not leak
+    // from the previous property into this one
+    cfg.W = 9; cfg.D = 8; cfg.storeys = 2; cfg.bearing = 0;
+    cfg.address = ''; cfg.summary = ''; cfg.assessmentId = id;
+    cfg.houseType = 'detached'; cfg.sharedSide = 'left';
+    cfg.group = ''; cfg.option = ''; cfg.structural = false;
+    Object.keys(captures).forEach(function(k){ delete captures[k]; });
+    rooms = [];
+    try{
+      const raw = localStorage.getItem(recKey(id));
+      if(!raw) return false;
+      const d = JSON.parse(raw);
+      if(d && d.cfg){
+        cfg.W = +d.cfg.W || 9;
+        cfg.D = +d.cfg.D || 8;
+        cfg.storeys = d.cfg.storeys === 1 ? 1 : 2;
+        cfg.bearing = ((+d.cfg.bearing || 0) % 360 + 360) % 360;
+        cfg.address = typeof d.cfg.address === 'string' ? d.cfg.address : '';
+        cfg.summary = typeof d.cfg.summary === 'string' ? d.cfg.summary : '';
+        if(['detached','semi','terrace','apartment'].indexOf(d.cfg.houseType) !== -1){
+          cfg.houseType = d.cfg.houseType;
+        }
+        cfg.sharedSide = d.cfg.sharedSide === 'right' ? 'right' : 'left';
+        cfg.group = d.cfg.group || '';
+        cfg.option = d.cfg.option || '';
+        cfg.structural = !!d.cfg.structural;
+      }
+      if(d && d.captures){
+        Object.keys(d.captures).forEach(function(k){
+          const c = d.captures[k] || {};
+          captures[k] = {
+            note: typeof c.note === 'string' ? c.note : '',
+            // 'uploading' cannot be true of a photo we have just read from
+            // disk - the page that was sending it is gone. Send it again;
+            // the server treats a repeat as already received.
+            photos: (Array.isArray(c.photos) ? c.photos : []).map(function(ph){
+              return ph && ph.state === 'uploading' ? Object.assign({}, ph, { state:'pending' }) : ph;
+            }),
+            crack: typeof c.crack === 'boolean' ? c.crack : (+c.crackMm > 0 ? true : undefined),
+            crackMm: +c.crackMm || 0,
+            defects: Array.isArray(c.defects) ? c.defects
+                     : (c.pattern === 'pattern' ? ['pattern'] : [])
+          };
+        });
+      }
+      if(d && Array.isArray(d.rooms)){
+        rooms = d.rooms.filter(function(r){ return r && r.slug; }).map(function(r){
+          return { slug: r.slug, name: r.name || 'Room', storey: r.storey === 1 ? 1 : 0,
+                   note: typeof r.note === 'string' ? r.note : '',
+                   crack: typeof r.crack === 'boolean' ? r.crack : (+r.crackMm > 0 ? true : undefined),
+                   crackMm: +r.crackMm || 0,
+                   defects: Array.isArray(r.defects) ? r.defects : [] };
+        });
+      }
+      return true;
+    }catch(e){ return false; }
+  }
+
+  // ---------- photo store ----------
+  // Blobs go to IndexedDB; localStorage cannot hold them. Notes and the house
+  // configuration stay in localStorage, which is plenty for their size.
+  const DB_NAME = 'elevation-picker', DB_STORE = 'photos';
+  let dbPromise = null;
+  function db(){
+    if(dbPromise) return dbPromise;
+    dbPromise = new Promise(function(resolve, reject){
+      let req;
+      try{ req = indexedDB.open(DB_NAME, 1); }
+      catch(e){ reject(e); return; }
+      req.onupgradeneeded = function(){
+        if(!req.result.objectStoreNames.contains(DB_STORE)){
+          req.result.createObjectStore(DB_STORE, { keyPath:'id' });
+        }
+      };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error); };
+    });
+    return dbPromise;
+  }
+  function tx(mode, fn){
+    return db().then(function(d){
+      return new Promise(function(res, rej){
+        const t = d.transaction(DB_STORE, mode);
+        const out = fn(t.objectStore(DB_STORE));
+        t.oncomplete = function(){ res(out && out.result !== undefined ? out.result : out); };
+        t.onerror = function(){ rej(t.error); };
+      });
+    });
+  }
+  function putPhoto(rec){ return tx('readwrite', function(st){ return st.put(rec); }); }
+  function getPhoto(id){ return tx('readonly', function(st){ return st.get(id); }); }
+  function delPhoto(id){ return tx('readwrite', function(st){ return st.delete(id); }); }
+
+  function uid(){
+    // The tablet issues the id, not the server. A queued photo has an identity
+    // before it has ever reached the network.
+    if(crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    return 'p-' + Date.now().toString(16) + '-' + Math.random().toString(16).slice(2, 10);
+  }
+
+  // ---------- geometry ----------
+  function tri(a,b,c){ return [a[0],a[1],a[2], b[0],b[1],b[2], c[0],c[1],c[2]]; }
+  function quad(a,b,c,d){ return [tri(a,b,c), tri(a,c,d)]; }
+
+  function build(){
+    const w = cfg.W, d = cfg.D, n = cfg.storeys;
+    const hw = w/2, hd = d/2, wallH = n*STOREY_H;
+    const centerY = (wallH + ROOF_H) / 2;
+    const y0 = s => s*STOREY_H - centerY;
+    const y1 = s => (s+1)*STOREY_H - centerY;
+    const apexY = wallH + ROOF_H - centerY;
+    groundY = -centerY;
+    const eaveY = wallH - centerY;
+    const storeyName = s => n === 1 ? '' : (s === 0 ? 'Ground' : 'First');
+
+    // Four elevations, one selectable panel per storey. The ridge runs along X,
+    // so the gable triangles belong to the left and right walls.
+    const faces = [
+      { key:'front', name:'Front',       normal:[0,0,1],
+        at:(a,b)=>[[-hw,a,hd],[hw,a,hd],[hw,b,hd],[-hw,b,hd]] },
+      { key:'rear',  name:'Rear',        normal:[0,0,-1],
+        at:(a,b)=>[[hw,a,-hd],[-hw,a,-hd],[-hw,b,-hd],[hw,b,-hd]] },
+      { key:'left',  name:'Left gable',  normal:[-1,0,0],
+        at:(a,b)=>[[-hw,a,-hd],[-hw,a,hd],[-hw,b,hd],[-hw,b,-hd]] },
+      { key:'right', name:'Right gable', normal:[1,0,0],
+        at:(a,b)=>[[hw,a,hd],[hw,a,-hd],[hw,b,-hd],[hw,b,hd]] }
+    ];
+
+    // Which faces belong to the neighbours. They still render - the house
+    // still looks like the house - but they cannot be selected or counted.
+    const party = cfg.houseType === 'semi' ? [cfg.sharedSide]
+      : cfg.houseType === 'terrace' ? ['left', 'right']
+      : cfg.houseType === 'apartment' ? ['left', 'right', 'rear']
+      : [];
+
+    panels = [];
+    for(let f=0; f<faces.length; f++){
+      const face = faces[f];
+      const isParty = party.indexOf(face.key) !== -1;
+      for(let s=0; s<n; s++){
+        const v = face.at(y0(s), y1(s));
+        const tris = quad(v[0], v[1], v[2], v[3]);
+        if(s === n-1 && (face.key === 'left' || face.key === 'right')){
+          const x = face.key === 'left' ? -hw : hw;
+          tris.push(face.key === 'left'
+            ? tri([x,eaveY,-hd],[x,eaveY,hd],[x,apexY,0])
+            : tri([x,eaveY,hd],[x,eaveY,-hd],[x,apexY,0]));
+        }
+        panels.push({
+          id: face.key+'-'+s, name: face.name, storey: storeyName(s),
+          normal: face.normal, tris: tris,
+          pick: !isParty, party: isParty, group: isParty ? 3 : 0,
+          door: face.key === 'front' && s === 0
+        });
+      }
+    }
+
+    // Roof slopes: present for form, not selectable.
+    const slope = Math.atan2(ROOF_H, hd);
+    panels.push({ id:'roof-front', name:'Roof', storey:'', pick:false, group:3,
+      normal:[0, Math.cos(slope), Math.sin(slope)],
+      tris: quad([-hw,eaveY,hd],[hw,eaveY,hd],[hw,apexY,0],[-hw,apexY,0]) });
+    panels.push({ id:'roof-rear', name:'Roof', storey:'', pick:false, group:3,
+      normal:[0, Math.cos(slope), -Math.sin(slope)],
+      tris: quad([hw,eaveY,-hd],[-hw,eaveY,-hd],[-hw,apexY,0],[hw,apexY,0]) });
+
+    facing = new Float32Array(panels.length);
+    live = new Uint8Array(panels.length);
+
+    // Explicit edges so the corners, the storey divisions and the front door
+    // read clearly. A dot field alone does not say where a wall stops.
+    const baseY = -centerY;
+    const doorTop = baseY + DOOR_H;
+    door = { half: DOOR_HALF, top: doorTop, z: hd };
+    edges = [];
+    function edge(a, b, w, lw){ edges.push({ a:a, b:b, w:w, lw:lw || 1 }); }
+
+    const corners = [[-hw,-hd],[hw,-hd],[hw,hd],[-hw,hd]];
+    for(let i=0;i<4;i++){
+      const c = corners[i], e2 = corners[(i+1)%4];
+      edge([c[0],baseY,c[1]], [c[0],eaveY,c[1]], 0.52, 1.2);      // corner post
+      edge([c[0],baseY,c[1]], [e2[0],baseY,e2[1]], 0.42, 1);      // base
+      edge([c[0],eaveY,c[1]], [e2[0],eaveY,e2[1]], 0.42, 1);      // eaves
+    }
+    for(let sy=1; sy<n; sy++){                                    // storey lines
+      const yy = y0(sy);
+      for(let i=0;i<4;i++){
+        const c = corners[i], e2 = corners[(i+1)%4];
+        edge([c[0],yy,c[1]], [e2[0],yy,e2[1]], 0.30, 1);
+      }
+    }
+    edge([-hw,apexY,0], [hw,apexY,0], 0.46, 1.1);                 // ridge
+    edge([-hw,eaveY,hd], [-hw,apexY,0], 0.40, 1);                 // rakes
+    edge([-hw,eaveY,-hd], [-hw,apexY,0], 0.40, 1);
+    edge([hw,eaveY,hd], [hw,apexY,0], 0.40, 1);
+    edge([hw,eaveY,-hd], [hw,apexY,0], 0.40, 1);
+    edge([-DOOR_HALF,baseY,hd], [-DOOR_HALF,doorTop,hd], 0.68, 1.3);
+    edge([DOOR_HALF,baseY,hd], [DOOR_HALF,doorTop,hd], 0.68, 1.3);
+    edge([-DOOR_HALF,doorTop,hd], [DOOR_HALF,doorTop,hd], 0.68, 1.3);
+
+    sample(centerY);
+    camDist = Math.max(w, d, wallH + ROOF_H) * 2.75;
+    if(selected && !panels.some(p => p.id === selected)) selected = null;
+    syncUI();
+  }
+
+  function triArea(t){
+    const ux=t[3]-t[0], uy=t[4]-t[1], uz=t[5]-t[2];
+    const vx=t[6]-t[0], vy=t[7]-t[1], vz=t[8]-t[2];
+    const a=uy*vz-uz*vy, b=uz*vx-ux*vz, c=ux*vy-uy*vx;
+    return Math.sqrt(a*a + b*b + c*c) / 2;
+  }
+
+  function sample(centerY){
+    const DENSITY = 21, ROOF_DENSITY = 11, RING = 320;
+    const counts = [];
+    let total = RING;
+    for(let i=0;i<panels.length;i++){
+      const dens = panels[i].pick ? DENSITY : ROOF_DENSITY;
+      const c = panels[i].tris.map(t => Math.max(3, Math.round(triArea(t)*dens)));
+      counts.push(c);
+      for(let j=0;j<c.length;j++) total += c[j];
+    }
+    const px = new Float32Array(total), py = new Float32Array(total), pz = new Float32Array(total);
+    const pnl = new Uint16Array(total), seed = new Float32Array(total);
+    let k = 0;
+    for(let i=0;i<panels.length;i++){
+      const tris = panels[i].tris;
+      for(let j=0;j<tris.length;j++){
+        const t = tris[j];
+        for(let q=0;q<counts[i][j];q++){
+          let r1 = Math.random(), r2 = Math.random();
+          if(r1 + r2 > 1){ r1 = 1 - r1; r2 = 1 - r2; }
+          const qx = t[0] + (t[3]-t[0])*r1 + (t[6]-t[0])*r2;
+          const qy = t[1] + (t[4]-t[1])*r1 + (t[7]-t[1])*r2;
+          const qz = t[2] + (t[5]-t[2])*r1 + (t[8]-t[2])*r2;
+          // the doorway is an opening, so it stays empty
+          if(panels[i].door && Math.abs(qx) <= door.half && qy <= door.top) continue;
+          px[k] = qx; py[k] = qy; pz[k] = qz;
+          pnl[k] = i; seed[k] = Math.random()*6.283;
+          k++;
+        }
+      }
+    }
+    // A faint ground ring so the house reads as sitting on something.
+    const rad = Math.max(cfg.W, cfg.D) * 0.62;
+    for(let q=0;q<RING;q++){
+      const a = Math.random()*6.283, rr = rad*(1 + Math.random()*0.55);
+      px[k] = Math.cos(a)*rr; py[k] = -centerY; pz[k] = Math.sin(a)*rr*0.85;
+      pnl[k] = RING_SENTINEL; seed[k] = Math.random()*6.283;
+      k++;
+    }
+    pts = { px:px, py:py, pz:pz, pnl:pnl, seed:seed };
+    nPts = k;
+  }
+
+  // ---------- projection ----------
+  let cyw=1, syw=0, cpt=1, spt=0;
+  const _v = [0,0,0];
+  function setRot(){
+    cyw = Math.cos(yaw); syw = Math.sin(yaw);
+    cpt = Math.cos(pitch); spt = Math.sin(pitch);
+  }
+  function rot(x,y,z,out){
+    const x1 = x*cyw - z*syw, z1 = x*syw + z*cyw;
+    out[0] = x1;
+    out[1] = y*cpt - z1*spt;
+    out[2] = y*spt + z1*cpt;
+    return out;
+  }
+  function project(x,y,z){
+    rot(x,y,z,_v);
+    const zv = _v[2] + camDist;
+    if(zv < 0.6) return null;
+    const sc = focal/zv;
+    return [cx + _v[0]*sc, cy - _v[1]*sc, zv];
+  }
+
+  function resize(){
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    cv.style.width = W+'px'; cv.style.height = H+'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    focal = Math.min(W, H) * 1.45;
+    cx = W/2; cy = H/2 - Math.min(H*0.06, 46);
+  }
+
+  // ---------- render ----------
+  let last = performance.now();
+  function frame(now){
+    const dt = Math.min((now - last)/1000, 0.05); last = now;
+    const t = now/1000;
+
+    yaw   += (targetYaw   - yaw)   * Math.min(1, dt*14);
+    pitch += (targetPitch - pitch) * Math.min(1, dt*14);
+    agitation *= Math.exp(-dt*3.2);
+    setRot();
+
+    ctx.fillStyle = '#0A0D11';
+    ctx.fillRect(0, 0, W, H);
+    for(let i=0;i<buckets.length;i++) buckets[i].length = 0;
+
+    for(let i=0;i<panels.length;i++){
+      const n = panels[i].normal;
+      rot(n[0], n[1], n[2], _v);
+      facing[i] = _v[2];
+      live[i] = (panels[i].pick && -_v[2] >= SELECT_FACING_MIN) ? 1 : 0;
+    }
+
+    const px = pts.px, py = pts.py, pz = pts.pz, pnl = pts.pnl, seed = pts.seed;
+    const PR = 118, PR2 = PR*PR;
+
+    for(let i=0;i<nPts;i++){
+      const pi = pnl[i];
+      const isRing = pi === RING_SENTINEL;
+      const p = isRing ? null : panels[pi];
+      const front = isRing ? true : facing[pi] < 0;
+
+      let x = px[i], y = py[i], z = pz[i];
+
+      // idle shimmer, amplified by drag speed, pushed along the surface normal
+      if(!reduced && p){
+        const w = Math.sin(t*1.4 + seed[i]) * (0.012 + agitation*0.16);
+        x += p.normal[0]*w; y += p.normal[1]*w; z += p.normal[2]*w;
+      }
+
+      rot(x, y, z, _v);
+      const zv = _v[2] + camDist;
+      if(zv < 0.6) continue;
+      const sc = focal/zv;
+      let sx = cx + _v[0]*sc, sy = cy - _v[1]*sc;
+
+      // the dots get pushed aside near the finger
+      let boost = 0;
+      if(pointerActive){
+        const ddx = sx - pointerX, ddy = sy - pointerY;
+        const d2 = ddx*ddx + ddy*ddy;
+        if(d2 < PR2 && d2 > 0.01){
+          const dd = Math.sqrt(d2), f = 1 - dd/PR;
+          const push = f*f*30;
+          sx += (ddx/dd)*push; sy += (ddy/dd)*push;
+          boost = f*f;
+        }
+      }
+      if(sx < -30 || sx > W+30 || sy < -30 || sy > H+30) continue;
+
+      let g = 0;
+      if(isRing){
+        g = 3;
+      } else if(!p.pick){
+        g = 3;
+      } else if(p.id === selected || p.id === hovered){
+        g = 1;
+      } else if(wallDone(captures[p.id])){
+        g = 2;
+      }
+
+      const depth = 1 - Math.min(1, (zv - (camDist - 9)) / 20);
+      let a;
+      if(!front){
+        a = 0.16 + depth*0.12;
+      } else if(!isRing && p.pick && !live[pi]){
+        a = 0.24 + depth*0.16;              // visible, but too oblique to tap
+      } else {
+        a = 0.55 + depth*0.45;
+      }
+      a += boost*0.5;
+      if(isRing) a *= 0.42;
+      else if(!p.pick) a *= 0.72;
+      if(a > 1) a = 1;
+
+      const lvl = a <= 0 ? 0 : (a >= 1 ? ALPHAS-1 : (a*(ALPHAS-1))|0);
+      const r = Math.max(0.55, Math.min(3.0, (front ? 1.35 : 1.05) * sc/58 + boost*1.3));
+      const b = buckets[g*ALPHAS + lvl];
+      b.push(sx, sy, r);
+    }
+
+    for(let g=0; g<COLORS.length; g++){
+      for(let a=0; a<ALPHAS; a++){
+        const b = buckets[g*ALPHAS + a];
+        if(!b.length) continue;
+        ctx.fillStyle = swatch[g][a];
+        ctx.beginPath();
+        for(let i=0;i<b.length;i+=3){
+          ctx.moveTo(b[i] + b[i+2], b[i+1]);
+          ctx.arc(b[i], b[i+1], b[i+2], 0, 6.2832);
+        }
+        ctx.fill();
+      }
+    }
+
+    // house edges: corner posts, storey divisions, roof lines, front door
+    for(let i=0;i<edges.length;i++){
+      const e = edges[i];
+      const ea = project(e.a[0], e.a[1], e.a[2]);
+      const eb = project(e.b[0], e.b[1], e.b[2]);
+      if(!ea || !eb) continue;
+      const dep = 1 - Math.min(1, (((ea[2]+eb[2])/2) - (camDist - 9)) / 20);
+      ctx.strokeStyle = 'rgba(147,162,178,' + (e.w * (0.30 + dep*0.70)).toFixed(3) + ')';
+      ctx.lineWidth = e.lw;
+      ctx.beginPath();
+      ctx.moveTo(ea[0], ea[1]);
+      ctx.lineTo(eb[0], eb[1]);
+      ctx.stroke();
+    }
+
+    // north marker, so the compass reading is visible on the model itself
+    {
+      const br = cfg.bearing * Math.PI/180;
+      const rr = Math.max(cfg.W, cfg.D) * 0.88;
+      const np = project(Math.sin(br)*rr, groundY, Math.cos(br)*rr);
+      if(np){
+        ctx.fillStyle = 'rgba(230,235,241,.72)';
+        ctx.font = '600 11px "IBM Plex Mono", ui-monospace, monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('N', np[0], np[1]);
+      }
+    }
+
+    // outline the selected wall so the tap target is unambiguous
+    if(selected){
+      let idx = -1;
+      for(let i=0;i<panels.length;i++) if(panels[i].id === selected){ idx = i; break; }
+      if(idx >= 0 && facing[idx] < 0){
+        const tris = panels[idx].tris;
+        ctx.strokeStyle = 'rgba(240,166,60,.85)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for(let j=0;j<tris.length;j++){
+          const tr = tris[j];
+          for(let e=0;e<3;e++){
+            const f = (e+1)%3;
+            const a = project(tr[e*3], tr[e*3+1], tr[e*3+2]);
+            const c = project(tr[f*3], tr[f*3+1], tr[f*3+2]);
+            if(a && c){ ctx.moveTo(a[0], a[1]); ctx.lineTo(c[0], c[1]); }
+          }
+        }
+        ctx.stroke();
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- picking ----------
+  function inTri(mx,my, ax,ay, bx,by, cx2,cy2){
+    const d1 = (mx-bx)*(ay-by) - (ax-bx)*(my-by);
+    const d2 = (mx-cx2)*(by-cy2) - (bx-cx2)*(my-cy2);
+    const d3 = (mx-ax)*(cy2-ay) - (cx2-ax)*(my-ay);
+    const neg = (d1<0)||(d2<0)||(d3<0);
+    const pos = (d1>0)||(d2>0)||(d3>0);
+    return !(neg && pos);
+  }
+  function pick(mx, my){
+    let best = null, bestZ = Infinity;
+    for(let i=0;i<panels.length;i++){
+      const p = panels[i];
+      if(!p.pick) continue;
+      rot(p.normal[0], p.normal[1], p.normal[2], _v);
+      // too oblique to be a fair target - this is what stops you selecting a
+      // side wall through the front of the house
+      if(-_v[2] < SELECT_FACING_MIN) continue;
+      for(let j=0;j<p.tris.length;j++){
+        const tr = p.tris[j];
+        const a = project(tr[0],tr[1],tr[2]);
+        const b = project(tr[3],tr[4],tr[5]);
+        const c = project(tr[6],tr[7],tr[8]);
+        if(!a || !b || !c) continue;
+        if(inTri(mx,my, a[0],a[1], b[0],b[1], c[0],c[1])){
+          const z = (a[2]+b[2]+c[2])/3;
+          if(z < bestZ){ bestZ = z; best = p.id; }
+        }
+      }
+    }
+    return best;
+  }
+
+  // ---------- interaction ----------
+  let downX=0, downY=0, downT=0, lastX=0, lastY=0, dragging=false, moved=0, hintGone=false;
+
+  cv.addEventListener('pointerdown', function(e){
+    // Capture can throw if the pointer is already gone (or synthetic); a
+    // failed capture must not cost the tap.
+    try{ cv.setPointerCapture(e.pointerId); }catch(err){}
+    dragging = true; moved = 0;
+    downX = lastX = e.clientX; downY = lastY = e.clientY;
+    downT = performance.now();
+    pointerActive = true; pointerX = e.clientX; pointerY = e.clientY;
+  });
+
+  cv.addEventListener('pointermove', function(e){
+    pointerActive = true; pointerX = e.clientX; pointerY = e.clientY;
+    if(!dragging){
+      if(e.pointerType === 'mouse'){
+        const h = pick(e.clientX, e.clientY);
+        if(h !== hovered){ hovered = h; cv.style.cursor = h ? 'pointer' : 'grab'; }
+      }
+      return;
+    }
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    moved += Math.abs(dx) + Math.abs(dy);
+    targetYaw += dx * 0.0075;
+    // Negative pitch lifts the camera above the house, positive drops it
+    // underneath. Never below level, never higher than PITCH_ABOVE.
+    targetPitch = Math.max(-PITCH_ABOVE, Math.min(0, targetPitch + dy*0.005));
+    agitation = Math.min(1, agitation + (Math.abs(dx) + Math.abs(dy)) * 0.012);
+    if(moved > 30) dismissHint();
+  });
+
+  function endPointer(e){
+    if(!dragging) return;
+    dragging = false;
+    const quick = performance.now() - downT < 400;
+    const still = Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) < 12;
+    if(quick && still){
+      select(pick(e.clientX, e.clientY));
+      dismissHint();
+    }
+    if(e.pointerType !== 'mouse'){ pointerActive = false; hovered = null; }
+  }
+  cv.addEventListener('pointerup', endPointer);
+  cv.addEventListener('pointercancel', function(){ dragging = false; pointerActive = false; });
+  cv.addEventListener('pointerleave', function(){
+    if(!dragging){ pointerActive = false; hovered = null; }
+  });
+
+  function dismissHint(){
+    if(hintGone) return;
+    hintGone = true;
+    document.getElementById('hint').hidden = true;
+  }
+
+  // ---------- orientation ----------
+  const POINTS = ['North','North-east','East','South-east','South','South-west','West','North-west'];
+  function pointName(b){ return POINTS[Math.round((((b%360)+360)%360)/45) % 8]; }
+
+  // The front wall is +Z. Going clockwise from above: front, left, rear, right.
+  const FACE_OFFSET = { front:0, left:90, rear:180, right:270 };
+  function faceBearing(id){
+    return (cfg.bearing + (FACE_OFFSET[id.split('-')[0]] || 0)) % 360;
+  }
+
+  function readCompass(){
+    return new Promise(function(resolve, reject){
+      function listen(){
+        let settled = false;
+        const timer = setTimeout(function(){
+          if(!settled){ cleanup(); reject(new Error('no reading')); }
+        }, 4000);
+        function cleanup(){
+          clearTimeout(timer);
+          removeEventListener('deviceorientationabsolute', onEvt);
+          removeEventListener('deviceorientation', onEvt);
+        }
+        function onEvt(e){
+          let h = null;
+          if(typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)){
+            h = e.webkitCompassHeading;                  // iOS, already true north
+          } else if(e.absolute && typeof e.alpha === 'number'){
+            h = (360 - e.alpha) % 360;                   // Android, absolute frame
+          }
+          if(h === null) return;
+          // alpha is referenced to the top of the device, so a rotated tablet
+          // needs the screen angle added back. Verify this one in the field.
+          const sa = (screen.orientation && typeof screen.orientation.angle === 'number')
+            ? screen.orientation.angle : 0;
+          settled = true; cleanup();
+          resolve(((h + sa) % 360 + 360) % 360);
+        }
+        addEventListener('deviceorientationabsolute', onEvt);
+        addEventListener('deviceorientation', onEvt);
+      }
+
+      if(typeof DeviceOrientationEvent === 'undefined'){
+        reject(new Error('not supported here')); return;
+      }
+      if(typeof DeviceOrientationEvent.requestPermission === 'function'){
+        DeviceOrientationEvent.requestPermission()
+          .then(function(r){ r === 'granted' ? listen() : reject(new Error('permission refused')); })
+          .catch(function(){ reject(new Error('permission refused')); });
+      } else {
+        listen();
+      }
+    });
+  }
+
+  // ---------- UI ----------
+  function $(id){ return document.getElementById(id); }
+  const elOrient = $('stepOrient'), elHouse = $('stepHouse');
+  const elSummary = $('summary'), elSel = $('selection');
+
+  // Tapping a wall only picks it - the name and state show, and Assess opens
+  // the form. Two taps, but the first is cheap and the assessor sees what they
+  // hit before a form covers the house.
+  let panelOpen = false, selSnapshot = null;
+
+  function select(id){
+    if(stage !== 'capture') return;        // walls are not pickable during setup
+    selected = id;
+    panelOpen = false; selSnapshot = null;
+    if(id && !captures[id]) captures[id] = { photos:[], note:'', crackMm:0, defects:[] };
+    syncUI();
+    save();
+  }
+
+  function openWall(){
+    if(!selected) return;
+    const c = captures[selected];
+    // What the fields held on opening. Close puts this back; Save keeps
+    // whatever was typed. Photos are not part of it - a photo taken is
+    // evidence, not a form edit.
+    selSnapshot = { note: c.note || '', crack: c.crack, crackMm: +c.crackMm || 0,
+                    defects: (c.defects || []).slice() };
+    panelOpen = true;
+    syncUI();
+  }
+
+  function fieldsChanged(c, snap){
+    return (c.note || '') !== snap.note || c.crack !== snap.crack
+      || (+c.crackMm || 0) !== snap.crackMm
+      || (c.defects || []).join() !== snap.defects.join();
+  }
+
+  function syncUI(){
+    const walls = panels.filter(p => p.pick);
+    let done = 0;
+    for(let i=0;i<walls.length;i++){
+      if(wallDone(captures[walls[i].id])) done++;
+    }
+    const complete = walls.length > 0 && done === walls.length;
+    $('count').textContent = done + ' / ' + walls.length + ' walls';
+
+    let queued = 0, failed = 0;
+    Object.keys(captures).forEach(function(k){
+      const orphan = !wallExists(k);
+      captures[k].photos.forEach(function(ph){
+        if(ph.state === 'failed') failed++;
+        else if(!orphan && ph.state !== 'confirmed') queued++;
+      });
+    });
+    if(API_BASE){
+      pendingSamples(false).forEach(function(it){
+        if(it.sm.sync === 'failed') failed++; else queued++;
+      });
+    }
+    const conn = $('conn');
+    if(!navigator.onLine){
+      conn.textContent = queued ? queued + ' held on tablet' : 'Offline';
+      conn.classList.add('off');
+    } else if(queued){
+      conn.textContent = 'Sending ' + queued;
+      conn.classList.remove('off');
+    } else if(failed){
+      conn.textContent = failed + (failed === 1 ? ' photo failed' : ' photos failed');
+      conn.classList.add('off');
+    } else {
+      conn.textContent = API_BASE ? 'All synced' : 'Demo sync';
+      conn.classList.remove('off');
+    }
+    $('barfill').style.width = (walls.length ? (done/walls.length*100) : 0) + '%';
+
+    $('bVal').textContent = pointName(cfg.bearing) + ' \u00b7 ' + cfg.bearing + '\u00b0';
+    $('wVal').textContent = cfg.W.toFixed(1) + ' m';
+    $('dVal').textContent = cfg.D.toFixed(1) + ' m';
+    const segs = document.querySelectorAll('#storeySeg button');
+    for(let i=0;i<segs.length;i++){
+      segs[i].setAttribute('aria-pressed', String(+segs[i].dataset.storeys === cfg.storeys));
+    }
+    const types = document.querySelectorAll('#typeSeg button');
+    for(let i=0;i<types.length;i++){
+      types[i].setAttribute('aria-pressed', String(types[i].dataset.htype === cfg.houseType));
+    }
+    const sides = document.querySelectorAll('#sideSeg button');
+    for(let i=0;i<sides.length;i++){
+      sides[i].setAttribute('aria-pressed', String(sides[i].dataset.side === cfg.sharedSide));
+    }
+    $('sideField').hidden = cfg.houseType !== 'semi';
+
+    let p = null;
+    if(selected){
+      for(let i=0;i<panels.length;i++) if(panels[i].id === selected){ p = panels[i]; break; }
+    }
+    const capturing = stage === 'capture';
+    $('today').hidden = stage !== 'day';
+    $('dock').hidden  = stage === 'day';
+    elOrient.hidden  = stage !== 'orient';
+    elHouse.hidden   = stage !== 'house';
+    elSummary.hidden = !capturing || !!p;
+    $('picked').hidden = !capturing || !p || panelOpen;
+    elSel.hidden     = !capturing || !p || !panelOpen;
+    $('hint').hidden = hintGone || !capturing;
+
+    $('houseMeta').textContent = 'Front faces ' + pointName(cfg.bearing);
+    $('sumTitle').textContent = done + ' of ' + walls.length + ' walls done';
+    $('openReport').disabled = !complete;
+    $('editSetup').disabled = locked();
+    $('sumMeta').textContent = cfg.W.toFixed(1) + ' \u00d7 ' + cfg.D.toFixed(1) + ' m \u00b7 '
+      + cfg.storeys + (cfg.storeys === 1 ? ' storey' : ' storeys')
+      + ' \u00b7 front faces ' + pointName(cfg.bearing)
+      + (complete ? '' : ' \u00b7 a photo, a comment and the crack answer on every wall unlocks the report');
+
+    if(p){
+      const c = captures[p.id] || { photos:[], note:'' };
+      const faces = 'faces ' + pointName(faceBearing(p.id));
+      const nameHtml = p.name + (p.storey ? ' <span class="storey">· '+p.storey+'</span>' : '');
+      const hasNote = !!(c.note && c.note.trim());
+      const missing = wallMissing(c);
+      const tagText = (c.photos.length === 1 ? '1 photo' : c.photos.length + ' photos')
+        + (wallTouched(c) && missing.length ? ' \u00b7 needs ' + missing.join(', ') : '');
+
+      $('pickFaces').textContent = (wallDone(c) ? 'Assessed wall' : wallTouched(c) ? 'Part-assessed wall' : 'Tapped wall') + ' \u00b7 ' + faces;
+      $('pickName').innerHTML = nameHtml;
+      $('pickTag').textContent = tagText;
+      $('pickTag').classList.toggle('done', wallDone(c));
+      $('pickTag').classList.toggle('warn', c.photos.length > 0 && !hasNote);
+      $('assessWall').textContent = (wallTouched(c) ? 'Continue ' : 'Assess ') + p.name + (p.storey ? ' \u00b7 ' + p.storey : '');
+
+      $('selFaces').textContent = 'Selected wall \u00b7 ' + faces;
+      $('selName').innerHTML = nameHtml;
+      const tag = $('selTag');
+      tag.textContent = tagText;
+      tag.classList.toggle('done', wallDone(c));
+      tag.classList.toggle('warn', c.photos.length > 0 && !hasNote);
+
+      // Yes / No / not yet answered. The width only opens once there is a crack.
+      const segs = document.querySelectorAll('#crackSeg button');
+      for(let i=0;i<segs.length;i++){
+        const v = segs[i].dataset.crack === 'yes';
+        segs[i].setAttribute('aria-pressed', String(c.crack === v));
+      }
+      const lk = locked();
+      for(let i=0;i<segs.length;i++) segs[i].disabled = lk;
+      $('selCrack').disabled = lk || c.crack !== true;
+      if(document.activeElement !== $('selCrack')){
+        $('selCrack').value = c.crack === true && c.crackMm ? c.crackMm : '';
+      }
+      $('selNote').readOnly = lk;
+      $('addPhoto').disabled = lk;
+      $('takeSample').disabled = lk;
+      $('saveWall').hidden = lk;
+      $('selLocked').hidden = !lk;
+      $('assessWall').textContent = lk ? 'View ' + p.name + (p.storey ? ' \u00b7 ' + p.storey : '')
+        : $('assessWall').textContent;
+      const host = $('selDefects');
+      if(!host.childNodes.length){
+        DEFECTS.forEach(function(d){
+          const bt = document.createElement('button');
+          bt.type = 'button'; bt.dataset.k = d.k; bt.textContent = d.label;
+          if(d.severe) bt.classList.add('severe');
+          bt.addEventListener('click', function(){
+            if(!selected || locked()) return;
+            const cc = captures[selected];
+            if(!cc.defects) cc.defects = [];
+            const at = cc.defects.indexOf(d.k);
+            if(at === -1) cc.defects.push(d.k); else cc.defects.splice(at, 1);
+            auditEdit('defects on ' + selected);
+            syncUI(); save(); schedulePush();
+          });
+          host.appendChild(bt);
+        });
+      }
+      const defs = (c.defects) || [];
+      host.querySelectorAll('button').forEach(function(bt){
+        bt.setAttribute('aria-pressed', String(defs.indexOf(bt.dataset.k) !== -1));
+        bt.disabled = lk;
+      });
+      if($('selNote').value !== c.note) $('selNote').value = c.note;
+      renderThumbs(c);
+    }
+  }
+
+  $('bRange').addEventListener('input', function(e){
+    cfg.bearing = +e.target.value; syncUI(); save();
+  });
+
+  function setNote(msg, warn){
+    const el = $('compassNote');
+    el.textContent = msg;
+    el.classList.toggle('warn', !!warn);
+  }
+
+  $('useCompass').addEventListener('click', function(){
+    setNote('Hold the tablet flat, facing the door\u2026', false);
+    readCompass().then(function(heading){
+      // Facing the door means facing into the house, so the wall in front of
+      // you faces back the other way.
+      cfg.bearing = Math.round((heading + 180) % 360);
+      $('bRange').value = cfg.bearing;
+      syncUI(); save();
+      setNote('Set from compass. Nudge the slider if it looks wrong.', false);
+    }).catch(function(err){
+      setNote('No compass reading on this device (' + err.message + '). Set it with the slider.', true);
+    });
+  });
+
+  $('wRange').addEventListener('input', function(e){ cfg.W = +e.target.value; build(); save(); });
+  $('dRange').addEventListener('input', function(e){ cfg.D = +e.target.value; build(); save(); });
+  const segButtons = document.querySelectorAll('#storeySeg button');
+  for(let i=0;i<segButtons.length;i++){
+    segButtons[i].addEventListener('click', function(){
+      cfg.storeys = +this.dataset.storeys; build(); save(); schedulePush();
+    });
+  }
+  const typeButtons = document.querySelectorAll('#typeSeg button');
+  for(let i=0;i<typeButtons.length;i++){
+    typeButtons[i].addEventListener('click', function(){
+      cfg.houseType = this.dataset.htype; build(); save(); schedulePush();
+    });
+  }
+  const sideButtons = document.querySelectorAll('#sideSeg button');
+  for(let i=0;i<sideButtons.length;i++){
+    sideButtons[i].addEventListener('click', function(){
+      cfg.sharedSide = this.dataset.side; build(); save(); schedulePush();
+    });
+  }
+
+  // yaw accumulates without wrapping, so aim at whichever multiple of a full
+  // turn is nearest and the house takes the short way round.
+  $('recentre').addEventListener('click', function(){
+    const twoPi = Math.PI * 2;
+    targetYaw = FRONT_YAW + Math.round((yaw - FRONT_YAW) / twoPi) * twoPi;
+    targetPitch = -PITCH_ABOVE * 0.35;
+    dismissHint();
+  });
+
+  $('toHouse').addEventListener('click', function(){ stage = 'house'; syncUI(); });
+  $('backOrient').addEventListener('click', function(){ stage = 'orient'; syncUI(); });
+  $('toCapture').addEventListener('click', function(){
+    stage = 'capture'; syncUI(); schedulePush();
+  });
+  $('editSetup').addEventListener('click', function(){
+    if(locked()) return;
+    selected = null; stage = 'orient'; syncUI();
+  });
+
+  // ---------- capture and the outbox ----------
+  const thumbUrls = Object.create(null);
+
+  function renderThumbs(c){
+    const strip = $('thumbs');
+    strip.innerHTML = '';
+    c.photos.forEach(function(ph){
+      const fig = document.createElement('figure');
+      fig.className = 'thumb ' + ph.state;
+      const img = document.createElement('img');
+      img.alt = '';
+      fig.appendChild(img);
+      const cap = document.createElement('figcaption');
+      cap.textContent = ph.state === 'confirmed' ? 'Synced'
+        : ph.state === 'uploading' ? 'Sending'
+        : ph.state === 'failed' ? 'Failed' : 'Queued';
+      fig.appendChild(cap);
+      strip.appendChild(fig);
+      if(thumbUrls[ph.id]){ img.src = thumbUrls[ph.id]; return; }
+      getPhoto(ph.id).then(function(r){
+        if(!r || !r.blob) return;
+        thumbUrls[ph.id] = URL.createObjectURL(r.blob);
+        img.src = thumbUrls[ph.id];
+      }).catch(function(){});
+    });
+  }
+
+  $('addPhoto').addEventListener('click', function(){ $('photoInput').click(); });
+
+  $('photoInput').addEventListener('change', function(e){
+    const files = Array.prototype.slice.call(e.target.files || []);
+    e.target.value = '';
+    if(!selected || !files.length || locked()) return;
+    const wall = selected, c = captures[wall];
+    files.reduce(function(chain, f){
+      return chain.then(function(){
+        const id = uid();
+        return putPhoto({ id:id, wall:wall, blob:f, ts:Date.now() }).then(function(){
+          c.photos.push({ id:id, state:'pending', ts:Date.now() });
+          audit('photo added', wall);
+          save(); syncUI();
+        });
+      });
+    }, Promise.resolve()).then(pump).catch(function(){
+      setNote('Could not save that photo to the tablet.', true);
+    });
+  });
+
+  // The server needs the assessment and its walls to exist before a photo can
+  // be attached to one, so this runs ahead of the first upload and again
+  // whenever the shape or the notes change.
+  let assessmentPushed = false, pushTimer = null;
+
+  function pushAssessment(force){
+    if(!API_BASE) return Promise.resolve();
+    if(assessmentPushed && !force) return Promise.resolve();
+    // Every wall the tablet knows about, as the full record: note, widest
+    // crack and the Figure 2 defects. The server ignores slugs the shape no
+    // longer has, so an orphaned wall's data does no harm.
+    const walls = {};
+    Object.keys(captures).forEach(function(k){
+      const c = captures[k];
+      walls[k] = { note: c.note || '', crack_mm: +c.crackMm || 0,
+                   defects: c.defects || [] };
+    });
+    return fetch(API_BASE + '/assessments/' + cfg.assessmentId + '/', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reference: (activeProp() || {}).caseNo || '',
+        address: cfg.address,
+        summary: cfg.summary,
+        bearing: cfg.bearing,
+        house_type: cfg.houseType,
+        shared_side: cfg.houseType === 'semi' ? cfg.sharedSide : '',
+        damage_group: cfg.group,
+        remediation_option: cfg.option,
+        structural_concern: !!cfg.structural,
+        width_m: cfg.W.toFixed(1),
+        depth_m: cfg.D.toFixed(1),
+        storeys: cfg.storeys,
+        elevations: walls,
+        rooms: rooms.map(function(r){
+          return { slug: r.slug, name: r.name, storey: r.storey, note: r.note || '',
+                   crack_mm: +r.crackMm || 0, defects: r.defects || [] };
+        })
+      })
+    }).then(function(res){
+      if(!res.ok) throw new Error('assessment ' + res.status);
+      assessmentPushed = true;
+      pumpSamples();
+    });
+  }
+
+  function schedulePush(){
+    if(!API_BASE) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(function(){
+      pushAssessment(true).catch(function(){
+        // The next successful photo upload re-sends the assessment and its
+        // notes, and coming back online schedules another attempt.
+        assessmentPushed = false;
+      });
+    }, 700);
+  }
+
+  function upload(item){
+    if(!API_BASE){
+      // Demo mode: no server configured, so stand in for one.
+      return new Promise(function(resolve, reject){
+        setTimeout(function(){
+          navigator.onLine ? resolve() : reject(new Error('offline'));
+        }, 900);
+      });
+    }
+    return getPhoto(item.ph.id).then(function(rec){
+      if(!rec || !rec.blob){
+        // The tablet no longer has the picture. Retrying cannot bring it
+        // back, and one lost blob must not hold every later photo hostage.
+        const gone = new Error('blob missing'); gone.permanent = true; throw gone;
+      }
+      if(item.assessment !== cfg.assessmentId){
+        // The assessor opened another case while this was queued. Leave it
+        // for the next time its own case is open.
+        throw new Error('case switched');
+      }
+      return pushAssessment().then(function(){
+        const fd = new FormData();
+        fd.append('assessment', item.assessment);
+        fd.append('elevation', item.wall);
+        fd.append('taken_at', new Date(item.ph.ts).toISOString());
+        fd.append('image', rec.blob, item.ph.id + '.jpg');
+        return fetch(API_BASE + '/captures/' + item.ph.id + '/', {
+          method: 'PUT', body: fd
+        });
+      });
+    }).then(function(res){
+      // 200 means the server already had it - a retry after a dropped reply.
+      if(!res.ok){
+        const err = new Error('capture ' + res.status);
+        // 404 is the wall not being there yet (the assessment push is
+        // debounced, or the shape just changed); it comes right, so wait.
+        err.permanent = res.status >= 400 && res.status < 500 && res.status !== 404;
+        throw err;
+      }
+    });
+  }
+
+  function wallExists(id){
+    return panels.some(function(p){ return p.id === id; });
+  }
+
+  function wallCounts(id){
+    return panels.some(function(p){ return p.id === id && p.pick; });
+  }
+
+  function nextPending(){
+    const ids = Object.keys(captures);
+    for(let i=0;i<ids.length;i++){
+      // A wall can stop existing, or become a party wall the server no
+      // longer holds - the shape changed after its photo was taken. Leave
+      // those photos alone rather than uploading into a 404.
+      if(!wallCounts(ids[i])) continue;
+      const list = captures[ids[i]].photos;
+      for(let j=0;j<list.length;j++){
+        if(list[j].state === 'pending'){
+          // The case is fixed now, not when the request is finally built.
+          return { ph: list[j], wall: ids[i], assessment: cfg.assessmentId };
+        }
+      }
+    }
+    return null;
+  }
+
+  let pumping = false, backoff = 800;
+  function pump(){
+    if(pumping || !navigator.onLine) return;
+    const item = nextPending();
+    if(!item) return;
+    const ph = item.ph;
+    pumping = true;
+    ph.state = 'uploading'; save(); syncUI();
+    upload(item).then(function(){
+      ph.state = 'confirmed';
+      backoff = 800;
+      return 150;
+    }).catch(function(err){
+      if(err && err.permanent){
+        // The server understood and said no. Asking again will not help.
+        ph.state = 'failed';
+        return 150;
+      }
+      // Transient - server down, no route, dropped connection. Back off,
+      // doubling up to a minute, or being online with an unreachable server
+      // becomes a battery-draining hot loop.
+      ph.state = 'pending';
+      backoff = Math.min(backoff * 2, 60000);
+      return backoff;
+    }).then(function(delay){
+      pumping = false; save(); syncUI();
+      if(navigator.onLine) setTimeout(pump, delay);
+    });
+  }
+
+  addEventListener('online', function(){
+    backoff = 800; smpBackoff = 800;
+    syncUI(); pump(); pumpSamples(); schedulePush();
+  });
+  addEventListener('offline', syncUI);
+
+  // ---- sample sync ----
+  // A sample is not write-once like a photo: it moves taken -> order placed
+  // -> sent -> result, and the lab fields change along the way. So every
+  // change marks it dirty and the whole record is re-sent; the server upserts
+  // by the tablet's id, so a repeat is harmless. Samples live on the case in
+  // the day list, and cases other than the active one can still owe an
+  // upload (a result arriving days later), so the pump walks every case.
+  function sampleDirty(sm){
+    sm.sync = 'pending';
+    saveDay(); syncUI(); pumpSamples();
+  }
+
+  // Everything owed, or (due only) everything owed whose wait is over. A
+  // sample that failed transiently waits its own backoff rather than holding
+  // the head of the queue, so other cases' cores still go.
+  function pendingSamples(dueOnly){
+    const out = [], now = Date.now();
+    day.properties.forEach(function(prop){
+      (prop.samples || []).forEach(function(sm){
+        if(sm.provisional) return;
+        if(sm.sync === 'confirmed' || sm.sync === 'failed') return;
+        if(dueOnly && sm.nextTry && sm.nextTry > now) return;
+        out.push({ sm: sm, prop: prop });
+      });
+    });
+    return out;
+  }
+
+  function uploadSample(item){
+    const sm = item.sm, prop = item.prop;
+    const iso = function(ms){ return ms ? new Date(ms).toISOString() : ''; };
+    // The active case is pushed first so its assessment exists server-side.
+    // Another case's sample can 404 until that case is next opened; that is
+    // a wait, not a failure.
+    const ahead = prop.id === cfg.assessmentId ? pushAssessment() : Promise.resolve();
+    return ahead.then(function(){
+      return sm.photoId && !sm.photoSent ? getPhoto(sm.photoId).catch(function(){ return null; })
+                                         : Promise.resolve(null);
+    }).then(function(rec){
+      const fd = new FormData();
+      fd.append('assessment', prop.id);
+      fd.append('location', sm.locLabel || sm.loc || '');
+      fd.append('status', sm.status || 'taken');
+      fd.append('lab', sm.lab || '');
+      fd.append('test_type', sm.test || '');
+      fd.append('order_no', sm.orderNo || '');
+      if(sm.sulfur != null) fd.append('total_sulfur', sm.sulfur);
+      fd.append('risk_class', sm.risk || '');
+      fd.append('taken_at', iso(sm.takenAt));
+      fd.append('sent_at', iso(sm.sentAt));
+      fd.append('result_at', iso(sm.resultAt));
+      fd.append('voided', sm.voided ? 'true' : 'false');
+      fd.append('void_reason', sm.voidReason || '');
+      fd.append('voided_at', iso(sm.voidedAt));
+      if(rec && rec.blob) fd.append('photo', rec.blob, sm.photoId + '.jpg');
+      return fetch(API_BASE + '/samples/' + sm.id + '/', { method:'PUT', body: fd })
+        .then(function(res){
+          if(res.ok){ if(rec && rec.blob) sm.photoSent = true; return; }
+          const err = new Error('sample ' + res.status);
+          err.permanent = res.status >= 400 && res.status < 500 && res.status !== 404;
+          throw err;
+        });
+    });
+  }
+
+  let smpPumping = false, smpBackoff = 800, smpTimer = null;
+  function pumpSamples(){
+    if(!API_BASE || smpPumping || !navigator.onLine) return;
+    const list = pendingSamples(true);
+    if(!list.length){
+      // Nothing due; wake when the soonest deferred one is.
+      const all = pendingSamples(false);
+      if(all.length){
+        const soonest = Math.min.apply(null, all.map(function(it){ return it.sm.nextTry || 0; }));
+        clearTimeout(smpTimer);
+        smpTimer = setTimeout(pumpSamples, Math.max(200, soonest - Date.now()));
+      }
+      return;
+    }
+    const item = list[0], sm = item.sm;
+    smpPumping = true;
+    sm.sync = 'uploading'; saveDay();
+    uploadSample(item).then(function(){
+      // An edit made while this was in flight set it back to pending; that
+      // edit still has to go, so only settle what is still ours.
+      if(sm.sync === 'uploading') sm.sync = 'confirmed';
+      delete sm.nextTry;
+      smpBackoff = 800;
+      return 150;
+    }).catch(function(err){
+      if(err && err.permanent){ if(sm.sync === 'uploading') sm.sync = 'failed'; return 150; }
+      if(sm.sync === 'uploading') sm.sync = 'pending';
+      smpBackoff = Math.min(smpBackoff * 2, 60000);
+      sm.nextTry = Date.now() + smpBackoff;
+      return 150;
+    }).then(function(delay){
+      smpPumping = false; saveDay(); syncUI();
+      // The card shows its sync state, so refresh the list if it is open.
+      if(!$('samples').hidden) renderSamples();
+      if(navigator.onLine) setTimeout(pumpSamples, delay);
+    });
+  }
+  $('takeSample').addEventListener('click', function(){
+    if(!selected || locked()) return;
+    let name = selected;
+    for(let i=0;i<panels.length;i++) if(panels[i].id === selected){ name = panels[i].name; break; }
+    addSample(selected, name + ' \u00b7 faces ' + pointName(faceBearing(selected)), true);
+    smpFilter = smpWall = selected;
+    renderSamples();
+    $('samples').hidden = false;
+  });
+
+  $('assessWall').addEventListener('click', openWall);
+  $('unpickWall').addEventListener('click', function(){ select(null); });
+
+  $('saveWall').addEventListener('click', function(){
+    if(!selected) return;
+    if(selSnapshot && fieldsChanged(captures[selected], selSnapshot)) audit('wall saved', selected);
+    schedulePush();
+    select(null);
+  });
+  $('closeWall').addEventListener('click', function(){
+    if(!selected) return;
+    const c = captures[selected];
+    if(selSnapshot && fieldsChanged(c, selSnapshot)){
+      c.note = selSnapshot.note; c.crack = selSnapshot.crack;
+      c.crackMm = selSnapshot.crackMm; c.defects = selSnapshot.defects.slice();
+      audit('wall closed, edits discarded', selected);
+      save(); schedulePush();
+    }
+    select(null);
+  });
+
+  const crackBtns = document.querySelectorAll('#crackSeg button');
+  for(let i=0;i<crackBtns.length;i++) crackBtns[i].addEventListener('click', function(){
+    if(!selected || locked()) return;
+    const c = captures[selected];
+    c.crack = this.dataset.crack === 'yes';
+    if(!c.crack) c.crackMm = 0;
+    auditEdit('visible crack on ' + selected);
+    syncUI(); save(); schedulePush();
+    if(c.crack) $('selCrack').focus();
+  });
+  $('selNote').addEventListener('input', function(e){
+    if(!selected || locked()) return;
+    captures[selected].note = e.target.value;
+    auditEdit('note on ' + selected);
+    save(); schedulePush();
+  });
+
+  $('selCrack').addEventListener('input', function(e){
+    if(!selected || locked()) return;
+    captures[selected].crackMm = +e.target.value || 0;
+    auditEdit('crack width on ' + selected);
+    save(); schedulePush();
+  });
+  // ---------- the day ----------
+  // Cases come from the County Council by email - Case No., address, Eircode -
+  // and only from there. The property id IS the assessment id the server sees.
+  const DAY_KEY = 'ep-day-v1';
+  let day = { properties: [], activeId: '', route: null };
+  let openCase = '';                       // the row whose options are showing
+
+  function recKey(id){ return KEY + ':' + id; }
+  function activeProp(){
+    for(let i=0;i<day.properties.length;i++){
+      if(day.properties[i].id === day.activeId) return day.properties[i];
+    }
+    return null;
+  }
+  function loadDay(){
+    try{
+      const raw = localStorage.getItem(DAY_KEY);
+      if(!raw) return;
+      const d = JSON.parse(raw);
+      if(d && Array.isArray(d.properties)){
+        day.properties = d.properties;
+        day.activeId = d.activeId || '';
+        day.route = d.route || null;
+      }
+    }catch(e){}
+  }
+  function saveDay(){
+    try{ localStorage.setItem(DAY_KEY, JSON.stringify(day)); }catch(e){}
+  }
+
+  // ---- lifecycle and audit ----
+  // Status is derived from what actually happened, except sign-off, which is
+  // an explicit act. 'processing' is reserved for when the AI is drafting.
+  const STATUS_LABEL = {
+    not_started: 'Not started',
+    in_progress: 'In progress',
+    processing:  'Processing',
+    ready:       'Ready to review',
+    signed_off:  'Signed off'
+  };
+
+  // Signed off means what was signed stays what was signed. Everything that
+  // changes the assessment checks this; Reopen on the report is the one way
+  // back, and it wants a reason for the audit trail.
+  function locked(){
+    const prop = activeProp();
+    return !!(prop && prop.status === 'signed_off');
+  }
+
+  function caseStatus(prop, pr){
+    if(prop.status === 'signed_off') return 'signed_off';
+    if(!pr.exists || pr.touched === 0) return 'not_started';
+    if(pr.done < pr.total) return 'in_progress';
+    // Cores still at the lab do not close the door: the result has to be
+    // received from inside the case. 'processing' stays reserved for the AI.
+    return 'ready';
+  }
+
+  // Append-only, on the case itself. Every change of substance lands here -
+  // that is the point: an assessment feeding a compensation scheme has to be
+  // able to say who touched it and when.
+  function audit(action, detail){
+    const prop = activeProp();
+    if(!prop) return;
+    auditFor(prop, action, detail);
+  }
+  function auditFor(prop, action, detail){
+    if(!prop.audit) prop.audit = [];
+    prop.audit.push({ t: Date.now(), a: action, d: detail || '' });
+    if(prop.audit.length > 300) prop.audit.splice(0, prop.audit.length - 300);
+    saveDay();
+  }
+  // once per field per visit is signal; every keystroke is noise
+  const auditedFields = {};
+  function auditEdit(field){
+    const prop = activeProp();
+    if(!prop) return;
+    const k = prop.id + ':' + field;
+    if(auditedFields[k]) return;
+    auditedFields[k] = true;
+    audit('edited', field + (prop.status === 'signed_off' ? ' (after sign-off)' : ''));
+  }
+
+  // The imaginary lab, reached over the same channel as everything else. In
+  // demo mode it answers itself; wired to a real lab endpoint it would not
+  // change the code around it. Placing an order returns the lab's order number;
+  // asking for results returns the finding.
+  function labPlaceOrder(sm){
+    return new Promise(function(resolve){
+      setTimeout(function(){
+        resolve('LAB-' + new Date().getFullYear() + '-' +
+          Math.floor(1000 + Math.random() * 9000));
+      }, 700);
+    });
+  }
+  function labFetchResult(sm){
+    return new Promise(function(resolve){
+      setTimeout(function(){
+        // demo finding; a real lab returns the measured values. Total sulfur
+        // by HTC to two decimals (7.2.3.4); ~0.10 % S is what cement alone
+        // gives (Figure 3, note X). The Table 2 class is the lab's call too.
+        const sulfur = Math.round((0.05 + Math.random() * 1.2) * 100) / 100;
+        const risk = sulfur <= 0.15 ? 'Negligible'
+          : RISK_CLASSES[1 + Math.floor(Math.random() * 3)];
+        resolve({ sulfur: sulfur, risk: risk });   // the lab measures; the engineer categorises the dwelling
+      }, 900);
+    });
+  }
+
+  // Opened from a wall, the panel shows only that wall's cores - the
+  // assessor is standing at it and the rest is noise. The Samples button on
+  // the main bar shows the whole case. Numbering stays global (S-03 is S-03
+  // wherever you see it), so the same core has one name in the report.
+  let smpFilter = null;      // the wall being shown, or null for the whole case
+  let smpWall = null;        // the wall the panel was opened from, if any
+
+  function renderSamples(){
+    const prop = activeProp();
+    if(!prop) return;
+    if(!prop.samples) prop.samples = [];
+    let wallName = '';
+    if(smpFilter){
+      for(let i=0;i<panels.length;i++) if(panels[i].id === smpFilter){ wallName = panels[i].name; break; }
+      if(!wallName) smpFilter = null;      // the wall is gone; fall back to all
+    }
+    $('smpCase').textContent = smpFilter ? wallName
+      : (prop.caseNo || (prop.address || '').slice(0, 24));
+    document.querySelector('#samples .add-sample').hidden = !!smpFilter || locked();
+    const host = $('smpList');
+    host.innerHTML = '';
+    let shown = 0;
+
+    prop.samples.forEach(function(sm, i){
+      // Samples saved before the Test Suite A change carry the 2018 test
+      // names and a free-mica %. Map the name; the number has no equivalent
+      // and stays blank until the lab reports total sulfur.
+      if(LEGACY_TEST[sm.test]) sm.test = LEGACY_TEST[sm.test];
+      if(smpFilter && sm.loc !== smpFilter) return;
+      shown++;
+      const card = document.createElement('div');
+      card.className = 'smp' + (sm.voided ? ' void' : '');
+      const lk = locked();
+
+      const head = document.createElement('div');
+      head.className = 'smp-head';
+      const left = document.createElement('div');
+      const b = document.createElement('b');
+      b.textContent = 'S-' + String(sampleNo(prop, sm)).padStart(2, '0');
+      const loc = document.createElement('small');
+      loc.textContent = (sm.locLabel || sm.loc || 'location not set')
+        + (sm.orderNo ? '  \u00b7  ' + sm.orderNo : '');
+      left.appendChild(b); left.appendChild(loc);
+      const stat = document.createElement('span');
+      stat.className = 'smp-stat ' + (sm.voided ? 'void' : sm.status);
+      stat.textContent = (sm.voided ? 'Void' : (SMP_STATUS[sm.status] || sm.status))
+        + (!API_BASE || sm.provisional ? '' : sm.sync === 'confirmed' ? ' \u00b7 synced'
+           : sm.sync === 'failed' ? ' \u00b7 sync failed' : ' \u00b7 queued');
+      head.appendChild(left); head.appendChild(stat);
+      card.appendChild(head);
+
+      // core photo
+      const strip = document.createElement('div');
+      strip.className = 'thumbs';
+      strip.style.marginTop = '10px';
+      if(sm.photoId){
+        const img = document.createElement('img');
+        const fig = document.createElement('figure');
+        fig.className = 'thumb confirmed';
+        img.alt = '';
+        if(thumbUrls[sm.photoId]) img.src = thumbUrls[sm.photoId];
+        else getPhoto(sm.photoId).then(function(r){
+          if(r && r.blob){ thumbUrls[sm.photoId] = URL.createObjectURL(r.blob); img.src = thumbUrls[sm.photoId]; }
+        }).catch(function(){});
+        fig.appendChild(img); strip.appendChild(fig);
+        card.appendChild(strip);
+      }
+
+      if(sm.voided){
+        const v = document.createElement('p');
+        v.className = 'smp-void';
+        v.textContent = 'Voided ' + new Date(sm.voidedAt).toLocaleDateString('en-IE')
+          + (sm.voidReason ? ' \u2014 ' + sm.voidReason : '')
+          + (sm.orderNo ? ' \u00b7 was ' + (SMP_STATUS[sm.status] || sm.status).toLowerCase() : '');
+        card.appendChild(v);
+        host.appendChild(card);
+        return;
+      }
+
+      // lab order fields, editable until the order is placed
+      if(sm.status === 'taken' || sm.status === 'order_sent'){
+        const fields = document.createElement('div');
+        fields.className = 'smp-fields';
+        function field(label, key, opts){
+          const l = document.createElement('label'); l.textContent = label;
+          let input;
+          if(opts){
+            input = document.createElement('select');
+            opts.forEach(function(o){ const op = document.createElement('option'); op.value = o; op.textContent = o || '\u2014'; input.appendChild(op); });
+          } else { input = document.createElement('input'); }
+          input.value = sm[key] || '';
+          input.disabled = lk || sm.status !== 'taken';
+          input.addEventListener('input', function(){ sm[key] = input.value; commitSample(sm); sampleDirty(sm); });
+          l.appendChild(input); fields.appendChild(l);
+        }
+        field('Lab', 'lab', ['', 'Sandberg', 'Petrolab']);
+        field('Test', 'test', ['', 'Test Suite A', 'Test Suite B']);
+        card.appendChild(fields);
+      }
+
+      // result, once it is back
+      if(sm.status === 'result'){
+        const res = document.createElement('div');
+        res.className = 'smp-fields';
+        function ro(label, val){
+          const l = document.createElement('label'); l.textContent = label;
+          const d = document.createElement('input'); d.value = val; d.disabled = true;
+          l.appendChild(d); res.appendChild(d.parentNode);
+        }
+        ro('Lab', sm.lab || '\u2014');
+        ro('Test', sm.test || '\u2014');
+        ro('Total sulfur % S', (sm.sulfur != null ? Number(sm.sulfur).toFixed(2) : '\u2014'));
+        ro('Table 2 risk', sm.risk || '\u2014');
+        card.appendChild(res);
+        if(sm.risk){
+          const flag = document.createElement('p');
+          const over = sm.risk !== 'Negligible';
+          flag.className = 'risk-flag' + (over ? ' over' : '');
+          flag.textContent = 'Table 2: ' + sm.risk + ' \u2014 ' + (RISK_NEXT[sm.risk] || '');
+          card.appendChild(flag);
+        }
+      }
+
+      // actions for the current step - none once the case is signed off
+      const actions = document.createElement('div');
+      actions.className = 'smp-actions';
+      function act(label, primary, fn){
+        const bt = document.createElement('button');
+        bt.type = 'button'; bt.className = 'btn' + (primary ? ' primary' : '') + ' grow';
+        bt.textContent = label; bt.addEventListener('click', fn); actions.appendChild(bt);
+      }
+      if(lk){ host.appendChild(card); return; }
+      if(smpVoiding === sm.id){
+        // typing the reason
+        const box = document.createElement('div');
+        box.className = 'smp-fields';
+        const l = document.createElement('label'); l.textContent = 'Reason for voiding';
+        const inp = document.createElement('input'); inp.maxLength = 160;
+        inp.placeholder = 'e.g. core crumbled in transit'; l.appendChild(inp); box.appendChild(l);
+        card.appendChild(box);
+        act('Confirm void', true, function(){
+          const why = inp.value.trim();
+          if(!why){ setSmpNote('Give a reason for voiding ' + b.textContent + '.', true); inp.focus(); return; }
+          sm.voided = true; sm.voidReason = why; sm.voidedAt = Date.now();
+          smpVoiding = null;
+          auditFor(prop, b.textContent + ' voided \u2014 ' + why);
+          sampleDirty(sm); renderSamples();
+          setSmpNote(b.textContent + ' voided. It stays on the record.', false);
+        });
+        act('Keep', false, function(){ smpVoiding = null; renderSamples(); });
+        card.appendChild(actions);
+        host.appendChild(card);
+        setTimeout(function(){ inp.focus(); }, 0);
+        return;
+      }
+      if(!sm.photoId && (sm.status === 'taken' || sm.status === 'order_sent')){
+        act('Core photo', false, function(){ smpPhotoFor = sm.id; $('smpPhoto').click(); });
+      }
+      if(sm.status === 'taken'){
+        act('Send lab order', true, function(){
+          if(!sm.lab && !sm.test){ setSmpNote('Pick a lab and a test first.', true); return; }
+          if(!sm.lab){ setSmpNote('Pick a lab first.', true); return; }
+          if(!sm.test){ setSmpNote('Pick a test first.', true); return; }
+          setSmpNote('Placing the order\u2026', false);
+          labPlaceOrder(sm).then(function(orderNo){
+            sm.orderNo = orderNo; sm.status = 'order_sent'; sm.orderAt = Date.now();
+            auditFor(prop, 'lab order placed for ' + b.textContent + ' \u2014 ' + orderNo);
+            sampleDirty(sm); renderSamples();
+            setSmpNote('Lab order placed. Order number ' + orderNo + ' received.', false);
+          });
+        });
+      } else if(sm.status === 'order_sent'){
+        act('Mark sent to lab', true, function(){
+          sm.status = 'sent'; sm.sentAt = Date.now();
+          auditFor(prop, b.textContent + ' posted to lab');
+          sampleDirty(sm); renderSamples();
+        });
+      } else if(sm.status === 'sent'){
+        act('Receive results', true, function(){
+          setSmpNote('Fetching results\u2026', false);
+          labFetchResult(sm).then(function(r){
+            sm.sulfur = r.sulfur; sm.risk = r.risk; sm.status = 'result'; sm.resultAt = Date.now();
+            auditFor(prop, 'results in for ' + b.textContent + ' \u2014 '
+              + r.sulfur.toFixed(2) + ' % S, Table 2 ' + r.risk);
+            sampleDirty(sm); renderSamples();
+            setSmpNote('Results received and attributed to ' + b.textContent + '.', false);
+          });
+        });
+      }
+      if(sm.status === 'taken'){
+        act('Remove', false, function(){
+          if(sm.photoId){ delPhoto(sm.photoId).catch(function(){}); }
+          prop.samples.splice(i, 1);
+          if(!sm.provisional) auditFor(prop, b.textContent + ' removed');
+          saveDay(); renderSamples();
+        });
+      } else {
+        act('Void', false, function(){ smpVoiding = sm.id; renderSamples(); });
+      }
+      card.appendChild(actions);
+      host.appendChild(card);
+    });
+
+    if(!shown){
+      const empty = document.createElement('p');
+      empty.className = 'note'; empty.style.marginTop = '12px';
+      empty.textContent = smpFilter
+        ? 'No cores from this wall yet.'
+        : 'No samples yet. Take one from a wall, or add the rising-wall sample here.';
+      host.appendChild(empty);
+    }
+    if(smpFilter){
+      const all = document.createElement('button');
+      all.type = 'button'; all.className = 'btn ghost'; all.style.marginTop = '12px';
+      const total = prop.samples.length;
+      all.textContent = 'Show all ' + total + (total === 1 ? ' sample' : ' samples') + ' on this case';
+      all.addEventListener('click', function(){ smpFilter = null; renderSamples(); });
+      host.appendChild(all);
+    } else if(smpWall){
+      // Opened from a wall and widened to the case: offer the way back.
+      let wname = '';
+      for(let i=0;i<panels.length;i++) if(panels[i].id === smpWall){ wname = panels[i].name + (panels[i].storey ? ' · ' + panels[i].storey : ''); break; }
+      if(wname){
+        const only = document.createElement('button');
+        only.type = 'button'; only.className = 'btn ghost'; only.style.marginTop = '12px';
+        only.textContent = 'Show only ' + wname;
+        only.addEventListener('click', function(){ smpFilter = smpWall; renderSamples(); });
+        host.appendChild(only);
+      }
+    }
+  }
+
+  function setSmpNote(msg, warn){
+    const el = $('smpNote');
+    if(!el) return;
+    el.textContent = msg; el.classList.toggle('warn', !!warn);
+  }
+
+  // Take sample opens a card straight away so the assessor can fill it in
+  // standing at the wall. Until they touch it - a lab, a test, a core photo -
+  // it is provisional: not synced, not audited, and dropped when the panel
+  // closes. So a change of mind leaves nothing behind.
+  function addSample(locId, locLabel, provisional){
+    const prop = activeProp();
+    if(!prop) return null;
+    if(!prop.samples) prop.samples = [];
+    const sm = { id: uid(), loc: locId, locLabel: locLabel, status: 'taken',
+                 takenAt: Date.now(), lab:'', test:'', orderNo:'', photoId:null,
+                 sulfur:null, risk:'', sync:'pending' };
+    if(provisional) sm.provisional = true;
+    prop.samples.push(sm);
+    if(provisional){ saveDay(); return sm; }
+    sampleNo(prop, sm);
+    auditFor(prop, 'sample taken \u2014 ' + locLabel);
+    sampleDirty(sm);
+    return sm;
+  }
+  function commitSample(sm){
+    if(!sm.provisional) return;
+    delete sm.provisional;
+    const prop = activeProp();
+    sampleNo(prop, sm);
+    auditFor(prop, 'sample taken \u2014 ' + sm.locLabel);
+  }
+  // S-numbers are issued once and never reused, so the audit trail's S-03 is
+  // the same core the card calls S-03 after an earlier one is removed. Cores
+  // from before numbering get theirs in list order, the first time asked.
+  function sampleNo(prop, sm){
+    if(!prop) return 0;
+    if(!prop.sampleSeq) prop.sampleSeq = 0;
+    let issued = false;
+    (prop.samples || []).forEach(function(x){
+      if(x.no == null && !x.provisional){ x.no = ++prop.sampleSeq; issued = true; }
+    });
+    if(sm.no == null && !sm.provisional){ sm.no = ++prop.sampleSeq; issued = true; }
+    if(issued) saveDay();
+    if(sm.no == null){
+      // provisional: show the number it would get, without spending it
+      return prop.sampleSeq + 1;
+    }
+    return sm.no;
+  }
+  function dropProvisional(){
+    let dropped = false;
+    day.properties.forEach(function(prop){
+      if(!prop.samples) return;
+      const keep = prop.samples.filter(function(sm){ return !sm.provisional; });
+      if(keep.length !== prop.samples.length){ prop.samples = keep; dropped = true; }
+    });
+    if(dropped) saveDay();
+  }
+
+  $('openSamples').addEventListener('click', function(){ smpFilter = smpWall = null; renderSamples(); $('samples').hidden = false; });
+  $('smpClose').addEventListener('click', function(){ dropProvisional(); $('samples').hidden = true; syncUI(); });
+
+  $('smpAdd').addEventListener('click', function(){
+    if(locked()) return;
+    // manual add - defaults to the rising wall, the one non-elevation sample
+    const label = $('smpLoc').value.trim() || 'Rising wall, below ground';
+    addSample('rising-wall', label);
+    $('smpLoc').value = '';
+    renderSamples();
+  });
+
+  // core photo for the newest sample lacking one
+  let smpPhotoFor = null;
+  $('smpPhoto').addEventListener('change', function(e){
+    const f = (e.target.files || [])[0];
+    e.target.value = '';
+    const prop = activeProp();
+    if(!f || !prop || !prop.samples.length || locked()) return;
+    let sm = null;
+    for(let i=0;i<prop.samples.length;i++) if(prop.samples[i].id === smpPhotoFor){ sm = prop.samples[i]; break; }
+    smpPhotoFor = null;
+    if(!sm) sm = prop.samples[prop.samples.length - 1];
+    const id = uid();
+    putPhoto({ id:id, wall:'sample:' + sm.id, blob:f, ts:Date.now() }).then(function(){
+      sm.photoId = id; sm.photoSent = false; commitSample(sm); auditFor(prop, 'core photo added');
+      sampleDirty(sm); renderSamples();
+    }).catch(function(){});
+  });
+
+  $('smpExample').addEventListener('click', function(){
+    const sm = addSample('front-0', 'Front elevation, ground (sample data)');
+    if(!sm) return;
+    sm.lab = 'Sandberg'; sm.test = 'Test Suite A';
+    sm.orderNo = 'LAB-2026-4821'; sm.status = 'result';
+    sm.orderAt = Date.now() - 12*24*3600*1000; sm.sentAt = Date.now() - 11*24*3600*1000;
+    sm.resultAt = Date.now(); sm.sulfur = 0.42; sm.risk = 'Low to Medium';
+    auditFor(activeProp(), 'example lab result added');
+    sampleDirty(sm); renderSamples();
+  });
+
+  function openDetail(prop){
+    const pr = progress(prop);
+    const st = caseStatus(prop, pr);
+    $('detStatus').textContent = STATUS_LABEL[st];
+    $('detStatus').className = 'case-status ' + st;
+    $('detAddress').textContent = prop.address || 'Unnamed case';
+    $('detCase').textContent = prop.caseNo || '\u2014';
+    $('detOwner').textContent = prop.owner || '\u2014';
+    $('detEir').textContent = prop.eircode || '\u2014';
+    $('detCounty').textContent = prop.county || '\u2014';
+    $('detSent').textContent = prop.sentAt || '\u2014';
+    $('detFrom').textContent = prop.sentBy || '\u2014';
+    $('detWalls').textContent = pr.exists ? pr.done + ' of ' + pr.total : '\u2014';
+    const ss = sampleSummary(prop);
+    $('detSamples').textContent = (ss.total
+      ? ss.total + ' \u00b7 ' + ss.resulted + ' resulted'
+        + (ss.awaiting ? ', ' + ss.awaiting + ' at lab' : '')
+        + (ss.overdue ? ' \u00b7 overdue' : '')
+      : 'none') + (ss.voided ? ' \u00b7 ' + ss.voided + ' void' : '');
+    $('detGeo').textContent = prop.lat != null
+      ? prop.lat.toFixed(4) + ', ' + prop.lng.toFixed(4) : 'not found';
+    const list = $('auditList');
+    list.innerHTML = '';
+    const entries = (prop.audit || []).slice().reverse();
+    $('auditEmpty').hidden = !!entries.length;
+    entries.forEach(function(e){
+      const li = document.createElement('li');
+      const tm = document.createElement('time');
+      tm.textContent = new Date(e.t).toLocaleString('en-IE',
+        { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      const what = document.createElement('span');
+      what.textContent = e.a + (e.d ? ' \u00b7 ' + e.d : '');
+      li.appendChild(tm); li.appendChild(what);
+      list.appendChild(li);
+    });
+    $('detail').hidden = false;
+  }
+  $('closeDetail').addEventListener('click', function(){ $('detail').hidden = true; });
+
+  // ---- rooms ----
+  function storeyLabel(st){ return st === 1 ? 'First' : 'Ground'; }
+
+  function roomSlug(){
+    // device-issued, like everything else; the server upserts on it
+    return 'int-' + uid().replace(/-/g, '').slice(0, 8);
+  }
+
+  function addRoom(name, storey){
+    const r = { slug: roomSlug(), name: name, storey: storey === 1 ? 1 : 0,
+                note: '', crack: undefined, crackMm: 0, defects: [] };
+    rooms.push(r);
+    audit('room added', name + ' \u00b7 ' + storeyLabel(r.storey));
+    save(); schedulePush();
+    return r;
+  }
+
+  function renderRooms(){
+    const prop = activeProp();
+    if(!prop) return;
+    const lk = locked();
+    $('roomCase').textContent = prop.caseNo || (prop.address || '').slice(0, 24);
+    $('roomAdd').hidden = lk;
+    const host = $('roomList');
+    host.innerHTML = '';
+
+    rooms.forEach(function(r){
+      const card = document.createElement('div');
+      card.className = 'smp';
+
+      const head = document.createElement('div');
+      head.className = 'smp-head';
+      const left = document.createElement('div');
+      const b = document.createElement('b'); b.textContent = r.name;
+      const sub = document.createElement('small'); sub.textContent = storeyLabel(r.storey) + ' floor';
+      left.appendChild(b); left.appendChild(sub);
+      const stat = document.createElement('span');
+      stat.className = 'smp-stat';
+      function refreshStat(){
+        const bits = [];
+        if(r.crack === false) bits.push('no crack');
+        if(r.crack === true) bits.push(r.crackMm ? r.crackMm + ' mm' : 'crack');
+        if(r.defects.length) bits.push(r.defects.length + (r.defects.length === 1 ? ' defect' : ' defects'));
+        stat.textContent = bits.length ? bits.join(' \u00b7 ') : 'not yet assessed';
+      }
+      refreshStat();
+      head.appendChild(left); head.appendChild(stat);
+      card.appendChild(head);
+
+      const fields = document.createElement('div');
+      fields.className = 'room-fields';
+
+      // the crack question, then the width it unlocks
+      const row1 = document.createElement('div'); row1.className = 'row';
+      const q = document.createElement('div'); q.className = 'field'; q.style.flex = '0 0 auto';
+      const ql = document.createElement('span'); ql.className = 'label'; ql.textContent = 'Is there a visible crack?';
+      const seg = document.createElement('div'); seg.className = 'seg';
+      [['yes', 'Yes'], ['no', 'No']].forEach(function(o){
+        const bt = document.createElement('button'); bt.type = 'button'; bt.textContent = o[1];
+        bt.setAttribute('aria-pressed', String(r.crack === (o[0] === 'yes')));
+        bt.disabled = lk;
+        bt.addEventListener('click', function(){
+          if(lk) return;
+          r.crack = o[0] === 'yes';
+          if(!r.crack) r.crackMm = 0;
+          auditEdit('visible crack in ' + r.name);
+          save(); schedulePush(); renderRooms();
+        });
+        seg.appendChild(bt);
+      });
+      q.appendChild(ql); q.appendChild(seg); row1.appendChild(q);
+
+      const w = document.createElement('div'); w.className = 'field'; w.style.flex = '0 0 auto';
+      const wl = document.createElement('span'); wl.className = 'label'; wl.textContent = 'Widest crack';
+      const mm = document.createElement('div'); mm.className = 'mm';
+      const inp = document.createElement('input'); inp.type = 'number'; inp.min = '0'; inp.max = '50'; inp.step = '0.5';
+      inp.inputMode = 'decimal'; inp.value = r.crack === true && r.crackMm ? r.crackMm : '';
+      inp.disabled = lk || r.crack !== true;
+      inp.addEventListener('input', function(){
+        if(lk) return;
+        r.crackMm = +inp.value || 0;
+        auditEdit('crack width in ' + r.name);
+        refreshStat();
+        save(); schedulePush();
+      });
+      const unit = document.createElement('span'); unit.textContent = 'mm';
+      mm.appendChild(inp); mm.appendChild(unit); w.appendChild(wl); w.appendChild(mm); row1.appendChild(w);
+      fields.appendChild(row1);
+
+      // defects
+      const df = document.createElement('div'); df.className = 'field';
+      const dl = document.createElement('span'); dl.className = 'label'; dl.textContent = 'Defects seen (I.S. 465 Fig. 2)';
+      const dh = document.createElement('div'); dh.className = 'defects';
+      DEFECTS.forEach(function(d){
+        const bt = document.createElement('button'); bt.type = 'button'; bt.textContent = d.label;
+        if(d.severe) bt.classList.add('severe');
+        bt.setAttribute('aria-pressed', String(r.defects.indexOf(d.k) !== -1));
+        bt.disabled = lk;
+        bt.addEventListener('click', function(){
+          if(lk) return;
+          const at = r.defects.indexOf(d.k);
+          if(at === -1) r.defects.push(d.k); else r.defects.splice(at, 1);
+          bt.setAttribute('aria-pressed', String(at === -1));
+          refreshStat();
+          auditEdit('defects in ' + r.name);
+          save(); schedulePush();
+        });
+        dh.appendChild(bt);
+      });
+      df.appendChild(dl); df.appendChild(dh); fields.appendChild(df);
+
+      // comment
+      const cf = document.createElement('div'); cf.className = 'field';
+      const cl = document.createElement('span'); cl.className = 'label'; cl.textContent = 'Comment';
+      const ta = document.createElement('textarea'); ta.value = r.note || ''; ta.readOnly = lk;
+      ta.placeholder = 'Where the cracking is, what it follows, anything the photos of the outside would not show\u2026';
+      ta.addEventListener('input', function(){
+        if(lk) return;
+        r.note = ta.value;
+        auditEdit('note in ' + r.name);
+        save(); schedulePush();
+      });
+      cf.appendChild(cl); cf.appendChild(ta); fields.appendChild(cf);
+      card.appendChild(fields);
+
+      if(!lk){
+        const actions = document.createElement('div'); actions.className = 'smp-actions';
+        const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'btn grow';
+        rm.textContent = 'Remove room';
+        rm.addEventListener('click', function(){
+          rooms = rooms.filter(function(x){ return x !== r; });
+          audit('room removed', r.name);
+          save(); schedulePush(); renderRooms();
+        });
+        actions.appendChild(rm); card.appendChild(actions);
+      }
+      host.appendChild(card);
+    });
+
+    if(!rooms.length){
+      const empty = document.createElement('p');
+      empty.className = 'note'; empty.style.marginTop = '12px';
+      empty.textContent = 'No rooms yet. Add the rooms you inspected inside.';
+      host.appendChild(empty);
+    }
+  }
+
+  $('openRooms').addEventListener('click', function(){ renderRooms(); $('rooms').hidden = false; });
+  $('roomClose').addEventListener('click', function(){ $('rooms').hidden = true; syncUI(); });
+  $('roomName').addEventListener('change', function(){
+    $('roomOther').hidden = this.value !== 'Other';
+    if(this.value === 'Other') $('roomOther').focus();
+  });
+  const storeyBtns = document.querySelectorAll('#roomStorey button');
+  for(let i=0;i<storeyBtns.length;i++) storeyBtns[i].addEventListener('click', function(){
+    for(let j=0;j<storeyBtns.length;j++) storeyBtns[j].setAttribute('aria-pressed', String(storeyBtns[j] === this));
+  });
+  $('roomAddBtn').addEventListener('click', function(){
+    if(locked()) return;
+    let name = $('roomName').value;
+    if(name === 'Other'){
+      name = $('roomOther').value.trim();
+      if(!name){ $('roomOther').focus(); return; }
+    }
+    const pressed = document.querySelector('#roomStorey button[aria-pressed="true"]');
+    const storey = pressed && pressed.dataset.storey === '1' ? 1 : 0;
+    if(storey === 1 && cfg.storeys === 1){ $('roomNote').textContent = 'This house has one storey.'; return; }
+    $('roomNote').textContent = '';
+    addRoom(name, storey);
+    $('roomOther').value = '';
+    renderRooms();
+  });
+
+  // ---- samples ----
+  // Samples live on the case (in the day list), not in the capture record, so
+  // the dashboard can read every case's lab state without opening each one.
+  // Lifecycle: taken on site -> lab order placed (lab returns an order no.)
+  // -> physically sent -> result received (fills total sulfur and the Table 2
+  // class). I.S. 465:2026 6.2 wants >=13 samples, incl. >=3 from the rising
+  // wall below ground.
+  const SMP_STATUS = {
+    taken:'Taken on site', order_sent:'Order placed', sent:'Sent to lab', result:'Result in'
+  };
+  // Once a lab order exists the core is part of the record: it can be voided
+  // with a reason, never removed. A wrong result means a new core, and the
+  // old one stays visible as void.
+  let smpVoiding = null;   // sample id whose void reason is being typed
+  // I.S. 465:2026 Table 2 - Test Suite A classification of the risk of future
+  // degradation, and what follows from each (7.2.4). No free-mica rule: the
+  // 2026 revision tests for iron sulfides and internal sulfate attack.
+  const LEGACY_TEST = { 'Simplified petrography':'Test Suite A', 'XRD':'Test Suite A', 'SEM-EDS':'Test Suite B' };
+  const RISK_CLASSES = ['Negligible', 'Low to Medium', 'High', 'Critical', 'Unclassified'];
+  const RISK_NEXT = {
+    'Negligible':    'no further testing',
+    'Low to Medium': 'Test Suite B should follow',
+    'High':          'Test Suite B should follow',
+    'Critical':      'no further testing if deleterious rock types present, else Suite B',
+    'Unclassified':  'Test Suite B should follow'
+  };
+
+  function sampleSummary(prop){
+    const list = (prop && prop.samples) || [];
+    let awaiting = 0, resulted = 0;
+    const now = Date.now(), TEN_DAYS = 10*24*3600*1000;
+    let overdue = false;
+    let voided = 0;
+    list.forEach(function(sm){
+      if(sm.provisional) return;
+      if(sm.voided){ voided++; return; }
+      if(sm.status === 'result') resulted++;
+      else {
+        awaiting++;   // taken, ordered or in transit - not yet resolved
+        if(sm.sentAt && now - sm.sentAt > TEN_DAYS) overdue = true;
+      }
+    });
+    return { total: awaiting + resulted, awaiting:awaiting, resulted:resulted,
+             overdue:overdue, voided:voided };
+  }
+
+  function setRouteNote(msg, warn){
+    const el = $('routeNote');
+    el.textContent = msg;
+    el.classList.toggle('warn', !!warn);
+  }
+
+  // walls with at least one photo, against the walls the house has
+  function progress(prop){
+    try{
+      const raw = localStorage.getItem(recKey(prop.id));
+      if(!raw) return { exists:false, done:0, touched:0, total:8 };
+      const d = JSON.parse(raw);
+      const caps = (d && d.captures) || {};
+      const c2 = (d && d.cfg) || {};
+      // The same walls build() would give this house - orphans from an
+      // earlier shape must not count.
+      const party = c2.houseType === 'semi' ? [c2.sharedSide === 'right' ? 'right' : 'left']
+        : c2.houseType === 'terrace' ? ['left', 'right']
+        : c2.houseType === 'apartment' ? ['left', 'right', 'rear'] : [];
+      const storeys = c2.storeys === 1 ? 1 : 2;
+      const wanted = {};
+      ['front', 'rear', 'left', 'right'].forEach(function(face){
+        if(party.indexOf(face) !== -1) return;
+        for(let st=0; st<storeys; st++) wanted[face + '-' + st] = true;
+      });
+      let done = 0, touched = 0;
+      Object.keys(caps).forEach(function(k){
+        if(!wanted[k]) return;
+        const c = caps[k] || {};
+        const ph = (c.photos || []).length, nt = (c.note || '').trim();
+        const ans = typeof c.crack === 'boolean';
+        if(ph && nt && ans) done++;
+        if(ph || nt || ans) touched++;
+      });
+      const total = Object.keys(wanted).length;
+      return { exists:true, done: Math.min(done, total), touched: touched, total: total };
+    }catch(e){ return { exists:false, done:0, touched:0, total:8 }; }
+  }
+
+  function distKm(a, b){
+    const R = 6371, rad = Math.PI / 180;
+    const dLat = (b.lat - a.lat) * rad, dLng = (b.lng - a.lng) * rad;
+    const h = Math.sin(dLat/2) * Math.sin(dLat/2)
+      + Math.cos(a.lat*rad) * Math.cos(b.lat*rad) * Math.sin(dLng/2) * Math.sin(dLng/2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  // Exact for a day-sized list: try every order, keep the shortest, prune
+  // branches already longer than the best. Beyond nine stops, fall back to
+  // nearest-neighbour rather than exploring billions of orders.
+  function bestOrder(from, props){
+    if(props.length > 9){
+      const left = props.map(function(_, i){ return i; });
+      const order = [];
+      let at = from, km = 0;
+      while(left.length){
+        let bi = 0, bd = Infinity;
+        for(let i=0;i<left.length;i++){
+          const d = distKm(at, props[left[i]]);
+          if(d < bd){ bd = d; bi = i; }
+        }
+        const k = left.splice(bi, 1)[0];
+        order.push(k); km += bd; at = props[k];
+      }
+      return { order: order, km: km };
+    }
+    let best = null, bestKm = Infinity;
+    (function walk(rest, order, soFar, at){
+      if(soFar >= bestKm) return;
+      if(!rest.length){ best = order.slice(); bestKm = soFar; return; }
+      for(let i=0;i<rest.length;i++){
+        const r = rest.slice();
+        const k = r.splice(i, 1)[0];
+        walk(r, order.concat(k), soFar + distKm(at, props[k]), props[k]);
+      }
+    })(props.map(function(_, i){ return i; }), [], 0, from);
+    return { order: best || [], km: bestKm === Infinity ? 0 : bestKm };
+  }
+
+  function whereAmI(){
+    return new Promise(function(resolve, reject){
+      if(!navigator.geolocation){ reject(new Error('no geolocation')); return; }
+      navigator.geolocation.getCurrentPosition(
+        function(pos){ resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+        function(err){ reject(new Error(err.message || 'refused')); },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+      );
+    });
+  }
+
+  // ---- pulling cases out of the council email ----
+  const EIRCODE_RE = /\b(?:D6W|[AC-FHKNPRTV-Y]\d{2})\s?[0-9AC-FHKNPRTV-Y]{4}\b/gi;
+  const CASE_RE = /case\s*(?:no|number|ref(?:erence)?)?\s*[.:#]?\s*([A-Z0-9][A-Z0-9\/\-]{2,})/gi;
+  const ADDR_RE = /(?:address|property)\s*[.:]\s*([^\n]+)/i;
+  const OWNER_RE = /^\s*(?:home\s*owner|owner|applicant|occupier)s?\s*[.:]\s*([^\n]+)/im;
+  const FROM_RE = /^\s*from\s*[.:]\s*([^\n]+)/im;
+  const SENT_RE = /^\s*(?:sent|date)\s*[.:]\s*([^\n]+)/im;
+
+  // "John & Mary McGinley" names two people but writes the surname once.
+  // The first-named homeowner is the case contact, so give them it back.
+  function firstOwner(raw){
+    const first = raw.split(/\s*(?:&|,|\band\b)\s*/i)[0].trim();
+    if(first && first.indexOf(' ') === -1){
+      const words = raw.trim().split(/\s+/);
+      const surname = words[words.length - 1];
+      if(surname && surname.toLowerCase() !== first.toLowerCase()){
+        return first + ' ' + surname;
+      }
+    }
+    return first;
+  }
+
+  function countyOf(text){
+    let m = /\b(?:co\.|county)\s+(?!council)([A-Z][a-zA-Z]+)/i.exec(text);
+    if(m) return m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+    m = /([A-Z][a-zA-Z]+)\s+County\s+Council/i.exec(text);
+    return m ? m[1] : '';
+  }
+
+  function parseCouncilMail(text){
+    // Sender, sent date and county are properties of the email itself, so
+    // every case in it inherits them.
+    const fromM = FROM_RE.exec(text);
+    const sentM = SENT_RE.exec(text);
+    const sentBy = fromM
+      ? fromM[1].replace(/<[^>]*>/g, '').replace(/["']/g, '').trim().replace(/[,;\s]+$/, '')
+      : '';
+    const sentAt = sentM ? sentM[1].trim() : '';
+    const mailCounty = countyOf(text);
+
+    const anchors = [];
+    let m;
+    CASE_RE.lastIndex = 0;
+    while((m = CASE_RE.exec(text))) anchors.push({ at: m.index, caseNo: m[1].toUpperCase() });
+    const blocks = anchors.length
+      ? anchors.map(function(a, i){
+          return { caseNo: a.caseNo,
+                   text: text.slice(a.at, anchors[i+1] ? anchors[i+1].at : text.length) };
+        })
+      : [{ caseNo: '', text: text }];
+
+    const cases = [];
+    blocks.forEach(function(b){
+      EIRCODE_RE.lastIndex = 0;
+      const eir = EIRCODE_RE.exec(b.text);
+      const addr = ADDR_RE.exec(b.text);
+      const address = addr ? addr[1].trim().replace(/[,;\s]+$/, '') : '';
+      if(!b.caseNo && !eir && !address) return;
+      const ownerM = OWNER_RE.exec(b.text);
+      cases.push({
+        caseNo: b.caseNo,
+        address: address,
+        eircode: eir ? eir[0].toUpperCase().replace(/\s+/, ' ') : '',
+        owner: ownerM ? firstOwner(ownerM[1]) : '',
+        county: countyOf(b.text) || mailCounty,
+        sentBy: sentBy,
+        sentAt: sentAt
+      });
+    });
+    return cases;
+  }
+
+  function geocodeCase(prop){
+    const q = [prop.address, prop.eircode, 'Ireland'].filter(Boolean).join(', ');
+    if(!q) return;
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ie&q='
+        + encodeURIComponent(q))
+      .then(function(res){ return res.ok ? res.json() : []; })
+      .then(function(hits){
+        if(hits && hits.length){
+          prop.lat = parseFloat(hits[0].lat);
+          prop.lng = parseFloat(hits[0].lon);
+          saveDay(); renderDay();
+        }
+      })
+      .catch(function(){});   // no map location; it just will not join the route
+  }
+
+  function renderDay(){
+    const now = new Date();
+    const h = now.getHours();
+    $('greet').textContent = h < 12 ? 'Good morning' : (h < 18 ? 'Good afternoon' : 'Good evening');
+    $('dayDate').textContent = now.toLocaleDateString('en-IE',
+      { weekday:'long', day:'numeric', month:'long' }).toUpperCase();
+
+    const n = day.properties.length;
+    $('dayCount').textContent = n + (n === 1 ? ' case' : ' cases');
+
+    let toCapture = 0, part = 0, ready = 0;
+    const progressById = {};
+    day.properties.forEach(function(prop){
+      const pr = progress(prop);
+      progressById[prop.id] = pr;
+      if(!pr.exists || pr.touched === 0) toCapture++;
+      else if(pr.done < pr.total) part++;
+      else ready++;
+    });
+    $('tCapture').textContent = toCapture;
+    $('tPart').textContent = part;
+    $('tReady').textContent = ready;
+    $('daySummary').textContent = n
+      ? n + (n === 1 ? ' property' : ' properties') + " on today's list."
+      : 'Nothing on the list yet. Cases arrive by email from the County Council.';
+
+    // Resume only exists while the last property is unfinished.
+    const last = activeProp();
+    const lastPr = last ? progressById[last.id] : null;
+    const resumable = last && lastPr && lastPr.exists && lastPr.done < lastPr.total;
+    $('resumeLast').hidden = !resumable;
+    if(resumable){
+      $('resumeLast').textContent = 'Resume \u00b7 ' + (last.address || last.caseNo || 'last property');
+    }
+
+    const host = $('dayList');
+    host.innerHTML = '';
+    const routeIds = (day.route && day.route.ids) || [];
+    const ordered = [];
+    routeIds.forEach(function(id){
+      const prop = day.properties.find(function(q){ return q.id === id; });
+      if(prop) ordered.push(prop);
+    });
+    day.properties.forEach(function(prop){
+      if(ordered.indexOf(prop) === -1) ordered.push(prop);
+    });
+
+    let prev = day.route && day.route.from;
+    ordered.forEach(function(prop){
+      const stop = routeIds.indexOf(prop.id);
+      const pr = progressById[prop.id];
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'day-item' + (prop.id === day.activeId ? ' active' : '');
+
+      const num = document.createElement('span');
+      num.className = 'n';
+      num.textContent = stop >= 0 ? String(stop + 1) : '\u2013';
+
+      const addr = document.createElement('span');
+      addr.className = 'addr';
+      addr.textContent = prop.address || prop.caseNo || 'Unnamed case';
+      const sub = document.createElement('small');
+      const bits = [];
+      if(prop.caseNo) bits.push(prop.caseNo);
+      if(prop.eircode) bits.push(prop.eircode);
+      if(prop.lat == null){
+        bits.push('no map location');
+      } else if(stop >= 0 && prev){
+        bits.push(distKm(prev, prop).toFixed(1) + ' km');
+        prev = prop;
+      }
+      sub.textContent = bits.join(' \u00b7 ');
+      addr.appendChild(sub);
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'del';
+      del.textContent = '\u00d7';
+      del.setAttribute('aria-label', 'Remove case');
+      del.addEventListener('click', function(e){
+        e.stopPropagation();
+        removeProperty(prop.id);
+      });
+
+      const st = caseStatus(prop, pr);
+      const chip = document.createElement('span');
+      chip.className = 'case-status ' + st;
+      const lab = sampleSummary(prop);
+      chip.textContent = STATUS_LABEL[st]
+        + (st === 'in_progress' ? ' \u00b7 ' + pr.done + ' of ' + pr.total : '')
+        + (st === 'ready' && lab.awaiting ? ' \u00b7 ' + lab.awaiting + ' at lab' : '');
+
+      row.appendChild(num); row.appendChild(addr);
+      row.appendChild(chip); row.appendChild(del);
+      row.addEventListener('click', function(){
+        openCase = openCase === prop.id ? '' : prop.id;
+        renderDay();
+      });
+      host.appendChild(row);
+
+      // A tapped row offers what its status allows - nothing more.
+      if(openCase === prop.id){
+        const opts = document.createElement('div');
+        opts.className = 'case-options';
+        function opt(label, primary, fn){
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'btn' + (primary ? ' primary' : '') + ' grow';
+          b.textContent = label;
+          b.addEventListener('click', fn);
+          opts.appendChild(b);
+        }
+        opt('View details', false, function(){ openDetail(prop); });
+        if(st === 'not_started'){
+          opt('Start assessment', true, function(){
+            auditFor(prop, 'assessment started');
+            switchProperty(prop.id);
+          });
+        } else if(st === 'in_progress'){
+          opt('Continue assessment', true, function(){
+            auditFor(prop, 'assessment reopened');
+            switchProperty(prop.id);
+          });
+        } else if(st === 'ready'){
+          opt('Review', true, function(){
+            auditFor(prop, 'opened for review');
+            switchProperty(prop.id, true);
+          });
+        } else if(st === 'signed_off'){
+          opt('Edit', true, function(){
+            auditFor(prop, 'opened for editing after sign-off');
+            switchProperty(prop.id, true);
+          });
+        }
+        // 'processing' offers only View details, exactly as specified
+        host.appendChild(opts);
+      }
+    });
+
+    // Maps can take an address as well as a point, so the button only needs
+    // something to aim at - a planned route is better, not required.
+    $('openMaps').disabled = !day.properties.some(mappable);
+  }
+
+  function mappable(p){
+    return (p.lat != null && p.lng != null) || !!(p.address || p.eircode);
+  }
+  // A point when the lookup found one, else the address and Eircode as text.
+  // Google resolves Eircodes well; the lookup we use for routing does not.
+  function mapsPoint(p){
+    if(p.lat != null && p.lng != null) return p.lat + ',' + p.lng;
+    return [p.address, p.eircode, 'Ireland'].filter(Boolean).join(', ');
+  }
+
+  function removeProperty(id){
+    day.properties = day.properties.filter(function(p){ return p.id !== id; });
+    day.route = null;
+    if(day.activeId === id) day.activeId = '';
+    try{ localStorage.removeItem(recKey(id)); }catch(e){}
+    // photos in IndexedDB are left behind; a cleanup sweep is a later problem
+    saveDay(); renderDay();
+  }
+
+  function switchProperty(id, toReport){
+    day.activeId = id;
+    openCase = '';
+    saveDay();
+    selected = null; hovered = null; assessmentPushed = false;
+    const had = load(id);
+    if(!had){
+      // a fresh case starts with what the council email gave us
+      const prop = activeProp();
+      if(prop) cfg.address = [prop.address, prop.eircode].filter(Boolean).join(', ');
+    }
+    $('wRange').value = cfg.W;
+    $('dRange').value = cfg.D;
+    $('bRange').value = cfg.bearing;
+    stage = had ? 'capture' : 'orient';
+    build();
+    pump(); pumpSamples();
+    if(toReport && had){
+      renderReport();
+      $('report').hidden = false;
+    }
+  }
+
+  function openToday(){
+    save(); saveDay();
+    stage = 'day';
+    renderDay();
+    syncUI();
+  }
+
+  function applyRoute(from, routable, how){
+    const r = bestOrder(from, routable);
+    day.route = {
+      from: from,
+      ids: r.order.map(function(i){ return routable[i].id; }),
+      km: r.km
+    };
+    saveDay(); renderDay();
+    setRouteNote('Shortest order ' + how + ' \u00b7 ' + r.km.toFixed(1) + ' km as the crow flies.', false);
+  }
+
+  $('planRoute').addEventListener('click', function(){
+    const routable = day.properties.filter(function(p){ return p.lat != null && p.lng != null; });
+    if(!routable.length){
+      setRouteNote('No case has a map location yet - the address lookup may still be running, or found nothing.', true);
+      return;
+    }
+    setRouteNote('Getting your location\u2026', false);
+    whereAmI().then(function(here){
+      applyRoute(here, routable, 'from where you are');
+    }).catch(function(){
+      applyRoute({ lat: routable[0].lat, lng: routable[0].lng }, routable,
+        'from ' + (routable[0].address || 'the first case') + ' (location was refused)');
+    });
+  });
+
+  $('openMaps').addEventListener('click', function(){
+    // In route order when a route was planned, else the list as it stands.
+    const routed = day.route && day.route.ids && day.route.ids.length;
+    const ordered = routed
+      ? day.route.ids.map(function(id){ return day.properties.find(function(p){ return p.id === id; }); })
+      : day.properties.slice();
+    const stops = ordered.filter(function(p){ return p && mappable(p); });
+    if(!stops.length) return;
+    const enc = function(p){ return encodeURIComponent(mapsPoint(p)); };
+    const last = stops[stops.length - 1];
+    let url = 'https://www.google.com/maps/dir/?api=1&travelmode=driving';
+    // No origin means Maps starts from wherever the tablet is.
+    if(routed && day.route.from) url += '&origin=' + day.route.from.lat + ',' + day.route.from.lng;
+    url += '&destination=' + enc(last);
+    if(stops.length > 1){
+      url += '&waypoints=' + stops.slice(0, -1).map(enc).join('%7C');
+    }
+    window.open(url, '_blank', 'noopener');
+  });
+
+  $('importMail').addEventListener('click', function(){
+    const text = $('mailPaste').value;
+    if(!text.trim()){ setRouteNote('Paste the council email first.', true); return; }
+    const found = parseCouncilMail(text);
+    if(!found.length){
+      setRouteNote('Nothing recognisable in that - no Case No., address or Eircode found.', true);
+      return;
+    }
+    let added = 0, dup = 0;
+    found.forEach(function(c){
+      if(c.caseNo && day.properties.some(function(p){ return p.caseNo === c.caseNo; })){
+        dup++; return;
+      }
+      const prop = { id: uid(), caseNo: c.caseNo, address: c.address,
+                     eircode: c.eircode, owner: c.owner, county: c.county,
+                     sentBy: c.sentBy, sentAt: c.sentAt,
+                     lat: null, lng: null, audit: [] };
+      day.properties.push(prop);
+      auditFor(prop, 'case imported from council email');
+      geocodeCase(prop);
+      added++;
+    });
+    day.route = null;                      // the day changed, the order is stale
+    saveDay(); renderDay();
+    $('mailPaste').value = '';
+    setRouteNote(added + (added === 1 ? ' case' : ' cases') + ' added'
+      + (dup ? ', ' + dup + ' already on the list' : '')
+      + '. Map locations are being looked up.', false);
+  });
+
+  $('resumeLast').addEventListener('click', function(){
+    if(day.activeId) switchProperty(day.activeId);
+  });
+  $('openToday').addEventListener('click', openToday);
+  $('orientToday').addEventListener('click', openToday);
+
+  // ---------- the report ----------
+  const FACE_LABEL = { front:'Front', rear:'Rear', left:'Left gable', right:'Right gable' };
+
+  function wallBlock(b){
+    const c = captures[b.id] || { photos:[], note:'' };
+    const div = document.createElement('div');
+    div.className = 'doc-wall';
+
+    const head = document.createElement('div');
+    head.className = 'doc-wall-head';
+    const h = document.createElement('h3');
+    h.textContent = b.name;
+    if(b.suffix){
+      const sm = document.createElement('small');
+      sm.textContent = b.suffix;
+      h.appendChild(sm);
+    }
+    const facing = document.createElement('span');
+    facing.className = 'facing';
+    facing.textContent = 'faces ' + pointName(faceBearing(b.id));
+    head.appendChild(h); head.appendChild(facing);
+    div.appendChild(head);
+
+    if(b.party){
+      const pw = document.createElement('p');
+      pw.className = 'uncaptured';
+      pw.textContent = 'Party wall \u2014 not assessed.';
+      div.appendChild(pw);
+      return div;
+    }
+
+    if(c.photos.length){
+      const grid = document.createElement('div');
+      grid.className = 'doc-photos';
+      c.photos.forEach(function(ph){
+        const img = document.createElement('img');
+        img.alt = '';
+        if(thumbUrls[ph.id]){ img.src = thumbUrls[ph.id]; }
+        else getPhoto(ph.id).then(function(r){
+          if(!r || !r.blob) return;
+          thumbUrls[ph.id] = URL.createObjectURL(r.blob);
+          img.src = thumbUrls[ph.id];
+        }).catch(function(){});
+        grid.appendChild(img);
+      });
+      div.appendChild(grid);
+    }
+
+    if(c.crack === false || c.crackMm || (c.defects && c.defects.length)){
+      const meas = document.createElement('p');
+      const hit = wallMeetsThreshold(c);
+      meas.className = 'doc-crack' + (hit ? ' hit' : '');
+      const bits = [];
+      if(c.crack === false) bits.push('no visible crack');
+      if(c.crackMm) bits.push('widest crack ' + c.crackMm + ' mm');
+      (c.defects || []).forEach(function(k){ bits.push(DEFECT_LABEL[k] || k); });
+      if(hit) bits.push('meets Group 3 threshold');
+      meas.textContent = bits.join(' \u00b7 ');
+      div.appendChild(meas);
+    }
+
+    const note = document.createElement('div');
+    note.className = 'doc-edit';
+    note.contentEditable = String(!locked());
+    note.setAttribute('data-placeholder',
+      c.photos.length ? 'Observations for this wall\u2026' : 'Not captured.');
+    note.textContent = c.note || '';
+    note.addEventListener('input', function(){
+      if(locked()) return;
+      if(!captures[b.id]) captures[b.id] = { photos:[], note:'' };
+      captures[b.id].note = note.innerText.trim();
+      auditEdit('note on ' + b.id);
+      save(); schedulePush();
+    });
+    div.appendChild(note);
+    return div;
+  }
+
+  function renderReport(){
+    $('docDate').textContent = new Date().toLocaleDateString('en-IE',
+      { day:'numeric', month:'long', year:'numeric' });
+    $('docBearing').textContent = pointName(cfg.bearing) + ' (' + cfg.bearing + '\u00b0)';
+    $('docSize').textContent = cfg.W.toFixed(1) + ' \u00d7 ' + cfg.D.toFixed(1) + ' m';
+    $('docStoreys').textContent = cfg.storeys;
+    const prop = activeProp();
+    $('docRef').textContent = (prop && prop.caseNo) || cfg.assessmentId.slice(0, 8);
+    if($('docAddress').innerText.trim() !== cfg.address) $('docAddress').textContent = cfg.address;
+    if($('docSummary').innerText.trim() !== cfg.summary) $('docSummary').textContent = cfg.summary;
+
+    const OPTION_TEXT = {
+      '1':'Option 1 \u2014 full demolition and rebuild',
+      '2':'Option 2 \u2014 rebuild all external walls (inner + outer) to foundations',
+      '3':'Option 3 \u2014 external walls (inner + outer) to rising-wall level',
+      '4':'Option 4 \u2014 outer leaf to rising-wall level',
+      '5':'Option 5 \u2014 outer leaf replacement'
+    };
+    const grp = document.querySelectorAll('#docGroup button');
+    for(let i=0;i<grp.length;i++) grp[i].setAttribute('aria-pressed', String(grp[i].dataset.group === cfg.group));
+    const opt = document.querySelectorAll('#docOption button');
+    for(let i=0;i<opt.length;i++) opt[i].setAttribute('aria-pressed', String(opt[i].dataset.option === cfg.option));
+    $('docOptionText').textContent = cfg.option ? OPTION_TEXT[cfg.option] : '';
+    $('docStructural').checked = !!cfg.structural;
+    const sug = suggestGroup();
+    $('docSuggest').textContent = 'Suggested: Group ' + sug.g + ' \u2014 ' + sug.why
+      + (cfg.group ? '' : '  (tap a group to set it)');
+
+    const meets = assessmentMeetsThreshold();
+    $('docThreshold').classList.toggle('meets', meets);
+    $('docThreshBadge').textContent = meets ? 'Meets threshold' : 'Below threshold';
+    $('docThreshText').textContent = meets
+      ? 'At least one elevation shows pattern cracking of 1 mm or wider (I.S. 465 Fig. 2).'
+      : 'No elevation yet shows combined pattern cracking at 1 mm or wider on the evidence captured.';
+
+    const host = $('docWalls');
+    host.innerHTML = '';
+    panels.forEach(function(p){
+      if(p.pick){
+        host.appendChild(wallBlock({ id:p.id, name:p.name, suffix:p.storey }));
+      } else if(p.party){
+        host.appendChild(wallBlock({ id:p.id, name:p.name, suffix:p.storey, party:true }));
+      }
+    });
+    // Internal rooms, when any were inspected.
+    const rh = $('docRooms');
+    rh.innerHTML = '';
+    $('docRoomsSection').hidden = !rooms.length;
+    rooms.forEach(function(r){
+      const div = document.createElement('div');
+      div.className = 'doc-wall';
+      const head = document.createElement('div');
+      head.className = 'doc-wall-head';
+      const h = document.createElement('h3');
+      h.textContent = r.name;
+      const sm = document.createElement('small'); sm.textContent = storeyLabel(r.storey) + ' floor';
+      h.appendChild(sm);
+      head.appendChild(h);
+      div.appendChild(head);
+      const bits = [];
+      if(r.crack === false) bits.push('no visible crack');
+      if(r.crack === true && r.crackMm) bits.push('widest crack ' + r.crackMm + ' mm');
+      (r.defects || []).forEach(function(k){ bits.push(DEFECT_LABEL[k] || k); });
+      if(bits.length){
+        const meas = document.createElement('p');
+        meas.className = 'doc-crack';
+        meas.textContent = bits.join(' \u00b7 ');
+        div.appendChild(meas);
+      }
+      const note = document.createElement('p');
+      note.className = r.note ? '' : 'uncaptured';
+      note.textContent = r.note || 'No observations recorded.';
+      div.appendChild(note);
+      rh.appendChild(div);
+    });
+
+    // Evidence kept from an earlier shape: the server keeps these walls too,
+    // so the document shows them rather than pretending they never happened.
+    Object.keys(captures).forEach(function(k){
+      if(wallExists(k) || !captures[k].photos.length) return;
+      const face = FACE_LABEL[k.split('-')[0]] || k;
+      host.appendChild(wallBlock({ id:k, name:face, suffix:'previous shape' }));
+    });
+  }
+
+  $('openReport').addEventListener('click', function(){
+    renderReport();
+    $('report').hidden = false;
+  });
+  // openReport and switchProperty both land here; keep the button honest
+  const _renderReport = renderReport;
+  renderReport = function(){ _renderReport(); setSignOffState(); };
+  $('closeReport').addEventListener('click', function(){ $('report').hidden = true; });
+  $('printReport').addEventListener('click', function(){
+    audit('report exported');
+    window.print();
+  });
+
+  $('signOff').addEventListener('click', function(){
+    const prop = activeProp();
+    if(!prop) return;
+    if(prop.status === 'signed_off'){
+      // Reopen: ask why before anything unlocks.
+      $('reopenBox').hidden = false;
+      $('reopenReason').value = '';
+      $('reopenReason').focus();
+      return;
+    }
+    if(!allWallsDone()) return;
+    prop.status = 'signed_off';
+    auditFor(prop, 'signed off');
+    saveDay();
+    setSignOffState();
+    renderReport(); syncUI();
+  });
+  $('reopenCancel').addEventListener('click', function(){ $('reopenBox').hidden = true; });
+  $('reopenConfirm').addEventListener('click', function(){
+    const prop = activeProp();
+    const why = $('reopenReason').value.trim();
+    if(!prop || prop.status !== 'signed_off') return;
+    if(!why){ $('reopenReason').focus(); return; }
+    prop.status = 'in_progress';
+    auditFor(prop, 'reopened', why);
+    saveDay();
+    $('reopenBox').hidden = true;
+    setSignOffState();
+    renderReport(); syncUI();
+  });
+
+  function setSignOffState(){
+    const prop = activeProp();
+    const signed = prop && prop.status === 'signed_off';
+    $('signOff').textContent = signed ? 'Reopen' : 'Sign off';
+    // Nothing gets signed off with walls still open.
+    $('signOff').disabled = !signed && !allWallsDone();
+    if(!signed) $('reopenBox').hidden = true;
+    // The signed report is read-only until it is reopened.
+    $('docAddress').contentEditable = String(!signed);
+    $('docSummary').contentEditable = String(!signed);
+    $('docStructural').disabled = !!signed;
+    document.querySelectorAll('#docGroup button, #docOption button').forEach(function(b){ b.disabled = !!signed; });
+  }
+
+  $('docAddress').addEventListener('input', function(){
+    if(locked()) return;
+    cfg.address = this.innerText.trim();
+    auditEdit('address');
+    save(); schedulePush();
+  });
+  $('docSummary').addEventListener('input', function(){
+    if(locked()) return;
+    cfg.summary = this.innerText.trim();
+    auditEdit('summary');
+    save(); schedulePush();
+  });
+  $('docStructural').addEventListener('change', function(){
+    if(locked()){ this.checked = !!cfg.structural; return; }
+    cfg.structural = this.checked; auditEdit('structural stability flag');
+    renderReport(); save(); schedulePush();
+  });
+  const groupBtns = document.querySelectorAll('#docGroup button');
+  for(let i=0;i<groupBtns.length;i++) groupBtns[i].addEventListener('click', function(){
+    if(locked()) return;
+    cfg.group = this.dataset.group; auditEdit('damage group'); renderReport(); save(); schedulePush();
+  });
+  const optionBtns = document.querySelectorAll('#docOption button');
+  for(let i=0;i<optionBtns.length;i++) optionBtns[i].addEventListener('click', function(){
+    if(locked()) return;
+    cfg.option = this.dataset.option; auditEdit('remediation option'); renderReport(); save(); schedulePush();
+  });
+
+  addEventListener('resize', resize);
+
+  loadDay();
+  dropProvisional();
+  // A case pasted in with no signal never had its map lookup. One more try
+  // per load, spaced out for the lookup service's one-a-second rule.
+  day.properties.filter(function(p){ return p.lat == null && (p.address || p.eircode); })
+    .forEach(function(p, i){ setTimeout(function(){ if(navigator.onLine) geocodeCase(p); }, 1200 * (i + 1)); });
+  // Samples owed from earlier days go as soon as there is a server to send to.
+  setTimeout(pumpSamples, 0);
+
+  // One-time migration from the single-assessment era: wrap the old record as
+  // the first case of the day.
+  if(!day.properties.length){
+    try{
+      const legacy = localStorage.getItem(KEY);
+      if(legacy){
+        const d = JSON.parse(legacy);
+        const id = (d && d.cfg && d.cfg.assessmentId) || uid();
+        localStorage.setItem(recKey(id), legacy);
+        localStorage.removeItem(KEY);
+        day.properties.push({
+          id: id, caseNo: '',
+          address: (d && d.cfg && d.cfg.address) || '',
+          eircode: '', lat: null, lng: null
+        });
+        day.activeId = id;
+        saveDay();
+      }
+    }catch(e){}
+  }
+
+  // The day always opens on the welcome screen. Resume is a choice on it,
+  // and only while the last property is unfinished.
+  stage = 'day';
+  resize();
+  build();
+  renderDay();
+  requestAnimationFrame(frame);
+
+  // ---------- self-test hook ----------
+  // Opened with ?selftest, the page loads selftest.js and hands it these
+  // internals so it can drive a capture with the server down and check what
+  // survives. Nothing here runs without the parameter.
+  if(new URLSearchParams(location.search).has('selftest')){
+    window.__mica = {
+      cfg: cfg, captures: captures, day: day, apiBase: API_BASE,
+      panels: function(){ return panels; },
+      uid: uid, putPhoto: putPhoto, getPhoto: getPhoto, delPhoto: delPhoto,
+      save: save, saveDay: saveDay, load: load,
+      switchProperty: switchProperty, openToday: openToday,
+      select: select, syncUI: syncUI,
+      pump: pump, pumpSamples: pumpSamples, schedulePush: schedulePush,
+      addSample: addSample, sampleDirty: sampleDirty,
+      addRoom: addRoom, rooms: function(){ return rooms; },
+      setStage: function(s){ stage = s; syncUI(); },
+      resetBackoff: function(){ backoff = 800; smpBackoff = 800; }
+    };
+    const s = document.createElement('script');
+    s.src = 'selftest.js?' + Date.now();
+    document.body.appendChild(s);
+  }
+})();
+</script>

@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en-IE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mica Assess — I.S. 465 assessments, captured at the house</title>
+<meta name="description" content="Mica Assess is a tablet tool for the Housing Agency's Framework Chartered Engineers: the case arrives from the council, the engineer turns a model of the house and taps each wall, and the I.S. 465 report is drafted from what was captured. Prototype for the TechIreland National AI Challenge 2026.">
+<meta name="theme-color" content="#0A0D11">
+<style>
+  /* Type is the McCormack house theme (Fraunces / Work Sans / JetBrains Mono),
+     self-hosted in ../fonts as variable woff2 so nothing depends on a CDN.
+     Colour tokens are the capture app's own, from spikes/elevation-picker.html. */
+  @font-face{font-family:'Fraunces';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/fraunces.woff2') format('woff2')}
+  @font-face{font-family:'Work Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/work-sans.woff2') format('woff2')}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url('fonts/jetbrains-mono.woff2') format('woff2')}
+  :root{
+    --ground:#0A0D11;
+    --surface:#141A21;
+    --surface-2:#1C242E;
+    --line:#2A3441;
+    --line-2:#3A4756;
+    --text:#E6EBF1;
+    --muted:#8795A4;
+    --dot:#93A2B2;
+    --accent:#F0A63C;
+    --accent-ink:#241705;
+    --done:#4FB6A0;
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+    --sans:'Work Sans','Segoe UI',system-ui,-apple-system,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',SFMono-Regular,Menlo,monospace;
+    --wrap:1080px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--ground);color:var(--text);
+    font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  p{margin:0}
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+
+  .label{
+    font-family:var(--mono);font-size:11px;font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+  .label.accent{color:var(--accent)}
+  .label.done{color:var(--done)}
+  h1,h2,h3{margin:0;font-family:var(--serif);font-weight:600;letter-spacing:.005em;line-height:1.1}
+  h1{font-size:clamp(36px,5.6vw,64px)}
+  h2{font-size:clamp(26px,3.6vw,38px);max-width:22ch}
+  h3{font-size:19px;line-height:1.3}
+  .lede{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:56ch}
+  .lede b{color:var(--text);font-weight:500}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:12px 18px;border:1px solid var(--line-2);border-radius:6px;
+    background:var(--surface);color:var(--text);text-decoration:none;
+    font-family:var(--sans);font-size:14px;font-weight:600;letter-spacing:.01em;
+    transition:border-color .15s,background .15s;
+  }
+  .btn:hover{border-color:var(--muted)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+  .btn.primary:hover{background:#F5B658;border-color:#F5B658}
+  .btn.ghost{background:transparent;color:var(--muted)}
+  .btn.ghost:hover{color:var(--text)}
+  .btn svg{width:14px;height:14px}
+
+  /* ---- nav ---- */
+  nav{
+    position:sticky;top:0;z-index:5;
+    background:var(--ground);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+  .brand{display:flex;align-items:baseline;gap:12px;text-decoration:none}
+  .brand b{font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:.01em}
+  .brand span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  nav .links{display:flex;gap:22px;align-items:center}
+  nav .links a.txt{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);text-decoration:none}
+  nav .links a.txt:hover{color:var(--text)}
+  @media (max-width:720px){nav .links a.txt{display:none}.brand span{display:none}}
+
+  /* ---- hero ---- */
+  .hero{padding:clamp(56px,9vw,120px) 0 clamp(48px,7vw,96px);border-bottom:1px solid var(--line)}
+  .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center}
+  @media (max-width:880px){.hero .wrap{grid-template-columns:1fr}}
+  .hero .copy{display:flex;flex-direction:column;gap:22px}
+  .hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+  .hero .fine{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
+  .hero .fine i{color:var(--done);font-style:normal}
+  .house{position:relative;width:100%;max-width:440px;margin:0 auto}
+  .house svg{display:block;width:100%;height:auto}
+  .house .tag{
+    position:absolute;left:0;top:0;
+    background:var(--surface);border:1px solid var(--line-2);border-radius:6px;
+    padding:8px 11px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+    display:flex;flex-direction:column;gap:3px;
+  }
+  .house .tag b{color:var(--accent);font-weight:500}
+  .house .tag small{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+  /* ---- sections ---- */
+  section{padding:clamp(56px,7vw,96px) 0;border-bottom:1px solid var(--line)}
+  section .head{display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(28px,4vw,48px)}
+  section .head p{color:var(--muted);max-width:62ch;font-size:16.5px}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  @media (max-width:720px){.stats{grid-template-columns:1fr}}
+  .stat{background:var(--surface);padding:22px 22px 20px;display:flex;flex-direction:column;gap:6px}
+  .stat .n{font-family:var(--mono);font-size:clamp(28px,3vw,36px);font-weight:500;letter-spacing:-.02em;color:var(--text);font-variant-numeric:tabular-nums}
+  .stat .n small{font-size:14px;color:var(--muted);letter-spacing:0;margin-left:6px}
+  .stat .d{color:var(--muted);font-size:14px}
+
+  .pipe{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;margin-top:8px}
+  .pipe .step{
+    flex:1 1 110px;min-width:110px;background:var(--surface);border:1px solid var(--line);border-radius:6px;
+    padding:12px 12px 11px;display:flex;flex-direction:column;gap:5px;position:relative;
+  }
+  .pipe .step .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .pipe .step .v{font-size:14px;font-weight:500;line-height:1.3}
+  .pipe .step.here{border-color:var(--accent);background:rgba(240,166,60,.08)}
+  .pipe .step.here .k{color:var(--accent)}
+  .pipe .step.here::after{
+    content:"Mica Assess";position:absolute;left:10px;bottom:-11px;
+    background:var(--accent);color:var(--accent-ink);font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:3px 7px;border-radius:4px;
+  }
+  .pipe .step.dim{opacity:.55}
+  .pipe-note{margin-top:34px;color:var(--muted);max-width:66ch;font-size:16px}
+  .pipe-note b{color:var(--text);font-weight:500}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:880px){.steps{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.steps{grid-template-columns:1fr}}
+  .step-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:22px 22px 24px;display:flex;flex-direction:column;gap:10px}
+  .step-card .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent)}
+  .step-card p{color:var(--muted);font-size:14.5px}
+
+  .diff{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  @media (max-width:720px){.diff{grid-template-columns:1fr}}
+  .diff .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:10px}
+  .diff .card p{color:var(--muted);font-size:15px}
+  .diff .card code{font-family:var(--mono);font-size:12.5px;color:var(--text);background:var(--surface-2);padding:1px 6px;border-radius:4px}
+
+  .ai{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:720px){.ai{grid-template-columns:1fr}}
+  .ai .col{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:14px}
+  .ai .col.now{border-color:var(--line-2)}
+  .ai ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+  .ai li{color:var(--muted);font-size:15px;padding-left:18px;position:relative}
+  .ai li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .ai .now li::before{background:var(--done)}
+  .ai li b{color:var(--text);font-weight:500}
+  blockquote{
+    margin:32px 0 0;padding:22px 26px;border-left:2px solid var(--accent);
+    background:var(--surface);border-radius:0 8px 8px 0;
+    font-family:var(--serif);font-size:clamp(18px,1.8vw,23px);line-height:1.45;max-width:58ch;
+  }
+  blockquote span{display:block;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+  th{font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  tr:last-child td{border-bottom:0}
+  td.s{font-family:var(--mono);font-size:12px;letter-spacing:.06em;white-space:nowrap;width:1%}
+  td.s i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+  td.s.built{color:var(--done)}td.s.built i{background:var(--done)}
+  td.s.next{color:var(--muted)}td.s.next i{background:var(--line-2)}
+  td.s.part{color:var(--accent)}td.s.part i{background:var(--accent)}
+
+  /* ---- footer ---- */
+  footer{padding:clamp(48px,6vw,80px) 0 40px}
+  footer .cta{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;padding-bottom:40px;border-bottom:1px solid var(--line);margin-bottom:28px}
+  footer .cta h2{max-width:none}
+  footer .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><b>Mica Assess</b><span>I.S. 465 field assessment</span></a>
+    <div class="links">
+      <a class="txt" href="#how">How it works</a>
+      <a class="txt" href="#different">What is different</a>
+      <a class="txt" href="#ai">The AI</a>
+      <a class="btn primary" href="spikes/elevation-picker.html">Open the demo
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="copy">
+      <div class="label accent">TechIreland National AI Challenge 2026 · Prototype</div>
+      <h1>The I.S. 465 assessment, captured at the house.</h1>
+      <p class="lede">Mica Assess is a tablet tool for the <b>Housing Agency's Framework Chartered Engineers</b>. The case arrives from the council, the engineer turns a model of the house and taps each wall, and the report is drafted from what was captured. On site, with or without signal.</p>
+      <div class="actions">
+        <a class="btn primary" href="spikes/elevation-picker.html">Open the demo
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+        <a class="btn ghost" href="#how">How it works</a>
+      </div>
+      <p class="fine"><i>●</i> Runs in the browser against a simulated server. No login, no install. Best on a tablet or a laptop in landscape.</p>
+    </div>
+
+    <div class="house" aria-hidden="true">
+      <svg viewBox="0 0 360 300">
+        <defs>
+          <pattern id="dots" width="7" height="7" patternUnits="userSpaceOnUse">
+            <circle cx="3.5" cy="3.5" r=".9" fill="#93A2B2" opacity=".55"/>
+          </pattern>
+          <pattern id="dotsAccent" width="7" height="7" patternUnits="userSpaceOnUse">
+            <circle cx="3.5" cy="3.5" r=".95" fill="#F0A63C" opacity=".75"/>
+          </pattern>
+        </defs>
+        <g transform="translate(-30,-78) scale(1.32)">
+        <!-- ground shadow -->
+        <ellipse cx="195" cy="262" rx="125" ry="20" fill="#141A21"/>
+        <!-- left wall (x = 0) -->
+        <polygon points="180,170 102.1,215 102.1,125 180,80" fill="#141A21"/>
+        <polygon points="180,170 102.1,215 102.1,125 180,80" fill="url(#dots)"/>
+        <!-- front wall (y = 0), selected -->
+        <polygon points="180,170 283.9,230 283.9,140 232,70 180,80" fill="rgba(240,166,60,.10)"/>
+        <polygon points="180,170 283.9,230 283.9,140 232,70 180,80" fill="url(#dotsAccent)"/>
+        <!-- roof, left slope -->
+        <polygon points="180,80 232,70 154,115 102.1,125" fill="#1C242E"/>
+        <polygon points="180,80 232,70 154,115 102.1,125" fill="url(#dots)"/>
+        <!-- storey line -->
+        <polyline points="102.1,170 180,125 283.9,185" fill="none" stroke="#3A4756" stroke-width="1"/>
+        <!-- doorway: empty in the dot field, outlined -->
+        <polygon points="223.3,195 240.6,205 240.6,175 223.3,165" fill="#0A0D11" stroke="#F0A63C" stroke-width="1.2"/>
+        <!-- edges -->
+        <polygon points="180,170 102.1,215 102.1,125 180,80" fill="none" stroke="#3A4756" stroke-width="1.2" stroke-linejoin="round"/>
+        <polygon points="180,80 232,70 154,115 102.1,125" fill="none" stroke="#3A4756" stroke-width="1.2" stroke-linejoin="round"/>
+        <polygon points="180,170 283.9,230 283.9,140 232,70 180,80" fill="none" stroke="#F0A63C" stroke-width="1.6" stroke-linejoin="round"/>
+        <!-- compass tick -->
+        <g font-family="JetBrains Mono, monospace" font-size="10" fill="#8795A4" letter-spacing="1.4">
+          <line x1="40" y1="250" x2="40" y2="214" stroke="#3A4756" stroke-width="1"/>
+          <polygon points="40,208 36,218 44,218" fill="#8795A4"/>
+          <text x="34" y="268">N</text>
+        </g>
+        </g>
+      </svg>
+      <div class="tag"><small>Selected wall</small><b>Front · South-west</b><span>Storey 1 of 2 · 0 / 2 photos</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">The problem</div>
+      <h2>Thousands of houses. One report each, written up after the drive home.</h2>
+      <p>Defective concrete block damage is a rural, one-off-house problem. Cases reach the engineer as an email. The photos go on a phone, the notes on paper, and the report is assembled at a desk days later. The tool that fixes this has to work in a field in Donegal with no signal.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">~9,500<small>confirmed homes</small></div><div class="d">Estimates run as high as 20,000 across the affected counties.</div></div>
+      <div class="stat"><div class="n">5<small>counties</small></div><div class="d">Donegal, Mayo, Clare, Limerick and Sligo. Mostly bungalows, dormers and two-storey detached houses.</div></div>
+      <div class="stat"><div class="n">1<small>mm</small></div><div class="d">The pattern-cracking width that separates Group 2 minor damage from Group 3 damage in I.S. 465 Table 1, on any one elevation. Measured, not estimated.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="where">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">Where it sits</div>
+      <h2>Stage 6 of the Defective Concrete Block grant scheme.</h2>
+    </div>
+    <div class="pipe">
+      <div class="step dim"><div class="k">1</div><div class="v">Homeowner applies</div></div>
+      <div class="step dim"><div class="k">2</div><div class="v">Building Condition Assessment</div></div>
+      <div class="step dim"><div class="k">3</div><div class="v">County Council</div></div>
+      <div class="step dim"><div class="k">4</div><div class="v">Housing Agency</div></div>
+      <div class="step here"><div class="k">5 · 6</div><div class="v">Framework Chartered Engineers assess the house</div></div>
+      <div class="step"><div class="k">7</div><div class="v">Cores sampled, tested at a lab</div></div>
+      <div class="step"><div class="k">8</div><div class="v">Building Group and remediation option</div></div>
+      <div class="step dim"><div class="k">9</div><div class="v">Grant</div></div>
+    </div>
+    <p class="pipe-note">We chose the <b>managed pipeline</b>, not the lone report. Stage 6 has a panel of engineers, a queue of cases, external labs and statuses to track, and a result that has to go back to the council. That is the shape software fits. Today that traffic is email, and the demo takes the council's email as its only intake. <b>The proposed channel is two-way and coded</b>, like EDI: a case in from the agency, a signed-off assessment with its damage group and remediation option back out, as structured, encrypted data. The lab order and result already travel the same way inside the demo.</p>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">How it works</div>
+      <h2>From the council's email to a signed report.</h2>
+      <p>Every step below is built and working in the demo. The order is the order of a real day.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="num">01</div>
+        <h3>The case arrives by email. Paste it.</h3>
+        <p>Case number, address and Eircode are pulled out, several per email, de-duplicated and geocoded in the background. There is no "new assessment" button, so an uncommissioned assessment cannot exist.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">02</div>
+        <h3>The day is a list with a route.</h3>
+        <p>Each case's status decides the only actions it offers: start, continue, review, edit. The shortest route over the day's houses is handed to Google Maps for the driving.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">03</div>
+        <h3>Stand at the front door. Tap Use compass.</h3>
+        <p>The front wall's bearing is set from the tablet's heading, and every other wall is named from it: North, South-west. That is how these reports are written, and it removes a manual step.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">04</div>
+        <h3>Turn the house. Tap a wall.</h3>
+        <p>House type decides which walls exist. A semi's shared gable is drawn but dimmed, and appears in the report as "party wall, not assessed" rather than vanishing.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">05</div>
+        <h3>Photograph, comment, measure.</h3>
+        <p>Widest crack in millimetres, crack pattern, and the Figure 2 defect checklist, captured beside the photos. A wall counts as done only with a photo, a comment, and the crack question answered.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">06</div>
+        <h3>Cores go to the lab. The report comes back.</h3>
+        <p>Samples are tracked from taken to result in. The I.S. 465 Table 1 Building Group the evidence points to is suggested. The engineer confirms it, edits the report, signs it with their registration number, and exports a PDF.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="different">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">What is different</div>
+      <h2>Built for a tablet, outdoors, with no signal and possibly gloves.</h2>
+    </div>
+    <div class="diff">
+      <div class="card">
+        <h3>The tablet issues the ids.</h3>
+        <p>A photo has an identity the moment it is taken, before any server has seen it. Every upload is an idempotent <code>PUT</code>, so the same photo arriving twice is the same row. Put the tablet in flight mode mid-assessment and nothing breaks. The queue drains when signal returns, and nothing is deleted locally until the server confirms.</p>
+      </div>
+      <div class="card">
+        <h3>Nothing incomplete can be exported.</h3>
+        <p>The report and the sign-off unlock only when every assessable wall has a photo, a comment and the crack answer. The button says why it is disabled. Sign-off locks the report, and reopening it needs a written reason. The council would demand these rules anyway, so the tool enforces them.</p>
+      </div>
+      <div class="card">
+        <h3>The engineer measures. The tool reports what it implies.</h3>
+        <p>Crack width and pattern are structured fields, not prose. From them the report shows which Table 1 group the evidence points to, and why. Under I.S. 465:2026 the Chartered Engineer assigns the group, so the tool suggests and the engineer decides. Core testing follows the group: petrography, total sulfur, sulfide and sulfate content.</p>
+      </div>
+      <div class="card">
+        <h3>Every act is on the record.</h3>
+        <p>Imported, started, photo added, field edited, wall cleared, signed off, reopened with a reason. The audit trail is visible on the case, because an audit nobody can inspect is not one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ai">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">The AI, and what it is not</div>
+      <h2>The model proposes. The engineer signs.</h2>
+      <p>An engineer on the Engineers Ireland I.S. 465 register signs this report and carries the liability for it. The product speeds up their judgement rather than substituting for it.</p>
+    </div>
+    <div class="ai">
+      <div class="col">
+        <div class="label accent">In the design</div>
+        <ul>
+          <li><b>Photo to damage type.</b> The model proposes what it sees on a wall: stepped cracking on mortar joints, map cracking, spalling, delamination, with a severity. The engineer accepts or overrides. Every suggestion is editable.</li>
+          <li><b>Capture to draft.</b> The assessment summary is drafted from the walls, measurements and lab results, using the engineer's own past signed reports as worked examples.</li>
+          <li><b>Retrieval, not training.</b> No fine-tuning on assessor history. It works from the first report, updates the moment a new one is signed, and every draft can point at the reports that shaped it. That traceability matters in a grant process.</li>
+        </ul>
+      </div>
+      <div class="col now">
+        <div class="label done">In this prototype</div>
+        <ul>
+          <li><b>Not wired yet.</b> Every model call goes through one thin function, so the provider is a single file to swap. That function is a stub today.</li>
+          <li><b>The summaries in the demo are hand-written.</b> We would rather show a design that genuinely supports the claim than a pipeline that does not exist yet.</li>
+          <li><b>Exports carry a "prototype draft" line.</b> Nothing produced here is a formal I.S. 465 assessment.</li>
+        </ul>
+      </div>
+    </div>
+    <blockquote>"It does not assign a formal I.S. 465 damage rating unattended. An engineer signs this report and carries the liability, so the product speeds up their judgement rather than substituting for it."<span>Decision log, 5 September 2026</span></blockquote>
+  </div>
+</section>
+
+<section id="status">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">Status on 6 September 2026</div>
+      <h2>What is built, and what is next.</h2>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Stage</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>Council case intake from the agency email</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Day list and route planning</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Orientation from the tablet compass</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>House type and shape become walls</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Turn the house, tap a wall</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Photograph a wall, comment, crack width, Figure 2 defects</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Offline queue, sync to the API</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Samples taken on site, tracked to the lab and back</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Suggested I.S. 465 Building Group (Table 1)</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Assessor edits, signs off, exports to PDF</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Internal rooms</td><td class="s part"><i></i>Server ready</td></tr>
+          <tr><td>AI names the damage</td><td class="s next"><i></i>Next</td></tr>
+          <tr><td>Login by Engineers Ireland registration number</td><td class="s next"><i></i>Next</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="cta">
+      <h2>Turn the house. Tap a wall.</h2>
+      <a class="btn primary" href="spikes/elevation-picker.html">Open the demo
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+    </div>
+    <div class="meta">
+      <span>Mica Assess · Crintus &amp; Co</span>
+      <span>Prototype for the TechIreland National AI Challenge 2026</span>
+      <span>Built against I.S. 465:2026</span>
+      <span>Not a formal assessment</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
