@@ -1,9 +1,10 @@
 <title>Mica Assess</title>
 <meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
+  /* Type is self-hosted: the tablet has no signal on site, so nothing may
+     come from a font CDN. Same files as the landing page, one look across both. */
+  @font-face{font-family:'Work Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url('../fonts/work-sans.woff2') format('woff2')}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url('../fonts/jetbrains-mono.woff2') format('woff2')}
   /* Committed single visual world: a dark field instrument. The canvas is the
      page, so there is no light ground to design for - every colour is painted. */
   :root{
@@ -17,8 +18,8 @@
     --accent:#F0A63C;
     --accent-ink:#241705;
     --done:#4FB6A0;
-    --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;
-    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Work Sans",ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   *{box-sizing:border-box}
   [hidden]{display:none!important}
@@ -1397,7 +1398,7 @@
       const np = project(Math.sin(br)*rr, groundY, Math.cos(br)*rr);
       if(np){
         ctx.fillStyle = 'rgba(230,235,241,.72)';
-        ctx.font = '600 11px "IBM Plex Mono", ui-monospace, monospace';
+        ctx.font = '600 11px "JetBrains Mono", ui-monospace, monospace';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('N', np[0], np[1]);
       }
