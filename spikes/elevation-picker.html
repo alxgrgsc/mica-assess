@@ -501,6 +501,9 @@
       <div class="row" style="margin-top:8px">
         <button class="btn grow" id="importMail" type="button">Add cases from email</button>
       </div>
+      <div class="row" style="margin-top:8px" id="sampleMailRow">
+        <button class="btn grow" id="sampleMail" type="button">Try it with a sample council email</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3086,6 +3089,7 @@
     $('daySummary').textContent = n
       ? n + (n === 1 ? ' property' : ' properties') + " on today's list."
       : 'Nothing on the list yet. Cases arrive by email from the County Council.';
+    $('sampleMailRow').hidden = n > 0;   // only while there is nothing to look at
 
     // Resume only exists while the last property is unfinished.
     const last = activeProp();
@@ -3329,6 +3333,38 @@
     setRouteNote(added + (added === 1 ? ' case' : ' cases') + ' added'
       + (dup ? ', ' + dup + ' already on the list' : '')
       + '. Map locations are being looked up.', false);
+  });
+
+  // A first-time visitor has no council email to hand. This one goes through
+  // the same parser as a real one, so what the judge sees is the real intake.
+  const SAMPLE_MAIL = [
+    'From: Jane Doherty <housing@donegalcoco.ie>',
+    'Sent: Friday 4 September 2026 16:42',
+    'Subject: DCB Stage 6 - assessments for the week of 7 September',
+    '',
+    'Hi Alex,',
+    '',
+    'Two properties for Chartered Engineer assessment under I.S. 465. Grant applications and Stage 2 reports are on the portal.',
+    '',
+    'Case No: DCB-2026-04815',
+    'Address: 3 Sliabh Sneacht View, Drumfries, Co. Donegal',
+    'Eircode: F93 P2W8',
+    'Homeowner: Roisin Sweeney',
+    '',
+    'Case No: DCB-2026-04822',
+    'Address: Meenlaragh Road, Gortahork, Co. Donegal',
+    'Eircode: F92 XT86',
+    'Homeowners: Padraig & Aoife Gallagher',
+    '',
+    'Please confirm your visit dates back to this address.',
+    '',
+    'Jane Doherty',
+    'Defective Concrete Blocks Grant Scheme',
+    'Donegal County Council'
+  ].join('\n');
+  $('sampleMail').addEventListener('click', function(){
+    $('mailPaste').value = SAMPLE_MAIL;
+    $('importMail').click();
   });
 
   $('resumeLast').addEventListener('click', function(){
