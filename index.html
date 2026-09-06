@@ -91,16 +91,13 @@
   .hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
   .hero .fine{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
   .hero .fine i{color:var(--done);font-style:normal}
-  .house{position:relative;width:100%;max-width:440px;margin:0 auto}
-  .house svg{display:block;width:100%;height:auto}
-  .house .tag{
-    position:absolute;left:0;top:0;
-    background:var(--surface);border:1px solid var(--line-2);border-radius:6px;
-    padding:8px 11px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
-    display:flex;flex-direction:column;gap:3px;
-  }
-  .house .tag b{color:var(--accent);font-weight:500}
-  .house .tag small{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .shot{margin:0;width:100%;max-width:520px;justify-self:center}
+  .shot img{display:block;width:100%;height:auto;border:1px solid var(--line-2);border-radius:8px;background:#0A0D11}
+  .shot figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em;margin-top:10px;line-height:1.5}
+  .shot.wide{max-width:none;grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:center;padding:8px 0}
+  .shot.wide img{max-width:560px}
+  .shot.wide figcaption{margin-top:0;font-family:var(--sans);font-size:15px;color:var(--text-2,var(--muted));letter-spacing:0;line-height:1.55}
+  @media (max-width:880px){.shot.wide{grid-template-columns:1fr}}
 
   /* ---- sections ---- */
   section{padding:clamp(56px,7vw,96px) 0;border-bottom:1px solid var(--line)}
@@ -210,46 +207,10 @@
       <p class="fine"><i>●</i> Runs in the browser against a simulated server. No login, no install. A sample council email is one tap away. Best on a tablet or a laptop in landscape.</p>
     </div>
 
-    <div class="house" aria-hidden="true">
-      <svg viewBox="0 0 360 300">
-        <defs>
-          <pattern id="dots" width="7" height="7" patternUnits="userSpaceOnUse">
-            <circle cx="3.5" cy="3.5" r=".9" fill="#93A2B2" opacity=".55"/>
-          </pattern>
-          <pattern id="dotsAccent" width="7" height="7" patternUnits="userSpaceOnUse">
-            <circle cx="3.5" cy="3.5" r=".95" fill="#F0A63C" opacity=".75"/>
-          </pattern>
-        </defs>
-        <g transform="translate(-30,-78) scale(1.32)">
-        <!-- ground shadow -->
-        <ellipse cx="195" cy="262" rx="125" ry="20" fill="#141A21"/>
-        <!-- left wall (x = 0) -->
-        <polygon points="180,170 102.1,215 102.1,125 180,80" fill="#141A21"/>
-        <polygon points="180,170 102.1,215 102.1,125 180,80" fill="url(#dots)"/>
-        <!-- front wall (y = 0), selected -->
-        <polygon points="180,170 283.9,230 283.9,140 232,70 180,80" fill="rgba(240,166,60,.10)"/>
-        <polygon points="180,170 283.9,230 283.9,140 232,70 180,80" fill="url(#dotsAccent)"/>
-        <!-- roof, left slope -->
-        <polygon points="180,80 232,70 154,115 102.1,125" fill="#1C242E"/>
-        <polygon points="180,80 232,70 154,115 102.1,125" fill="url(#dots)"/>
-        <!-- storey line -->
-        <polyline points="102.1,170 180,125 283.9,185" fill="none" stroke="#3A4756" stroke-width="1"/>
-        <!-- doorway: empty in the dot field, outlined -->
-        <polygon points="223.3,195 240.6,205 240.6,175 223.3,165" fill="#0A0D11" stroke="#F0A63C" stroke-width="1.2"/>
-        <!-- edges -->
-        <polygon points="180,170 102.1,215 102.1,125 180,80" fill="none" stroke="#3A4756" stroke-width="1.2" stroke-linejoin="round"/>
-        <polygon points="180,80 232,70 154,115 102.1,125" fill="none" stroke="#3A4756" stroke-width="1.2" stroke-linejoin="round"/>
-        <polygon points="180,170 283.9,230 283.9,140 232,70 180,80" fill="none" stroke="#F0A63C" stroke-width="1.6" stroke-linejoin="round"/>
-        <!-- compass tick -->
-        <g font-family="JetBrains Mono, monospace" font-size="10" fill="#8795A4" letter-spacing="1.4">
-          <line x1="40" y1="250" x2="40" y2="214" stroke="#3A4756" stroke-width="1"/>
-          <polygon points="40,208 36,218 44,218" fill="#8795A4"/>
-          <text x="34" y="268">N</text>
-        </g>
-        </g>
-      </svg>
-      <div class="tag"><small>Selected wall</small><b>Front · South-west</b><span>Storey 1 of 2 · 0 / 2 photos</span></div>
-    </div>
+    <figure class="shot hero-shot">
+      <img src="img/hero-house.jpg" width="760" height="540" alt="The capture screen: a dotted 3D house with walls already captured in green and the tapped gable outlined in amber." loading="eager">
+      <figcaption>The demo, as captured. Walls already done are green; the tapped gable is amber, and its panel is below.</figcaption>
+    </figure>
   </div>
 </header>
 
@@ -326,6 +287,10 @@
         <h3>Cores go to the lab. The report comes back.</h3>
         <p>Samples are tracked from taken to result in. The I.S. 465 Table 1 Building Group the evidence points to is suggested. The engineer confirms it, edits the report, signs it with their registration number, and exports a PDF.</p>
       </div>
+      <figure class="shot wide">
+        <img src="img/assess-wall.png" width="915" height="774" alt="The wall panel for Left gable, First: crack yes, widest crack 2 mm, Vertical crack near corner selected from the Figure 2 list, a comment, one queued photo, and Add photo, Take sample, Save, Close buttons." loading="lazy">
+        <figcaption>Step 05 in the demo: the crack question, the widest crack in millimetres, the I.S. 465 Figure 2 defects, a comment and the photo, all on one wall. The photo shows Queued because there is no signal; it goes when there is.</figcaption>
+      </figure>
     </div>
   </div>
 </section>
@@ -428,6 +393,7 @@
       <span>Prototype for the TechIreland National AI Challenge 2026</span>
       <span>Built against I.S. 465:2026</span>
       <span>Not a formal assessment</span>
+      <span>Wall photos in the screenshots are openly licensed stand-ins, not from a DCB case: <a href="https://www.flickr.com/photos/98675081@N00/3027612977">spannar00ni</a> (CC BY 2.0), <a href="https://www.flickr.com/photos/9998127@N06/53197782552">wbaiv</a> (CC BY-SA 2.0)</span>
     </div>
   </div>
 </footer>
