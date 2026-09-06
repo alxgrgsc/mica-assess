@@ -224,7 +224,7 @@
     <div class="stats">
       <div class="stat"><div class="n">~9,500<small>confirmed homes</small></div><div class="d">Estimates run as high as 20,000 across the affected counties.</div></div>
       <div class="stat"><div class="n">5<small>counties</small></div><div class="d">Donegal, Mayo, Clare, Limerick and Sligo. Mostly bungalows, dormers and two-storey detached houses.</div></div>
-      <div class="stat"><div class="n">1<small>mm</small></div><div class="d">The pattern-cracking width that separates Group 2 minor damage from Group 3 damage in I.S. 465 Table 1, on any one elevation. Measured, not estimated.</div></div>
+      <div class="stat"><div class="n">1<small>mm</small></div><div class="d">The pattern-cracking width that separates Group 2 minor damage from Group 3 damage in I.S. 465 Table 1, on any one elevation.</div></div>
     </div>
   </div>
 </section>
@@ -245,7 +245,7 @@
       <div class="step"><div class="k">8</div><div class="v">Building Group and remediation option</div></div>
       <div class="step dim"><div class="k">9</div><div class="v">Grant</div></div>
     </div>
-    <p class="pipe-note">We chose the <b>managed pipeline</b>, not the lone report. Stage 6 has a panel of engineers, a queue of cases, external labs and statuses to track, and a result that has to go back to the council. That is the shape software fits. Today that traffic is email, and the demo takes the council's email as its only intake. <b>The proposed channel is two-way and coded</b>, like EDI: a case in from the agency, a signed-off assessment with its damage group and remediation option back out, as structured, encrypted data. The lab order and result already travel the same way inside the demo.</p>
+    <p class="pipe-note">We built for the <b>pipeline</b>. Stage 6 has a panel of engineers, a queue of cases, external labs and statuses to track, and a result that has to go back to the council. That is the shape software fits. Today that traffic is email, and the demo takes the council's email as its only intake. <b>The proposed channel is two-way and coded</b>, like EDI: a case in from the agency, a signed-off assessment with its damage group and remediation option back out, as structured, encrypted data. The lab order and result already travel the same way inside the demo.</p>
   </div>
 </section>
 
@@ -284,7 +284,7 @@
       </div>
       <div class="step-card">
         <div class="num">06</div>
-        <h3>Cores go to the lab. The report comes back.</h3>
+        <h3>Cores go to the lab. Results come back.</h3>
         <p>Samples are tracked from taken to result in. The I.S. 465 Table 1 Building Group the evidence points to is suggested. The engineer confirms it, edits the report, signs it with their registration number, and exports a PDF.</p>
       </div>
       <figure class="shot wide">
@@ -312,7 +312,7 @@
       </div>
       <div class="card">
         <h3>The engineer measures. The tool reports what it implies.</h3>
-        <p>Crack width and pattern are structured fields, not prose. From them the report shows which Table 1 group the evidence points to, and why. Under I.S. 465:2026 the Chartered Engineer assigns the group, so the tool suggests and the engineer decides. Core testing follows the group: petrography, total sulfur, sulfide and sulfate content.</p>
+        <p>Crack width and pattern are entered as fields. From them the report shows which Table 1 group the evidence points to, and why. Under I.S. 465:2026 the Chartered Engineer assigns the group, so the tool suggests and the engineer decides. Core testing follows the group: petrography, total sulfur, sulfide and sulfate content.</p>
       </div>
       <div class="card">
         <h3>Every act is on the record.</h3>
@@ -325,24 +325,24 @@
 <section id="ai">
   <div class="wrap">
     <div class="head">
-      <div class="label">The AI, and what it is not</div>
+      <div class="label">The AI</div>
       <h2>The model proposes. The engineer signs.</h2>
-      <p>An engineer on the Engineers Ireland I.S. 465 register signs this report and carries the liability for it. The product speeds up their judgement rather than substituting for it.</p>
+      <p>An engineer on the Engineers Ireland I.S. 465 register signs this report and carries the liability for it.</p>
     </div>
     <div class="ai">
       <div class="col">
         <div class="label accent">In the design</div>
         <ul>
-          <li><b>Photo to damage type.</b> The model proposes what it sees on a wall: stepped cracking on mortar joints, map cracking, spalling, delamination, with a severity. The engineer accepts or overrides. Every suggestion is editable.</li>
+          <li><b>Photo to damage type.</b> The model proposes what it sees on a wall: stepped cracking on mortar joints, map cracking, spalling, delamination, with a severity. The engineer accepts or overrides.</li>
           <li><b>Capture to draft.</b> The assessment summary is drafted from the walls, measurements and lab results, using the engineer's own past signed reports as worked examples.</li>
-          <li><b>Retrieval, not training.</b> No fine-tuning on assessor history. It works from the first report, updates the moment a new one is signed, and every draft can point at the reports that shaped it. That traceability matters in a grant process.</li>
+          <li><b>Retrieval.</b> No fine-tuning on assessor history. It works from the first report, updates the moment a new one is signed, and every draft can point at the reports that shaped it. That traceability matters in a grant process.</li>
         </ul>
       </div>
       <div class="col now">
         <div class="label done">In this prototype</div>
         <ul>
           <li><b>Not wired yet.</b> Every model call goes through one thin function, so the provider is a single file to swap. That function is a stub today.</li>
-          <li><b>The summaries in the demo are hand-written.</b> We would rather show a design that genuinely supports the claim than a pipeline that does not exist yet.</li>
+          <li><b>The summaries in the demo are hand-written.</b> We did not want to demo a pipeline that does not exist.</li>
           <li><b>Exports carry a "prototype draft" line.</b> Nothing produced here is a formal I.S. 465 assessment.</li>
         </ul>
       </div>
