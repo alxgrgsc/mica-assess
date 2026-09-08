@@ -179,6 +179,87 @@ border-bottom:1px solid var(--line);
   footer .cta{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;padding-bottom:40px;border-bottom:1px solid var(--line);margin-bottom:28px}
   footer .cta h2{max-width:none}
   footer .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--muted)}
+
+  /* ---- walkthrough: drag the pin, the scene follows ---- */
+  .scrub{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:28px 48px;align-items:center}
+  @media (max-width:880px){.scrub{grid-template-columns:1fr}}
+  .scrub-copy{display:flex;flex-direction:column;gap:12px;min-height:170px}
+  .scrub-copy .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
+  .scrub-copy h3{font-size:clamp(22px,2.4vw,28px);letter-spacing:-.03em;max-width:18ch}
+  .scrub-copy p{color:var(--muted);font-size:16px;max-width:44ch}
+  .scrub-scene{border:1px solid var(--line);background:var(--surface);aspect-ratio:16/10}
+  .scrub-scene svg{display:block;width:100%;height:100%}
+  .scrub-track{grid-column:1 / -1;position:relative;margin-top:8px;touch-action:none;user-select:none;-webkit-user-select:none}
+  .scrub-ticks{height:44px;pointer-events:none;
+    background:
+      repeating-linear-gradient(90deg,var(--line-2) 0 1px,transparent 1px 8px) 0 100% / 100% 12px no-repeat,
+      repeating-linear-gradient(90deg,var(--line-2) 0 1px,transparent 1px 40px) 0 100% / 100% 24px no-repeat;
+    border-bottom:1px solid var(--line-2)}
+  .scrub-range{position:absolute;top:0;left:-22px;width:calc(100% + 44px);height:44px;margin:0;padding:0;
+    background:transparent;-webkit-appearance:none;appearance:none;cursor:ew-resize}
+  .scrub-range::-webkit-slider-runnable-track{height:44px;background:transparent}
+  .scrub-range::-moz-range-track{height:44px;background:transparent}
+  .scrub-range::-webkit-slider-thumb{-webkit-appearance:none;width:44px;height:44px;border:0;border-radius:0;
+    background:radial-gradient(circle at 50% 7px,var(--accent) 5px,transparent 6px),linear-gradient(var(--accent),var(--accent)) 50% 100% / 2px 38px no-repeat}
+  .scrub-range::-moz-range-thumb{width:44px;height:44px;border:0;border-radius:0;
+    background:radial-gradient(circle at 50% 7px,var(--accent) 5px,transparent 6px),linear-gradient(var(--accent),var(--accent)) 50% 100% / 2px 38px no-repeat}
+  .scrub-range:focus{outline:none}
+  .scrub-range:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent);outline-offset:-2px}
+  .scrub-range:focus-visible::-moz-range-thumb{outline:2px solid var(--accent);outline-offset:-2px}
+  .scrub-marks{display:grid;grid-template-columns:repeat(6,1fr);margin:6px 0 0;padding:0;list-style:none}
+  .scrub-marks button{all:unset;display:block;cursor:pointer;text-align:center;padding:8px 0;
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted)}
+  .scrub-marks button:hover{color:var(--text)}
+  .scrub-marks button[aria-current]{color:var(--accent-deep)}
+  .scrub-marks button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .scrub-hint{margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
+
+  /* scene: every animation is 6s, paused, and scrubbed by the pin */
+  .scene *{animation-duration:6s;animation-timing-function:linear;animation-fill-mode:both;animation-play-state:paused}
+  .scene .ink{fill:none;stroke:var(--text);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+  .scene .thin{fill:none;stroke:var(--line-2);stroke-width:1;stroke-linejoin:round}
+  .scene .paper{fill:var(--ground);stroke:var(--text);stroke-width:1.5}
+  .scene .amber{fill:var(--accent)}
+  .scene .soft{fill:var(--accent-soft)}
+  .scene .t{font-family:var(--mono);font-size:10px;letter-spacing:.12em;fill:var(--text)}
+  .scene .t.m{fill:var(--muted)}
+  .scene .u{font-family:var(--sans);font-size:12.5px;fill:var(--text)}
+  .scene .st{opacity:0}
+  .scene .st1{animation-name:st1}.scene .st2{animation-name:st2}.scene .st3{animation-name:st3}
+  .scene .st4{animation-name:st4}.scene .st5{animation-name:st5}.scene .st6{animation-name:st6}
+  .scene .house{opacity:0;animation-name:house}
+  .scene .s1card{animation-name:s1card}
+  .scene .s2route{stroke-dasharray:700;animation-name:s2route}
+  .scene .s2dot{offset-path:path("M120,270 C 190,180 260,150 320,160 S 450,190 520,250");animation-name:s2dot}
+  .scene .s3needle{transform-box:view-box;transform-origin:320px 200px;animation-name:s3needle}
+  .scene .s3text{animation-name:s3text}
+  .scene .s4fill{animation-name:s4fill}
+  .scene .s4tap{transform-box:view-box;transform-origin:360px 205px;animation-name:s4tap}
+  .scene .s5flash{fill:#fff;animation-name:s5flash}
+  .scene .s5card{transform-box:view-box;transform-origin:500px 260px;animation-name:s5card}
+  .scene .s6core{animation-name:s6core}
+  .scene .s6doc{animation-name:s6doc}
+  .scene .s6tag{animation-name:s6tag}
+  @media (prefers-reduced-motion:reduce){.scene .s5flash{display:none}}
+  @keyframes st1{0.0%{opacity:1}15.33%{opacity:1}16.67%,100%{opacity:0}}
+  @keyframes st2{0%,16.67%{opacity:0}16.67%{opacity:0}18.0%,32.0%{opacity:1}33.33%,100%{opacity:0}}
+  @keyframes st3{0%,33.33%{opacity:0}33.33%{opacity:0}34.67%,48.67%{opacity:1}50.0%,100%{opacity:0}}
+  @keyframes st4{0%,50.0%{opacity:0}50.0%{opacity:0}51.33%,65.33%{opacity:1}66.67%,100%{opacity:0}}
+  @keyframes st5{0%,66.67%{opacity:0}66.67%{opacity:0}68.0%,82.0%{opacity:1}83.33%,100%{opacity:0}}
+  @keyframes st6{0%,83.33%{opacity:0}83.33%{opacity:0}84.67%,98.67%{opacity:1}}
+  @keyframes house{0%,50.0%{opacity:0}51.33%,82.0%{opacity:1}83.33%,100%{opacity:0}}
+  @keyframes s1card{0%,0.83%{transform:translateY(40px);opacity:0}6.67%,100%{transform:none;opacity:1}}
+  @keyframes s2route{0%,17.33%{stroke-dashoffset:700}24.33%,100%{stroke-dashoffset:0}}
+  @keyframes s2dot{0%,17.33%{offset-distance:0%}24.33%,100%{offset-distance:100%}}
+  @keyframes s3needle{0%,33.67%{transform:rotate(-75deg)}38.33%{transform:rotate(22deg)}40.0%,100%{transform:rotate(15deg)}}
+  @keyframes s3text{0%,39.67%{opacity:0}41.33%,100%{opacity:1}}
+  @keyframes s4fill{0%,52.0%{opacity:0}56.67%,100%{opacity:1}}
+  @keyframes s4tap{0%,51.33%{transform:scale(.2);opacity:0}53.0%{transform:scale(1);opacity:.9}56.33%,100%{transform:scale(1.6);opacity:0}}
+  @keyframes s5flash{0%,66.67%{opacity:0}67.5%{opacity:.75}69.33%,100%{opacity:0}}
+  @keyframes s5card{0%,68.0%{transform:scale(.6);opacity:0}72.67%,100%{transform:none;opacity:1}}
+  @keyframes s6core{0%,84.0%{transform:none}87.67%,100%{transform:translateX(150px)}}
+  @keyframes s6doc{0%,87.67%{transform:translateY(30px);opacity:0}90.33%,100%{transform:none;opacity:1}}
+  @keyframes s6tag{0%,90.33%{opacity:0}91.67%,100%{opacity:1}}
 </style>
 </head>
 <body>
@@ -251,6 +332,155 @@ border-bottom:1px solid var(--line);
       <div class="step dim"><div class="k">9</div><div class="v">Grant</div></div>
     </div>
     <p class="pipe-note">We built for the <b>pipeline</b>. Stage 6 has a panel of engineers, a queue of cases, external labs and statuses to track, and a result that has to go back to the council. That is the shape software fits. Today that traffic is email, and the demo takes the council's email as its only intake. <b>The proposed channel is two-way and coded</b>, like EDI: a case in from the agency, a signed-off assessment with its damage group and remediation option back out, as structured, encrypted data. The lab order and result already travel the same way inside the demo.</p>
+  </div>
+</section>
+
+<section id="walkthrough">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">One house, start to finish</div>
+      <h2>Drag through the day.</h2>
+      <p>The pin is the clock. Pull it from the council's email to the signed PDF and the scene follows; let go and it settles on a step. Arrow keys work too.</p>
+    </div>
+    <div class="scrub">
+      <div class="scrub-copy" aria-live="polite">
+        <div class="num" id="scrub-num">01</div>
+        <h3 id="scrub-label">The case comes from the council.</h3>
+        <p id="scrub-caption">A council email is the only way in. Case number, address and Eircode are read out of it.</p>
+      </div>
+      <div class="scrub-scene">
+        <svg class="scene" id="scene" viewBox="0 0 640 400" role="img" aria-labelledby="scene-title">
+          <title id="scene-title">Animated scene for the current step</title>
+
+          <!-- 01 council email -->
+          <g class="st st1">
+            <rect class="paper" x="170" y="170" width="260" height="150"/>
+            <polyline class="ink" points="170,170 300,262 430,170"/>
+            <polyline class="thin" points="170,320 268,240"/>
+            <polyline class="thin" points="430,320 332,240"/>
+            <text class="t m" x="170" y="350">FROM · DONEGAL COUNTY COUNCIL</text>
+            <g class="s1card">
+              <rect class="paper" x="380" y="56" width="200" height="104"/>
+              <text class="t" x="396" y="82">CASE DCB-2026-0412</text>
+              <text class="u" x="396" y="106">14 Glenview, Buncrana</text>
+              <text class="t m" x="396" y="130">F93 XY12</text>
+              <rect class="amber" x="396" y="140" width="46" height="3"/>
+            </g>
+          </g>
+
+          <!-- 02 route -->
+          <g class="st st2">
+            <g class="thin">
+              <line x1="60" y1="330" x2="580" y2="330"/><line x1="60" y1="110" x2="580" y2="110"/>
+              <line x1="140" y1="70" x2="140" y2="370"/><line x1="460" y1="70" x2="460" y2="370"/>
+            </g>
+            <path class="ink s2route" d="M120,270 C 190,180 260,150 320,160 S 450,190 520,250" stroke-dasharray="4 5"/>
+            <g class="ink">
+              <polygon points="106,282 120,268 134,282 134,300 106,300"/>
+              <polygon points="306,172 320,158 334,172 334,190 306,190"/>
+              <polygon points="506,262 520,248 534,262 534,280 506,280"/>
+            </g>
+            <circle class="amber s2dot" r="6"/>
+            <text class="t m" x="120" y="60">TODAY · 3 HOUSES · 48 KM</text>
+          </g>
+
+          <!-- 03 compass -->
+          <g class="st st3">
+            <circle class="ink" cx="320" cy="200" r="96"/>
+            <g class="thin">
+              <line x1="320" y1="104" x2="320" y2="118"/><line x1="320" y1="282" x2="320" y2="296"/>
+              <line x1="224" y1="200" x2="238" y2="200"/><line x1="402" y1="200" x2="416" y2="200"/>
+              <line x1="252" y1="132" x2="262" y2="142"/><line x1="388" y1="132" x2="378" y2="142"/>
+              <line x1="252" y1="268" x2="262" y2="258"/><line x1="388" y1="268" x2="378" y2="258"/>
+            </g>
+            <text class="t" x="314" y="96">N</text>
+            <g class="s3needle">
+              <polygon class="amber" points="320,118 330,200 310,200"/>
+              <polygon class="ink" points="320,282 330,200 310,200"/>
+              <circle class="paper" cx="320" cy="200" r="5"/>
+            </g>
+            <g class="s3text">
+              <text class="t" x="440" y="190">FRONT WALL</text>
+              <text class="u" x="440" y="212">faces 105°, east-south-east</text>
+              <text class="t m" x="440" y="236">OTHERS NAMED FROM IT</text>
+            </g>
+          </g>
+
+          <!-- house, shared by 04 and 05 -->
+          <g class="house" transform="translate(-70 0)">
+            <polygon class="paper" points="150,200 350,200 350,320 150,320"/>
+            <polygon class="paper" points="150,200 250,130 350,200"/>
+            <polygon class="paper" points="350,200 470,150 470,270 350,320"/>
+            <polygon class="paper" points="250,130 370,80 470,150 350,200"/>
+            <rect class="ink" x="232" y="262" width="34" height="58"/>
+            <rect class="ink" x="172" y="222" width="36" height="28"/>
+            <rect class="ink" x="292" y="222" width="36" height="28"/>
+            <text class="t m" x="150" y="350">SEMI · TWO STOREY · FRONT FACES 105°</text>
+          </g>
+
+          <!-- 04 tap a wall -->
+          <g class="st st4" transform="translate(-70 0)">
+            <polygon class="soft s4fill" points="350,200 470,150 470,270 350,320"/>
+            <circle class="amber s4tap" cx="430" cy="205" r="18"/>
+            <g class="s4fill">
+              <text class="t" x="480" y="230">GABLE · FIRST</text>
+              <text class="t m" x="480" y="250">FACES 15°</text>
+            </g>
+          </g>
+
+          <!-- 05 photograph, comment, measure -->
+          <g class="st st5">
+            <rect class="s5flash" x="0" y="0" width="640" height="400"/>
+            <g class="s5card">
+              <rect class="paper" x="400" y="190" width="200" height="140"/>
+              <rect class="thin" x="412" y="202" width="176" height="70"/>
+              <polyline class="ink" points="430,266 456,240 452,226 478,212 486,206"/>
+              <text class="t" x="412" y="292">WIDEST 2 MM</text>
+              <text class="t m" x="412" y="310">VERTICAL · NEAR CORNER</text>
+              <rect class="amber" x="530" y="208" width="54" height="16"/>
+              <text class="t" x="537" y="219">QUEUED</text>
+            </g>
+          </g>
+
+          <!-- 06 lab and report -->
+          <g class="st st6">
+            <g class="s6core">
+              <rect class="paper" x="110" y="190" width="28" height="80"/>
+              <ellipse class="paper" cx="124" cy="190" rx="14" ry="5"/>
+              <text class="t m" x="90" y="300">CORE 01</text>
+            </g>
+            <polygon class="ink" points="280,170 280,240 262,290 338,290 320,240 320,170"/>
+            <line class="ink" x1="270" y1="170" x2="330" y2="170"/>
+            <text class="t m" x="256" y="320">LAB · SULFUR · PETROGRAPHY</text>
+            <g class="s6doc">
+              <rect class="paper" x="440" y="70" width="160" height="210"/>
+              <g class="thin">
+                <line x1="460" y1="100" x2="580" y2="100"/><line x1="460" y1="120" x2="580" y2="120"/>
+                <line x1="460" y1="140" x2="550" y2="140"/><line x1="460" y1="176" x2="580" y2="176"/>
+                <line x1="460" y1="196" x2="580" y2="196"/><line x1="460" y1="216" x2="532" y2="216"/>
+              </g>
+              <text class="t" x="460" y="258">SIGNED · PDF</text>
+              <g class="s6tag">
+                <rect class="amber" x="460" y="150" width="70" height="16"/>
+                <text class="t" x="467" y="161">GROUP 3</text>
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="scrub-track">
+        <div class="scrub-ticks" aria-hidden="true"></div>
+        <input class="scrub-range" id="scrub" type="range" min="0" max="1000" value="83" step="1" aria-label="Walk through the six steps" aria-valuetext="Step 1 of 6: The case comes from the council.">
+        <ol class="scrub-marks" aria-label="Steps">
+          <li><button type="button" data-stage="0" aria-current="step">01</button></li>
+          <li><button type="button" data-stage="1">02</button></li>
+          <li><button type="button" data-stage="2">03</button></li>
+          <li><button type="button" data-stage="3">04</button></li>
+          <li><button type="button" data-stage="4">05</button></li>
+          <li><button type="button" data-stage="5">06</button></li>
+        </ol>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -404,5 +634,82 @@ border-bottom:1px solid var(--line);
   </div>
 </footer>
 
+<script>
+(function () {
+  var stages = [
+    ['01', 'The case comes from the council.', 'A council email is the only way in. Case number, address and Eircode are read out of it.'],
+    ['02', 'The day is a list with a route.', 'Each case offers only the actions its status allows. The route over the day\u2019s houses goes to Google Maps.'],
+    ['03', 'Stand at the front door. Tap Use compass.', 'The front wall\u2019s bearing comes from the tablet. Every other wall is named from it.'],
+    ['04', 'Turn the house. Tap a wall.', 'House type decides which walls exist. A shared gable is drawn but dimmed.'],
+    ['05', 'Photograph, comment, measure.', 'Widest crack in millimetres, the Figure 2 defects, a comment and the photo. Queued until there is signal.'],
+    ['06', 'Cores go to the lab. Results come back.', 'Samples are tracked to the result. The Table 1 group is suggested; the engineer confirms, signs and exports the PDF.']
+  ];
+  var range = document.getElementById('scrub');
+  var scene = document.getElementById('scene');
+  if (!range || !scene) return;
+  var num = document.getElementById('scrub-num');
+  var label = document.getElementById('scrub-label');
+  var caption = document.getElementById('scrub-caption');
+  var marks = Array.prototype.slice.call(document.querySelectorAll('.scrub-marks button'));
+  var N = stages.length, MAX = 1000, DURATION = 6000;
+  var anims = scene.getAnimations ? scene.getAnimations({ subtree: true }) : [];
+  var current = -1, settling = null;
+
+  function stageAt(t) { return Math.min(N - 1, Math.floor(t * N)); }
+  function midpoint(k) { return (k + 0.5) / N; }
+
+  function render(t) {
+    var time = t * DURATION;
+    for (var i = 0; i < anims.length; i++) { anims[i].pause(); anims[i].currentTime = time; }
+    var k = stageAt(t);
+    scene.setAttribute('data-stage', k);
+    if (k !== current) {
+      current = k;
+      num.textContent = stages[k][0];
+      label.textContent = stages[k][1];
+      caption.textContent = stages[k][2];
+      range.setAttribute('aria-valuetext', 'Step ' + (k + 1) + ' of ' + N + ': ' + stages[k][1]);
+      marks.forEach(function (b, i) { if (i === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    }
+  }
+
+  // Ease the pin to a stage midpoint so it never rests mid-crossfade.
+  function settle(target) {
+    if (settling) cancelAnimationFrame(settling);
+    var from = range.value / MAX, start = null, ms = 260;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / ms), e = 1 - Math.pow(1 - p, 3);
+      var t = from + (target - from) * e;
+      range.value = Math.round(t * MAX);
+      render(t);
+      if (p < 1) settling = requestAnimationFrame(step); else settling = null;
+    }
+    settling = requestAnimationFrame(step);
+  }
+
+  range.addEventListener('input', function () {
+    if (settling) { cancelAnimationFrame(settling); settling = null; }
+    render(range.value / MAX);
+  });
+  // Release with mouse or finger snaps; keyboard steps whole stages instead.
+  range.addEventListener('pointerup', function () { settle(midpoint(stageAt(range.value / MAX))); });
+  range.addEventListener('keydown', function (e) {
+    var k = stageAt(range.value / MAX), to = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') to = Math.min(N - 1, k + 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') to = Math.max(0, k - 1);
+    else if (e.key === 'Home') to = 0;
+    else if (e.key === 'End') to = N - 1;
+    if (to === null) return;
+    e.preventDefault();
+    settle(midpoint(to));
+  });
+  marks.forEach(function (b) {
+    b.addEventListener('click', function () { settle(midpoint(+b.getAttribute('data-stage'))); range.focus({ preventScroll: true }); });
+  });
+
+  render(range.value / MAX);
+})();
+</script>
 </body>
 </html>
