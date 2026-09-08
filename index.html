@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mica Assess — I.S. 465 assessments, captured at the house</title>
-<meta name="description" content="Mica Assess is a tablet tool for the Housing Agency's Framework Chartered Engineers: the case arrives from the council, the engineer turns a model of the house and taps each wall, and the I.S. 465 report is drafted from what was captured. Prototype for the TechIreland National AI Challenge 2026.">
+<title>Mica Assess — the I.S. 465 report, drafted at the house</title>
+<meta name="description" content="Mica Assess is a reporting workspace for the assessment practices doing Defective Concrete Block work: photos, voice notes and the homeowner's old documents go in on a tablet, and the draft I.S. 465 report comes out as a frozen PDF, edited by the professional who signs it. Prototype for the TechIreland National AI Challenge 2026.">
 <meta name="theme-color" content="#fffef2">
 <style>
   /* Look follows relace.ai: cream ground, near-black ink, one amber accent,
@@ -219,59 +219,61 @@ border-bottom:1px solid var(--line);
   .scene .ink{fill:none;stroke:var(--text);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
   .scene .thin{fill:none;stroke:var(--line-2);stroke-width:1;stroke-linejoin:round}
   .scene .paper{fill:var(--ground);stroke:var(--text);stroke-width:1.5}
+  .scene .panel{fill:var(--ground);stroke:var(--line-2);stroke-width:1}
   .scene .amber{fill:var(--accent)}
   .scene .soft{fill:var(--accent-soft)}
+  .scene .fillline{fill:var(--line)}
   .scene .t{font-family:var(--mono);font-size:10px;letter-spacing:.12em;fill:var(--text)}
   .scene .t.m{fill:var(--muted)}
+  .scene .t.a{fill:var(--accent-deep)}
   .scene .u{font-family:var(--sans);font-size:12.5px;fill:var(--text)}
+  .scene .u.m{fill:var(--muted)}
   .scene .st{opacity:0}
   .scene .st1{animation-name:st1}.scene .st2{animation-name:st2}.scene .st3{animation-name:st3}
   .scene .st4{animation-name:st4}.scene .st5{animation-name:st5}.scene .st6{animation-name:st6}
-  .scene .house{opacity:0;animation-name:house}
-  .scene .s1card{animation-name:s1card}
-  .scene .s2route{stroke-dasharray:700;animation-name:s2route}
-  .scene .s2dot{offset-path:path("M120,270 C 190,180 260,150 320,160 S 450,190 520,250");animation-name:s2dot}
-  .scene .s3needle{transform-box:view-box;transform-origin:320px 200px;animation-name:s3needle}
-  .scene .s3text{animation-name:s3text}
-  .scene .s4fill{animation-name:s4fill}
-  .scene .s4tap{transform-box:view-box;transform-origin:360px 205px;animation-name:s4tap}
-  .scene .s5flash{fill:#fff;animation-name:s5flash}
-  .scene .s5card{transform-box:view-box;transform-origin:500px 260px;animation-name:s5card}
-  .scene .s6core{animation-name:s6core}
-  .scene .s6doc{animation-name:s6doc}
-  .scene .s6tag{animation-name:s6tag}
-  @media (prefers-reduced-motion:reduce){.scene .s5flash{display:none}}
-  @keyframes st1{0.0%{opacity:1}15.33%{opacity:1}16.67%,100%{opacity:0}}
-  @keyframes st2{0%,16.67%{opacity:0}16.67%{opacity:0}18.0%,32.0%{opacity:1}33.33%,100%{opacity:0}}
-  @keyframes st3{0%,33.33%{opacity:0}33.33%{opacity:0}34.67%,48.67%{opacity:1}50.0%,100%{opacity:0}}
-  @keyframes st4{0%,50.0%{opacity:0}50.0%{opacity:0}51.33%,65.33%{opacity:1}66.67%,100%{opacity:0}}
-  @keyframes st5{0%,66.67%{opacity:0}66.67%{opacity:0}68.0%,82.0%{opacity:1}83.33%,100%{opacity:0}}
-  @keyframes st6{0%,83.33%{opacity:0}83.33%{opacity:0}84.67%,98.67%{opacity:1}}
-  @keyframes house{0%,50.0%{opacity:0}51.33%,82.0%{opacity:1}83.33%,100%{opacity:0}}
-  @keyframes s1card{0%,0.83%{transform:translateY(40px);opacity:0}6.67%,100%{transform:none;opacity:1}}
-  @keyframes s2route{0%,17.33%{stroke-dashoffset:700}24.33%,100%{stroke-dashoffset:0}}
-  @keyframes s2dot{0%,17.33%{offset-distance:0%}24.33%,100%{offset-distance:100%}}
-  @keyframes s3needle{0%,33.67%{transform:rotate(-75deg)}38.33%{transform:rotate(22deg)}40.0%,100%{transform:rotate(15deg)}}
-  @keyframes s3text{0%,39.67%{opacity:0}41.33%,100%{opacity:1}}
-  @keyframes s4fill{0%,52.0%{opacity:0}56.67%,100%{opacity:1}}
-  @keyframes s4tap{0%,51.33%{transform:scale(.2);opacity:0}53.0%{transform:scale(1);opacity:.9}56.33%,100%{transform:scale(1.6);opacity:0}}
-  @keyframes s5flash{0%,66.67%{opacity:0}67.5%{opacity:.75}69.33%,100%{opacity:0}}
-  @keyframes s5card{0%,68.0%{transform:scale(.6);opacity:0}72.67%,100%{transform:none;opacity:1}}
-  @keyframes s6core{0%,84.0%{transform:none}87.67%,100%{transform:translateX(150px)}}
-  @keyframes s6doc{0%,87.67%{transform:translateY(30px);opacity:0}90.33%,100%{transform:none;opacity:1}}
-  @keyframes s6tag{0%,90.33%{opacity:0}91.67%,100%{opacity:1}}
+  .scene .s1row{animation-name:s1row}.scene .s1state{animation-name:s1state}
+  .scene .s2doc{animation-name:s2doc}.scene .s2fill{animation-name:s2fill}.scene .s2src{animation-name:s2src}
+  .scene .s3photo{animation-name:s3photo}.scene .s3wave{animation-name:s3wave}
+  .scene .s3queued{animation-name:s3queued}.scene .s3uploaded{animation-name:s3uploaded}
+  .scene .s4typed{animation-name:s4typed}.scene .s4alt{animation-name:s4alt}.scene .s4kept{animation-name:s4kept}
+  .scene .s5v2{animation-name:s5v2}.scene .s5lock{animation-name:s5lock}
+  .scene .s6invite{animation-name:s6invite}.scene .s6tick{animation-name:s6tick}.scene .s6zip{animation-name:s6zip}
+  @keyframes st1{0%,15.33%{opacity:1}16.67%,100%{opacity:0}}
+  @keyframes st2{0%,16.67%{opacity:0}18.0%,32.0%{opacity:1}33.33%,100%{opacity:0}}
+  @keyframes st3{0%,33.33%{opacity:0}34.67%,48.67%{opacity:1}50.0%,100%{opacity:0}}
+  @keyframes st4{0%,50.0%{opacity:0}51.33%,65.33%{opacity:1}66.67%,100%{opacity:0}}
+  @keyframes st5{0%,66.67%{opacity:0}68.0%,82.0%{opacity:1}83.33%,100%{opacity:0}}
+  @keyframes st6{0%,83.33%{opacity:0}84.67%,98.67%{opacity:1}}
+  @keyframes s1row{0%,0.83%{transform:translateY(18px);opacity:0}5.83%,100%{transform:none;opacity:1}}
+  @keyframes s1state{0%,5.0%{opacity:0}7.5%,100%{opacity:1}}
+  @keyframes s2doc{0%,17.33%{transform:none}21.67%,100%{transform:translateX(150px)}}
+  @keyframes s2fill{0%,21.33%{opacity:0}23.67%,100%{opacity:1}}
+  @keyframes s2src{0%,23.33%{opacity:0}24.67%,100%{opacity:1}}
+  @keyframes s3photo{0%,34.33%{transform:translateY(16px);opacity:0}38.33%,100%{transform:none;opacity:1}}
+  @keyframes s3wave{0%,36.67%{opacity:0}39.0%,100%{opacity:1}}
+  @keyframes s3queued{0%,39.0%{opacity:1}40.33%,100%{opacity:0}}
+  @keyframes s3uploaded{0%,39.67%{opacity:0}41.0%,100%{opacity:1}}
+  @keyframes s4typed{0%,50.83%{opacity:0}53.33%,100%{opacity:1}}
+  @keyframes s4alt{0%,54.0%{transform:translateY(12px);opacity:0}57.0%,100%{transform:none;opacity:1}}
+  @keyframes s4kept{0%,56.33%{opacity:0}58.0%,100%{opacity:1}}
+  @keyframes s5v2{0%,68.33%{transform:translateY(30px);opacity:0}73.0%,100%{transform:none;opacity:1}}
+  @keyframes s5lock{0%,72.33%{opacity:0}74.33%,100%{opacity:1}}
+  @keyframes s6invite{0%,83.83%{transform:translateY(16px);opacity:0}86.67%,100%{transform:none;opacity:1}}
+  @keyframes s6tick{0%,87.0%{opacity:0}88.67%,100%{opacity:1}}
+  @keyframes s6zip{0%,88.33%{transform:none}91.33%,100%{transform:translateX(80px)}}
 </style>
 </head>
 <body>
 
 <nav>
   <div class="wrap">
-    <a class="brand" href="#top"><b>Mica Assess</b><span>I.S. 465 field assessment</span></a>
+    <a class="brand" href="#top"><b>Mica Assess</b><span>I.S. 465 reporting</span></a>
     <div class="links">
+      <a class="txt" href="#walkthrough">Walkthrough</a>
       <a class="txt" href="#how">How it works</a>
       <a class="txt" href="#different">What is different</a>
       <a class="txt" href="#ai">The AI</a>
-      <a class="btn primary" href="spikes/elevation-picker.html">Open the demo
+      <a class="btn primary" href="#walkthrough">Drag through it
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
     </div>
@@ -282,20 +284,19 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="copy">
       <div class="label accent">TechIreland National AI Challenge 2026 · Prototype</div>
-      <h1>The I.S. 465 assessment, captured at the house.</h1>
-      <p class="lede">Mica Assess is a tablet tool for the <b>Housing Agency's Framework Chartered Engineers</b>. The case arrives from the council, the engineer turns a model of the house and taps each wall, and the report is drafted from what was captured. On site, with or without signal.</p>
+      <h1>The I.S. 465 report, drafted before you leave the house.</h1>
+      <p class="lede">Mica Assess is a reporting workspace for the <b>assessment practices</b> doing Defective Concrete Block work. Photos, voice notes and the homeowner's old documents go in on a tablet. The draft report comes out as a frozen PDF, edited by the professional who signs it. On site, with or without signal.</p>
       <div class="actions">
-        <a class="btn primary" href="spikes/elevation-picker.html">Open the demo
+        <a class="btn primary" href="#walkthrough">Drag through it
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
         <a class="btn ghost" href="#how">How it works</a>
       </div>
-      <p class="fine"><i>●</i> Runs in the browser against a simulated server. No login, no install. A sample council email is one tap away. Best on a tablet or a laptop in landscape.</p>
+      <p class="fine"><i>●</i> The app behind this page is a private prototype: a server, a login, and synthetic cases only. The AI in it is a labelled fixture, not a live model. Nothing it produces is a formal assessment.</p>
     </div>
-
     <figure class="shot hero-shot">
-      <img src="img/hero-house.jpg" width="760" height="540" alt="The capture screen: a dotted 3D house with walls already captured in green and the tapped gable outlined in amber." loading="eager">
-      <figcaption>The demo, as captured. Walls already done are green; the tapped gable is amber, and its panel is below.</figcaption>
+      <img src="img/app-cases.png" width="1280" height="860" alt="The practice work list in the app: two synthetic cases, one capturing and one writing, with counts for assigned, capturing, writing and handed over." loading="eager">
+      <figcaption>The practice work list. How far the work is, whether it has synced, and what the scheme says about it are three separate things, on purpose.</figcaption>
     </figure>
   </div>
 </header>
@@ -305,7 +306,7 @@ border-bottom:1px solid var(--line);
     <div class="head">
       <div class="label">The problem</div>
       <h2>Thousands of houses. One report each, written up after the drive home.</h2>
-      <p>Defective concrete block damage is a rural, one-off-house problem. Cases reach the engineer as an email. The photos go on a phone, the notes on paper, and the report is assembled at a desk days later. The tool that fixes this has to work in a field in Donegal with no signal.</p>
+      <p>Defective concrete block damage is a rural, one-house-at-a-time problem. The professional photographs the house on a phone, dictates or scribbles notes, and writes the report at a desk days later from whatever can be found. The backlog is in the write-up, not the visit. The tool that fixes it has to work in a field in Donegal with no signal, and still produce a document a council will take.</p>
     </div>
     <div class="stats">
       <div class="stat"><div class="n">~9,500<small>confirmed homes</small></div><div class="d">Estimates run as high as 20,000 across the affected counties.</div></div>
@@ -319,19 +320,18 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">Where it sits</div>
-      <h2>Stage 6 of the Defective Concrete Block grant scheme.</h2>
+      <h2>Before the application, and again after the Agency decides.</h2>
     </div>
     <div class="pipe">
-      <div class="step dim"><div class="k">1</div><div class="v">Homeowner applies</div></div>
-      <div class="step dim"><div class="k">2</div><div class="v">Building Condition Assessment</div></div>
-      <div class="step dim"><div class="k">3</div><div class="v">County Council</div></div>
-      <div class="step dim"><div class="k">4</div><div class="v">Housing Agency</div></div>
-      <div class="step here"><div class="k">5 · 6</div><div class="v">Framework Chartered Engineers assess the house</div></div>
-      <div class="step"><div class="k">7</div><div class="v">Cores sampled, tested at a lab</div></div>
-      <div class="step"><div class="k">8</div><div class="v">Building Group and remediation option</div></div>
-      <div class="step dim"><div class="k">9</div><div class="v">Grant</div></div>
+      <div class="step dim"><div class="k">1</div><div class="v">Homeowner appoints a building professional</div></div>
+      <div class="step here"><div class="k">2</div><div class="v">Initial Building Condition Assessment</div></div>
+      <div class="step dim"><div class="k">3</div><div class="v">Application to the council</div></div>
+      <div class="step dim"><div class="k">4</div><div class="v">Housing Agency threshold decision</div></div>
+      <div class="step here"><div class="k">5</div><div class="v">Investigation, cores to a lab</div></div>
+      <div class="step dim"><div class="k">6</div><div class="v">Remediation option and grant</div></div>
+      <div class="step dim"><div class="k">7</div><div class="v">Remedial works and certification</div></div>
     </div>
-    <p class="pipe-note">We built for the <b>pipeline</b>. Stage 6 has a panel of engineers, a queue of cases, external labs and statuses to track, and a result that has to go back to the council. That is the shape software fits. Today that traffic is email, and the demo takes the council's email as its only intake. <b>The proposed channel is two-way and coded</b>, like EDI: a case in from the agency, a signed-off assessment with its damage group and remediation option back out, as structured, encrypted data. The lab order and result already travel the same way inside the demo.</p>
+    <p class="pipe-note">We built for the <b>practice</b>. Two of the seven boxes are professional reports: the initial BCA a homeowner commissions before applying, and the investigation the Agency directs later. Mica Assess keeps them as separate assessments in one case, because the second must not borrow the first's conclusions. Council and Agency get no login; they receive the PDF, as they do today. <b>The case-scoped requests and handover packages</b> exist to cut the missing-information loops, not to replace the council's portal.</p>
   </div>
 </section>
 
@@ -339,138 +339,144 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">One house, start to finish</div>
-      <h2>Drag through the day.</h2>
-      <p>The pin is the clock. Pull it from the council's email to the signed PDF and the scene follows; let go and it settles on a step. Arrow keys work too.</p>
+      <h2>Drag through one case.</h2>
+      <p>The pin is the clock. Pull it from the work list to the handover and the scene follows; let go and it settles on a step. Arrow keys work too.</p>
     </div>
     <div class="scrub">
       <div class="scrub-copy" aria-live="polite">
         <div class="num" id="scrub-num">01</div>
-        <h3 id="scrub-label">The case comes from the council.</h3>
-        <p id="scrub-caption">A council email is the only way in. Case number, address and Eircode are read out of it.</p>
+        <h3 id="scrub-label">Open the case.</h3>
+        <p id="scrub-caption">A practice admin creates the case and allocates it. Work state and sync state stay separate.</p>
       </div>
       <div class="scrub-scene">
         <svg class="scene" id="scene" viewBox="0 0 640 400" role="img" aria-labelledby="scene-title">
           <title id="scene-title">Animated scene for the current step</title>
 
-          <!-- 01 council email -->
+          <!-- 01 open the case -->
           <g class="st st1">
-            <rect class="paper" x="170" y="170" width="260" height="150"/>
-            <polyline class="ink" points="170,170 300,262 430,170"/>
-            <polyline class="thin" points="170,320 268,240"/>
-            <polyline class="thin" points="430,320 332,240"/>
-            <text class="t m" x="170" y="350">FROM · DONEGAL COUNTY COUNCIL</text>
-            <g class="s1card">
-              <rect class="paper" x="380" y="56" width="200" height="104"/>
-              <text class="t" x="396" y="82">CASE DCB-2026-0412</text>
-              <text class="u" x="396" y="106">14 Glenview, Buncrana</text>
-              <text class="t m" x="396" y="130">F93 XY12</text>
-              <rect class="amber" x="396" y="140" width="46" height="3"/>
+            <text class="t m" x="80" y="70">PRACTICE WORK LIST</text>
+            <text class="t m" x="80" y="112">CASE</text><text class="t m" x="330" y="112">WORKSTREAM</text><text class="t m" x="470" y="112">WORK STATE</text>
+            <line class="thin" x1="80" y1="122" x2="560" y2="122"/>
+            <g class="s1row">
+              <rect class="soft" x="72" y="134" width="496" height="58"/>
+              <text class="t a" x="86" y="160">DEMO-BCA-001</text>
+              <text class="u m" x="86" y="180">12 Example View, County Donegal</text>
+              <rect class="panel" x="330" y="150" width="88" height="20"/><text class="t" x="338" y="164">INITIAL BCA</text>
+              <g class="s1state"><rect class="panel" x="470" y="150" width="76" height="20"/><text class="t" x="478" y="164">ASSIGNED</text></g>
             </g>
+            <line class="thin" x1="80" y1="204" x2="560" y2="204"/>
+            <text class="t" x="86" y="232">DEMO-BCA-002</text>
+            <text class="u m" x="86" y="252">Incomplete Synthetic Case</text>
+            <rect class="panel" x="330" y="222" width="88" height="20"/><text class="t" x="338" y="236">INITIAL BCA</text>
+            <rect class="panel" x="470" y="222" width="80" height="20"/><text class="t" x="478" y="236">CAPTURING</text>
+            <line class="thin" x1="80" y1="276" x2="560" y2="276"/>
+            <text class="t m" x="80" y="330">WORK STATE · SYNC STATE · SCHEME STATUS: KEPT APART</text>
           </g>
 
-          <!-- 02 route -->
+          <!-- 02 prepare from documents -->
           <g class="st st2">
-            <g class="thin">
-              <line x1="60" y1="330" x2="580" y2="330"/><line x1="60" y1="110" x2="580" y2="110"/>
-              <line x1="140" y1="70" x2="140" y2="370"/><line x1="460" y1="70" x2="460" y2="370"/>
+            <g class="s2doc">
+              <rect class="paper" x="60" y="120" width="76" height="98"/><text class="t m" x="70" y="140">PDF</text>
+              <text class="u" x="70" y="200">Planning</text>
+              <rect class="paper" x="60" y="236" width="76" height="98"/><text class="t m" x="70" y="256">PDF</text>
+              <text class="u" x="70" y="316">Old report</text>
             </g>
-            <path class="ink s2route" d="M120,270 C 190,180 260,150 320,160 S 450,190 520,250" stroke-dasharray="4 5"/>
-            <g class="ink">
-              <polygon points="106,282 120,268 134,282 134,300 106,300"/>
-              <polygon points="306,172 320,158 334,172 334,190 306,190"/>
-              <polygon points="506,262 520,248 534,262 534,280 506,280"/>
+            <polyline class="ink" points="240,220 300,220 292,212"/><polyline class="ink" points="300,220 292,228"/>
+            <rect class="panel" x="330" y="90" width="250" height="250"/>
+            <text class="t m" x="346" y="116">B · BUILDING INFORMATION</text>
+            <text class="t m" x="346" y="150">YEAR BUILT</text><rect class="fillline" x="346" y="158" width="216" height="14"/>
+            <text class="t m" x="346" y="196">FLOOR AREA</text><rect class="fillline" x="346" y="204" width="216" height="14"/>
+            <text class="t m" x="346" y="242">CONSTRUCTION</text><rect class="fillline" x="346" y="250" width="216" height="14"/>
+            <g class="s2fill">
+              <rect class="soft" x="346" y="158" width="216" height="14"/><text class="u" x="352" y="170">2006</text>
+              <rect class="soft" x="346" y="204" width="216" height="14"/><text class="u" x="352" y="216">142 m²</text>
+              <rect class="soft" x="346" y="250" width="216" height="14"/><text class="u" x="352" y="262">Cavity wall, rendered</text>
             </g>
-            <circle class="amber s2dot" r="6"/>
-            <text class="t m" x="120" y="60">TODAY · 3 HOUSES · 48 KM</text>
+            <g class="s2src"><rect class="amber" x="346" y="290" width="164" height="16"/><text class="t" x="353" y="301">SOURCE · PLANNING.PDF</text></g>
           </g>
 
-          <!-- 03 compass -->
+          <!-- 03 capture on site, offline -->
           <g class="st st3">
-            <circle class="ink" cx="320" cy="200" r="96"/>
-            <g class="thin">
-              <line x1="320" y1="104" x2="320" y2="118"/><line x1="320" y1="282" x2="320" y2="296"/>
-              <line x1="224" y1="200" x2="238" y2="200"/><line x1="402" y1="200" x2="416" y2="200"/>
-              <line x1="252" y1="132" x2="262" y2="142"/><line x1="388" y1="132" x2="378" y2="142"/>
-              <line x1="252" y1="268" x2="262" y2="258"/><line x1="388" y1="268" x2="378" y2="258"/>
+            <text class="t m" x="70" y="70">LOCATIONS</text>
+            <rect class="panel" x="70" y="84" width="230" height="52"/><rect class="soft" x="78" y="92" width="36" height="36"/><text class="u" x="124" y="108">Front elevation</text><text class="t m" x="124" y="124">4 PHOTOS · INSPECTED</text>
+            <rect class="panel" x="70" y="144" width="230" height="52"/><rect class="soft" x="78" y="152" width="36" height="36"/><text class="u" x="124" y="168">Left gable</text><text class="t m" x="124" y="184">2 PHOTOS · INSPECTED</text>
+            <rect class="panel" x="70" y="204" width="230" height="52"/><rect class="fillline" x="78" y="212" width="36" height="36"/><text class="u" x="124" y="228">Kitchen</text><text class="t m" x="124" y="244">1 PHOTO · IN PROGRESS</text>
+            <rect class="panel" x="70" y="264" width="230" height="52"/><rect class="fillline" x="78" y="272" width="36" height="36"/><text class="u" x="124" y="288">Roof void</text><text class="t m" x="124" y="304">NOT INSPECTED · REASON</text>
+            <g class="s3photo">
+              <rect class="paper" x="340" y="100" width="230" height="200"/>
+              <rect class="thin" x="352" y="112" width="206" height="100"/>
+              <polyline class="ink" points="380,196 410,160 404,142 440,122"/>
+              <text class="t" x="352" y="236">KITCHEN · PHOTO 1</text>
+              <g class="s3wave"><polyline class="ink" points="352,270 360,258 368,282 376,252 384,286 392,262 400,276 408,256 416,280 424,264 432,272"/><text class="t m" x="444" y="274">DICTATED · 0:14</text></g>
+              <g class="s3queued"><rect class="soft" x="500" y="222" width="58" height="16"/><text class="t a" x="507" y="233">QUEUED</text></g>
+              <g class="s3uploaded"><rect class="amber" x="486" y="222" width="72" height="16"/><text class="t" x="493" y="233">UPLOADED</text></g>
             </g>
-            <text class="t" x="314" y="96">N</text>
-            <g class="s3needle">
-              <polygon class="amber" points="320,118 330,200 310,200"/>
-              <polygon class="ink" points="320,282 330,200 310,200"/>
-              <circle class="paper" cx="320" cy="200" r="5"/>
-            </g>
-            <g class="s3text">
-              <text class="t" x="440" y="190">FRONT WALL</text>
-              <text class="u" x="440" y="212">faces 105°, east-south-east</text>
-              <text class="t m" x="440" y="236">OTHERS NAMED FROM IT</text>
-            </g>
+            <text class="t m" x="70" y="350">ID ISSUED ON THE TABLET · SAVED LOCALLY FIRST</text>
           </g>
 
-          <!-- house, shared by 04 and 05 -->
-          <g class="house" transform="translate(-70 0)">
-            <polygon class="paper" points="150,200 350,200 350,320 150,320"/>
-            <polygon class="paper" points="150,200 250,130 350,200"/>
-            <polygon class="paper" points="350,200 470,150 470,270 350,320"/>
-            <polygon class="paper" points="250,130 370,80 470,150 350,200"/>
-            <rect class="ink" x="232" y="262" width="34" height="58"/>
-            <rect class="ink" x="172" y="222" width="36" height="28"/>
-            <rect class="ink" x="292" y="222" width="36" height="28"/>
-            <text class="t m" x="150" y="350">SEMI · TWO STOREY · FRONT FACES 105°</text>
-          </g>
-
-          <!-- 04 tap a wall -->
-          <g class="st st4" transform="translate(-70 0)">
-            <polygon class="soft s4fill" points="350,200 470,150 470,270 350,320"/>
-            <circle class="amber s4tap" cx="430" cy="205" r="18"/>
-            <g class="s4fill">
-              <text class="t" x="480" y="230">GABLE · FIRST</text>
-              <text class="t m" x="480" y="250">FACES 15°</text>
+          <!-- 04 edit the report -->
+          <g class="st st4">
+            <g class="t m"><text x="70" y="70">A</text><text x="100" y="70">B</text><text x="130" y="70">C</text><text x="160" y="70">D</text><text x="220" y="70">F</text><text x="250" y="70">G</text><text x="280" y="70">H</text></g>
+            <rect class="amber" x="186" y="58" width="16" height="16"/><text class="t" x="190" y="70">E</text>
+            <line class="thin" x1="70" y1="82" x2="570" y2="82"/>
+            <text class="t m" x="70" y="112">E · EXTERNAL DAMAGE</text>
+            <text class="t m" x="70" y="150">WIDEST CRACK, LEFT GABLE</text>
+            <rect class="panel" x="70" y="160" width="220" height="30"/>
+            <g class="s4typed"><text class="u" x="80" y="180">2 mm</text><rect class="amber" x="112" y="167" width="2" height="16"/><text class="t m" x="304" y="180">TYPED BY THE ASSESSOR</text></g>
+            <text class="t m" x="70" y="228">PATTERN</text>
+            <rect class="panel" x="70" y="238" width="220" height="30"/><text class="u" x="80" y="258">Vertical, near corner</text>
+            <g class="s4alt">
+              <rect class="paper" x="70" y="296" width="330" height="54"/>
+              <text class="t a" x="82" y="318">ALTERNATIVE · FIXTURE SUGGESTS 3 MM</text>
+              <text class="u m" x="82" y="338">Rerun after your edit. Accept, or leave it filed.</text>
             </g>
+            <g class="s4kept"><rect class="amber" x="420" y="306" width="120" height="16"/><text class="t" x="427" y="317">HUMAN VALUE KEPT</text></g>
           </g>
 
-          <!-- 05 photograph, comment, measure -->
+          <!-- 05 freeze a version -->
           <g class="st st5">
-            <rect class="s5flash" x="0" y="0" width="640" height="400"/>
-            <g class="s5card">
-              <rect class="paper" x="400" y="190" width="200" height="140"/>
-              <rect class="thin" x="412" y="202" width="176" height="70"/>
-              <polyline class="ink" points="430,266 456,240 452,226 478,212 486,206"/>
-              <text class="t" x="412" y="292">WIDEST 2 MM</text>
-              <text class="t m" x="412" y="310">VERTICAL · NEAR CORNER</text>
-              <rect class="amber" x="530" y="208" width="54" height="16"/>
-              <text class="t" x="537" y="219">QUEUED</text>
+            <rect class="paper" x="110" y="80" width="170" height="230"/>
+            <g class="thin"><line x1="130" y1="112" x2="260" y2="112"/><line x1="130" y1="132" x2="260" y2="132"/><line x1="130" y1="152" x2="230" y2="152"/><line x1="130" y1="190" x2="260" y2="190"/><line x1="130" y1="210" x2="260" y2="210"/></g>
+            <text class="t" x="130" y="250">VERSION 1 · DRAFT</text>
+            <text class="t m" x="130" y="270">SHA-256 80F9…DCA3</text>
+            <g class="s5lock"><rect class="amber" x="130" y="284" width="96" height="16"/><text class="t" x="137" y="295">NEVER CHANGES</text></g>
+            <g class="s5v2">
+              <rect class="paper" x="340" y="80" width="170" height="230"/>
+              <g class="thin"><line x1="360" y1="112" x2="490" y2="112"/><line x1="360" y1="132" x2="490" y2="132"/><line x1="360" y1="152" x2="470" y2="152"/><line x1="360" y1="190" x2="490" y2="190"/><line x1="360" y1="210" x2="440" y2="210"/></g>
+              <rect class="soft" x="360" y="204" width="130" height="14"/>
+              <text class="t" x="360" y="250">VERSION 2 · DRAFT</text>
+              <text class="t m" x="360" y="270">SHA-256 785B…89E3</text>
             </g>
+            <text class="t m" x="110" y="350">HEADLESS RENDER · PHOTO BYTES RE-CHECKED · NO SIGN-OFF LOCK</text>
           </g>
 
-          <!-- 06 lab and report -->
+          <!-- 06 share, request, hand over -->
           <g class="st st6">
-            <g class="s6core">
-              <rect class="paper" x="110" y="190" width="28" height="80"/>
-              <ellipse class="paper" cx="124" cy="190" rx="14" ry="5"/>
-              <text class="t m" x="90" y="300">CORE 01</text>
+            <g class="s6invite">
+              <rect class="paper" x="60" y="80" width="250" height="110"/>
+              <text class="t" x="74" y="104">INVITE · HOMEOWNER</text>
+              <text class="u m" x="74" y="126">One-time link. Inbox only, no case list.</text>
+              <text class="t m" x="74" y="156">REQUESTED · PLANNING GRANT</text>
+              <g class="s6tick"><rect class="amber" x="74" y="164" width="72" height="16"/><text class="t" x="81" y="175">UPLOADED</text></g>
             </g>
-            <polygon class="ink" points="280,170 280,240 262,290 338,290 320,240 320,170"/>
-            <line class="ink" x1="270" y1="170" x2="330" y2="170"/>
-            <text class="t m" x="256" y="320">LAB · SULFUR · PETROGRAPHY</text>
-            <g class="s6doc">
-              <rect class="paper" x="440" y="70" width="160" height="210"/>
-              <g class="thin">
-                <line x1="460" y1="100" x2="580" y2="100"/><line x1="460" y1="120" x2="580" y2="120"/>
-                <line x1="460" y1="140" x2="550" y2="140"/><line x1="460" y1="176" x2="580" y2="176"/>
-                <line x1="460" y1="196" x2="580" y2="196"/><line x1="460" y1="216" x2="532" y2="216"/>
-              </g>
-              <text class="t" x="460" y="258">SIGNED · PDF</text>
-              <g class="s6tag">
-                <rect class="amber" x="460" y="150" width="70" height="16"/>
-                <text class="t" x="467" y="161">GROUP 3</text>
-              </g>
+            <text class="t m" x="60" y="230">SHARE ONE VERSION · REVOKE ANY TIME</text>
+            <g class="s6zip">
+              <rect class="paper" x="60" y="260" width="180" height="70"/>
+              <text class="t" x="74" y="284">HANDOVER.ZIP</text>
+              <text class="t m" x="74" y="304">V1.PDF · CHOSEN EVIDENCE</text>
+              <text class="t m" x="74" y="320">MANIFEST.JSON · HASHES</text>
             </g>
+            <polyline class="ink" points="332,295 368,295 360,287"/><polyline class="ink" points="368,295 360,303"/>
+            <rect class="panel" x="380" y="250" width="190" height="90"/>
+            <text class="t" x="394" y="276">INVESTIGATION PRACTICE</text>
+            <text class="u m" x="394" y="298">Separate assessment.</text>
+            <text class="u m" x="394" y="316">Cannot read the BCA's notes.</text>
           </g>
         </svg>
       </div>
       <div class="scrub-track">
         <div class="scrub-ticks" aria-hidden="true"></div>
-        <input class="scrub-range" id="scrub" type="range" min="0" max="1000" value="83" step="1" aria-label="Walk through the six steps" aria-valuetext="Step 1 of 6: The case comes from the council.">
+        <input class="scrub-range" id="scrub" type="range" min="0" max="1000" value="83" step="1" aria-label="Walk through the six steps" aria-valuetext="Step 1 of 6: Open the case.">
         <ol class="scrub-marks" aria-label="Steps">
           <li><button type="button" data-stage="0" aria-current="step">01</button></li>
           <li><button type="button" data-stage="1">02</button></li>
@@ -488,43 +494,43 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">How it works</div>
-      <h2>From the council's case to a signed report.</h2>
-      <p>Every step below works in the demo. Where the design goes further than the demo, the step says so. The order is the order of a real day.</p>
+      <h2>Prepare, capture, autofill, edit, export.</h2>
+      <p>Every step below runs in the prototype on synthetic cases. Where a step is simulated, it says so. The order is the order of a real job.</p>
     </div>
     <div class="steps">
       <div class="step-card">
         <div class="num">01</div>
-        <h3>The case comes from the council. Nothing else can start one.</h3>
-        <p>The design is a coded, two-way channel with the agency, like EDI: the case in as structured, encrypted data, the signed-off assessment and its damage group back out the same way. The schema is defined and not yet wired, so the demo takes today's traffic instead, the council's email, and pulls case number, address and Eircode out of it. Either way there is no "new assessment" button: an uncommissioned assessment cannot exist.</p>
+        <h3>Open the case.</h3>
+        <p>A practice administrator creates the case and allocates an assessor. The initial BCA and any later investigation are separate assessments inside it, so the second never inherits the first's conclusions. The work list keeps three things apart: how far the work is, whether it has synced, and what the scheme says about it.</p>
       </div>
       <div class="step-card">
         <div class="num">02</div>
-        <h3>The day is a list with a route.</h3>
-        <p>Each case's status decides the only actions it offers: start, continue, review, edit. The shortest route over the day's houses is handed to Google Maps for the driving.</p>
+        <h3>Prepare from what already exists.</h3>
+        <p>The professional uploads what the homeowner already has: the planning file, a previous engineer's report, old photos. An extraction job reads the readable ones and fills blank fields in sections A to D, each value labelled with its source document. An unreadable file is kept as an original and flagged, not silently dropped.</p>
       </div>
       <div class="step-card">
         <div class="num">03</div>
-        <h3>Stand at the front door. Tap Use compass.</h3>
-        <p>The front wall's bearing is set from the tablet's heading, and every other wall is named from it: North, South-west. That is how these reports are written, and it removes a manual step.</p>
+        <h3>Capture on site, offline.</h3>
+        <p>Locations are a list with thumbnails and inspection states: front elevation, left gable, kitchen, the roof void you could not get into and why. Each photo and dictated note gets its id on the tablet, is written to local storage first, and queues until there is signal. The same upload arriving twice is the same row.</p>
       </div>
       <div class="step-card">
         <div class="num">04</div>
-        <h3>Turn the house. Tap a wall.</h3>
-        <p>House type decides which walls exist. A semi's shared gable is drawn but dimmed, and appears in the report as "party wall, not assessed" rather than vanishing.</p>
+        <h3>Edit the report. Keep every human change.</h3>
+        <p>The report follows the I.S. 465 Annex A structure, sections A to H, edited in place with a live preview. Rerunning extraction never overwrites something a person typed; the differing value is filed as an alternative to accept or ignore. A missing field shows a warning and does not block a draft.</p>
       </div>
       <div class="step-card">
         <div class="num">05</div>
-        <h3>Photograph, comment, measure.</h3>
-        <p>Widest crack in millimetres, crack pattern, and the Figure 2 defect checklist, captured beside the photos. A wall counts as done only with a photo, a comment, and the crack question answered.</p>
+        <h3>Freeze a version.</h3>
+        <p>Create version 1 and it is rendered to PDF by a headless browser, hashed, and stored with its snapshot. Edit and create version 2; version 1 is byte for byte what it was. There is no sign-off lock and no approval queue, because the declaration is the professional's, not the software's.</p>
       </div>
       <div class="step-card">
         <div class="num">06</div>
-        <h3>Cores go to the lab. Results come back.</h3>
-        <p>Samples are tracked from taken to result in. The I.S. 465 Table 1 Building Group the evidence points to is suggested. The engineer confirms it, edits the report, signs it with their registration number, and exports a PDF.</p>
+        <h3>Share, request, hand over.</h3>
+        <p>Invite the homeowner or a helper with a one-time link; they see an inbox, not the practice's cases. Request the documents the desk study needs, share one chosen version, revoke either. When the Agency directs an investigation, hand the case to that practice as a ZIP with a manifest and only the evidence you selected.</p>
       </div>
       <figure class="shot wide">
-        <img src="img/assess-wall.png" width="915" height="774" alt="The wall panel for Left gable, First: crack yes, widest crack 2 mm, Vertical crack near corner selected from the Figure 2 list, a comment, one queued photo, and Add photo, Take sample, Save, Close buttons." loading="lazy">
-        <figcaption>Step 05 in the demo: the crack question, the widest crack in millimetres, the I.S. 465 Figure 2 defects, a comment and the photo, all on one wall. The photo shows Queued because there is no signal; it goes when there is.</figcaption>
+        <img src="img/app-report.png" width="1280" height="860" alt="The report editor in the app: section tabs A to H, typed fields with their source, and the assembled preview beside them." loading="lazy">
+        <figcaption>Step 04 in the prototype: the report editor, one section at a time, with the assembled preview alongside. The same assembler renders the preview and the PDF, so what you see is what freezes. The <a href="spikes/elevation-picker.html">6 September field spike</a> with the 3D house picker is kept for the record.</figcaption>
       </figure>
     </div>
   </div>
@@ -534,24 +540,24 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">What is different</div>
-      <h2>Built for a tablet, outdoors, with no signal and possibly gloves.</h2>
+      <h2>Built for the write-up, and for a tablet with no signal.</h2>
     </div>
     <div class="diff">
       <div class="card">
         <h3>The tablet issues the ids.</h3>
-        <p>A photo has an identity the moment it is taken, before any server has seen it. Every upload is an idempotent <code>PUT</code>, so the same photo arriving twice is the same row. Put the tablet in flight mode mid-assessment and nothing breaks. The queue drains when signal returns, and nothing is deleted locally until the server confirms.</p>
+        <p>A photo, a note or a document has an identity the moment it is captured, before any server has seen it. Every upload is an idempotent <code>PUT</code> with a key the server remembers, so the same thing arriving twice is the same row. Flight mode mid-visit breaks nothing. The queue drains when signal returns, and nothing is deleted locally until the server has it.</p>
       </div>
       <div class="card">
-        <h3>Nothing incomplete can be exported.</h3>
-        <p>The report and the sign-off unlock only when every assessable wall has a photo, a comment and the crack answer. The button says why it is disabled. Sign-off locks the report, and reopening it needs a written reason. The council would demand these rules anyway, so the tool enforces them.</p>
+        <h3>Drafts export with their warnings showing.</h3>
+        <p>There is no approval queue and no lock. A missing field is a visible warning on the draft and in the PDF, not a closed door. Export never manufactures a declaration or implies the council accepted anything. The professional's declaration is a field they fill themselves.</p>
       </div>
       <div class="card">
-        <h3>The engineer measures. The tool reports what it implies.</h3>
-        <p>Crack width and pattern are entered as fields. From them the report shows which Table 1 group the evidence points to, and why. Under I.S. 465:2026 the Chartered Engineer assigns the group, so the tool suggests and the engineer decides. Core testing follows the group: petrography, total sulfur, sulfide and sulfate content.</p>
+        <h3>Suggestions never overwrite a person.</h3>
+        <p>Extraction and transcription produce typed suggestions. A blank field takes the suggestion and shows where it came from. A field someone typed keeps its value, and a differing suggestion is filed as an alternative. Rerun as often as you like; the human edits survive every time.</p>
       </div>
       <div class="card">
-        <h3>Every act is on the record.</h3>
-        <p>Imported, started, photo added, field edited, wall cleared, signed off, reopened with a reason. The audit trail is visible on the case, because an audit nobody can inspect is not one.</p>
+        <h3>Versions are immutable, and can prove it.</h3>
+        <p>Each report version freezes its snapshot and checks every photo's bytes against their stored hash, before and after rendering, then stores the PDF's own hash. Handover ZIPs carry a manifest with the same hashes. Download version 1 next year and it matches.</p>
       </div>
     </div>
   </div>
@@ -561,55 +567,54 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">The AI</div>
-      <h2>The model proposes. The engineer signs.</h2>
-      <p>An engineer on the Engineers Ireland I.S. 465 register signs this report and carries the liability for it.</p>
+      <h2>The model proposes. The professional signs.</h2>
+      <p>A chartered engineer, chartered building surveyor or registered architect signs the initial BCA and carries the liability for it.</p>
     </div>
     <div class="ai">
       <div class="col">
         <div class="label accent">In the design</div>
         <ul>
-          <li><b>Photo to damage type.</b> The model proposes what it sees on a wall: stepped cracking on mortar joints, map cracking, spalling, delamination, with a severity. The engineer accepts or overrides.</li>
-          <li><b>Capture to draft.</b> The assessment summary is drafted from the walls, measurements and lab results, using the engineer's own past signed reports as worked examples.</li>
-          <li><b>Retrieval.</b> No fine-tuning on assessor history. It works from the first report, updates the moment a new one is signed, and every draft can point at the reports that shaped it. That traceability matters in a grant process.</li>
+          <li><b>Document to fields.</b> Reads the planning file, prior reports and lab sheets, and proposes values for the report's typed fields with the source they came from.</li>
+          <li><b>Voice to findings.</b> A note dictated at the wall becomes a transcript and a proposed observation, with defect keys from the I.S. 465 Figure 2 list.</li>
+          <li><b>Retrieval, not training.</b> No fine-tuning on assessor history. Every draft can point at the documents and recordings that shaped it, which matters in a grant process.</li>
         </ul>
       </div>
       <div class="col now">
         <div class="label done">In this prototype</div>
         <ul>
-          <li><b>Not wired yet.</b> Every model call goes through one thin function, so the provider is a single file to swap. That function is a stub today.</li>
-          <li><b>The summaries in the demo are hand-written.</b> We did not want to demo a pipeline that does not exist.</li>
-          <li><b>Exports carry a "prototype draft" line.</b> Nothing produced here is a formal I.S. 465 assessment.</li>
+          <li><b>A labelled fixture.</b> Every suggestion in the demo comes from a deterministic fake adapter reading a fixture file. The UI and the PDF mark it as simulated.</li>
+          <li><b>The live adapter exists and is unverified.</b> A provider adapter sits behind the same interface and has not been run against real documents. No claim is made for its quality.</li>
+          <li><b>Nothing here is a formal assessment.</b> Exports carry a draft marker. Lab results in the demo are synthetic and say so on the page.</li>
         </ul>
       </div>
     </div>
-    <blockquote>"It does not assign a formal I.S. 465 damage rating unattended. An engineer signs this report and carries the liability, so the product speeds up their judgement rather than substituting for it."<span>Decision log, 5 September 2026</span></blockquote>
+    <blockquote>"Gaps and AI suggestions remain visible, and draft export stays available with incomplete fields. Export must not manufacture a professional declaration or imply council acceptance."<span>Decision log, 8 September 2026</span></blockquote>
   </div>
 </section>
 
 <section id="status">
   <div class="wrap">
     <div class="head">
-      <div class="label">Status on 6 September 2026</div>
+      <div class="label">Status on 8 September 2026</div>
       <h2>What is built, and what is next.</h2>
     </div>
     <div class="tablewrap">
       <table>
         <thead><tr><th>Stage</th><th>State</th></tr></thead>
         <tbody>
-          <tr><td>Council case intake from the agency email</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Coded two-way channel with the agency (case in, assessment out)</td><td class="s part"><i></i>Schema defined</td></tr>
-          <tr><td>Day list and route planning</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Orientation from the tablet compass</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>House type and shape become walls</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Turn the house, tap a wall</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Photograph a wall, comment, crack width, Figure 2 defects</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Offline queue, sync to the API</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Samples taken on site, tracked to the lab and back</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Suggested I.S. 465 Building Group (Table 1)</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Assessor edits, signs off, exports to PDF</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Internal rooms</td><td class="s part"><i></i>Server ready</td></tr>
-          <tr><td>AI names the damage</td><td class="s next"><i></i>Next</td></tr>
-          <tr><td>Login by Engineers Ireland registration number</td><td class="s next"><i></i>Next</td></tr>
+          <tr><td>Practices, cases, allocation and the work list</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Document upload and extraction into sections A to D, with sources</td><td class="s built"><i></i>Built, fixture AI</td></tr>
+          <tr><td>Locations, photos, dictation, offline outbox</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Report editor, sections A to H, live preview</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Immutable PDF versions with hashes</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Homeowner and helper invitations, document requests, report shares</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Separate investigation assessment, samples, lab documents</td><td class="s built"><i></i>Built, synthetic lab</td></tr>
+          <tr><td>Handover package as a ZIP with a manifest</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Live AI provider</td><td class="s part"><i></i>Wired, unverified</td></tr>
+          <tr><td>Real tablet over private HTTPS</td><td class="s part"><i></i>Not yet run</td></tr>
+          <tr><td>Council and Agency channel</td><td class="s next"><i></i>Next</td></tr>
+          <tr><td>Laboratory integration</td><td class="s next"><i></i>Next</td></tr>
+          <tr><td>Login by professional registration number</td><td class="s next"><i></i>Next</td></tr>
         </tbody>
       </table>
     </div>
@@ -619,8 +624,8 @@ border-bottom:1px solid var(--line);
 <footer>
   <div class="wrap">
     <div class="cta">
-      <h2>Turn the house. Tap a wall.</h2>
-      <a class="btn primary" href="spikes/elevation-picker.html">Open the demo
+      <h2>Prepare. Capture. Edit. Export.</h2>
+      <a class="btn primary" href="#walkthrough">Drag through it
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
     </div>
@@ -629,7 +634,7 @@ border-bottom:1px solid var(--line);
       <span>Prototype for the TechIreland National AI Challenge 2026</span>
       <span>Built against I.S. 465:2026</span>
       <span>Not a formal assessment</span>
-      <span>Wall photos in the screenshots are openly licensed stand-ins, not from a DCB case: <a href="https://www.flickr.com/photos/98675081@N00/3027612977">spannar00ni</a> (CC BY 2.0), <a href="https://www.flickr.com/photos/9998127@N06/53197782552">wbaiv</a> (CC BY-SA 2.0)</span>
+      <span>Screenshots show synthetic cases only. No client material appears on this page.</span>
     </div>
   </div>
 </footer>
@@ -637,12 +642,12 @@ border-bottom:1px solid var(--line);
 <script>
 (function () {
   var stages = [
-    ['01', 'The case comes from the council.', 'A council email is the only way in. Case number, address and Eircode are read out of it.'],
-    ['02', 'The day is a list with a route.', 'Each case offers only the actions its status allows. The route over the day\u2019s houses goes to Google Maps.'],
-    ['03', 'Stand at the front door. Tap Use compass.', 'The front wall\u2019s bearing comes from the tablet. Every other wall is named from it.'],
-    ['04', 'Turn the house. Tap a wall.', 'House type decides which walls exist. A shared gable is drawn but dimmed.'],
-    ['05', 'Photograph, comment, measure.', 'Widest crack in millimetres, the Figure 2 defects, a comment and the photo. Queued until there is signal.'],
-    ['06', 'Cores go to the lab. Results come back.', 'Samples are tracked to the result. The Table 1 group is suggested; the engineer confirms, signs and exports the PDF.']
+    ['01', 'Open the case.', 'A practice admin creates the case and allocates it. Work state and sync state stay separate.'],
+    ['02', 'Prepare from what already exists.', 'Upload the planning file, an old report, the homeowner\u2019s photos. Extraction fills the blank fields and labels each value with its source.'],
+    ['03', 'Capture on site, offline.', 'A list of locations, not a 3D house. Photos and dictated notes get their id on the tablet and queue until there is signal.'],
+    ['04', 'Edit the report. Keep every human change.', 'Sections A to H, editable in place. A rerun never overwrites a value a person typed; the new one waits as an alternative.'],
+    ['05', 'Freeze a version.', 'Version 1 is rendered to PDF and hashed. Edit again and you get version 2; version 1 never changes.'],
+    ['06', 'Share, request, hand over.', 'Invite the homeowner to upload what is missing, share one chosen version, and hand the case to the investigation practice as a ZIP with a manifest.']
   ];
   var range = document.getElementById('scrub');
   var scene = document.getElementById('scene');
