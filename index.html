@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mica Assess — the I.S. 465 report, drafted at the house</title>
-<meta name="description" content="Mica Assess is a reporting workspace for the assessment practices doing Defective Concrete Block work: photos, voice notes and the homeowner's old documents go in on a tablet, and the draft I.S. 465 report comes out as a frozen PDF, edited by the professional who signs it. Prototype for the TechIreland National AI Challenge 2026.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23fcaa2d' stroke-width='9' stroke-linecap='square'%3E%3Cpath d='M10 20h44'/%3E%3Cpath d='M32 52V28'/%3E%3Cpath d='M17 52 32 28l15 24'/%3E%3C/svg%3E">
+<title>Releve — the I.S. 465 report, drafted at the house</title>
+<meta name="description" content="Releve is a reporting workspace for the assessment practices doing Defective Concrete Block work: photos, voice notes and the homeowner's old documents go in on a tablet, and the draft I.S. 465 report comes out as a frozen PDF, edited by the professional who signs it. Prototype for the TechIreland National AI Challenge 2026.">
 <meta name="theme-color" content="#fffef2">
 <style>
   /* Look follows relace.ai: cream ground, near-black ink, one amber accent,
@@ -81,6 +82,7 @@ border-bottom:1px solid var(--line);
   }
   nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
   .brand{display:flex;align-items:baseline;gap:12px;text-decoration:none}
+  .brand .mark{width:26px;height:26px;flex:0 0 auto;align-self:center;color:var(--accent)}
   .brand b{font-family:var(--sans);font-size:19px;font-weight:600;letter-spacing:-.03em}
   .brand span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
   nav .links{display:flex;gap:22px;align-items:center}
@@ -96,6 +98,54 @@ border-bottom:1px solid var(--line);
   .hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
   .hero .fine{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
   .hero .fine i{color:var(--done);font-style:normal}
+  /* The correction in the problem headline. The resting state, and what
+     shows without JS or with reduced motion, is the true one: Thousands.
+     With JS the old word is laid over the same slot, struck by hand, then
+     dropped out of the line while the new one falls in from above and
+     knocks the line about on landing. It settles a degree or two off
+     square, like something set down by hand rather than typeset. */
+  .swap{position:relative;display:inline-block;white-space:nowrap}
+  .was{display:none;text-decoration:none}
+  .was .rub{position:absolute;left:-1%;top:.54em;width:102%;height:.4em;overflow:visible;pointer-events:none}
+  .was .rub path{fill:none;stroke:var(--accent-deep);stroke-width:3;stroke-linecap:round;
+    vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:0}
+  .now{display:inline-block;text-decoration:none;color:var(--accent-deep);transform:rotate(-1.8deg)}
+  .js .swap{width:var(--w0)}
+  .js .was{display:inline-block;position:absolute;left:0;top:0;white-space:nowrap;color:var(--text)}
+  .js .was .rub path{stroke-dashoffset:1}
+  .js .now{opacity:0}
+  .js h2.fix.on .was .rub path{animation:rub .45s cubic-bezier(.4,0,.2,1) 1s forwards}
+  .js h2.fix.on .was{animation:drop-out .5s cubic-bezier(.55,0,.9,.45) 1.45s forwards}
+  .js h2.fix.on .swap{animation:slot .4s cubic-bezier(.5,0,.6,1) 1.45s forwards}
+  .js h2.fix.on .now{animation:drop-in .5s cubic-bezier(.5,0,.6,1) 1.55s forwards}
+  .js h2.fix.on{animation:ground .34s ease-out 2s}
+  @keyframes rub{to{stroke-dashoffset:0}}
+  @keyframes slot{to{width:var(--w1)}}
+  @keyframes drop-out{
+    0%{opacity:1;transform:translateY(0) rotate(0)}
+    100%{opacity:0;transform:translateY(.85em) rotate(-5deg)}}
+  @keyframes drop-in{
+    0%{opacity:0;transform:translateY(-1.3em) rotate(5deg)}
+    12%{opacity:1}
+    72%{transform:translateY(.07em) rotate(-2.8deg)}
+    88%{transform:translateY(-.03em) rotate(-1.1deg)}
+    100%{opacity:1;transform:translateY(0) rotate(-1.8deg)}}
+  @keyframes ground{
+    0%{transform:translateY(0)}
+    18%{transform:translateY(3px)}
+    38%{transform:translateY(-2px)}
+    58%{transform:translateY(2px)}
+    78%{transform:translateY(-1px)}
+    100%{transform:translateY(0)}}
+  @media (prefers-reduced-motion:reduce){
+    .js .was{display:none}
+    .js .swap{width:auto}
+    .js .now{opacity:1}
+    .js h2.fix.on,.js h2.fix.on .was,.js h2.fix.on .now,.js h2.fix.on .was .rub path{animation:none}
+  }
+  .hero .say{font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--muted);margin:-8px 0 0}
+  .hero .say b{color:var(--text);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+  .hero .say i{font-style:normal;color:var(--accent-deep);letter-spacing:.06em;text-transform:uppercase}
   /* hero reel: 4 frames x 5s = 20s loop, pure CSS. Hover or focus pauses it. */
   .reel{--n:4;--dur:20s}
   .reel-frames{position:relative;aspect-ratio:1280/860;border:1px solid var(--line-2);background:var(--surface);overflow:hidden}
@@ -345,15 +395,17 @@ border-bottom:1px solid var(--line);
 </style>
 </head>
 <body>
+<script>document.documentElement.className+=" js"</script>
 
 <nav>
   <div class="wrap">
-    <a class="brand" href="#top"><b>Mica Assess</b><span>I.S. 465 reporting</span></a>
+    <a class="brand" href="#top"><svg class="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><b>Releve</b><span>I.S. 465 reporting</span></a>
     <div class="links">
       <a class="txt" href="#walkthrough">One visit</a>
       <a class="txt" href="#hands">One case</a>
       <a class="txt" href="#how">How it works</a>
       <a class="txt" href="#ai">The AI</a>
+      <a class="txt" href="#buyer">Who pays</a>
       <a class="btn primary" href="#walkthrough">Drag through it
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
@@ -366,6 +418,7 @@ border-bottom:1px solid var(--line);
     <div class="copy">
       <div class="label accent">TechIreland National AI Challenge 2026 · Prototype</div>
       <h1>The report is written while the work is done.</h1>
+      <p class="say"><b>Releve</b> <i>rel-uh-VAY</i> · French for a survey reading, and for one shift handing over to the next.</p>
       <p class="lede">Photos, voice notes and the homeowner's old paperwork go in on a tablet. The draft report comes out at the house. The assessor corrects it and signs it. Then everyone who needs it sees the same case.</p>
       <div class="actions">
         <a class="btn primary" href="#walkthrough">Drag through one visit
@@ -398,7 +451,7 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">The problem</div>
-      <h2>Thousands of houses. One report each. Written days later, from memory.</h2>
+      <h2 class="fix"><span class="swap"><del class="was">Hundreds<svg class="rub" viewBox="0 0 120 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9 C 26 4, 48 11, 70 6 S 104 9, 117 4"/></svg></del><ins class="now">Thousands</ins></span> of houses. One report each. Written days later, from memory.</h2>
       <p>The visit takes a morning. The write-up takes the week, at a desk, from a camera roll and a notebook. Then the lab, the council and the homeowner each get their own copy, and each asks for something that is missing.</p>
     </div>
     <div class="stats">
@@ -672,7 +725,36 @@ border-bottom:1px solid var(--line);
         <p>The declaration is empty until the assessor fills it. The PDF says "draft" until they say otherwise.</p>
       </div>
     </div>
-    <p class="pipe-note">In this prototype every suggestion comes from a labelled stand-in, not a live model. The live connection exists and has not been tested on real documents.</p>
+    <p class="pipe-note">The hard part was never the model. It is holding a legal report structure, a source for every value, and a version that cannot change after it is sent. Swap the model out and that scaffolding is what remains.</p>
+    <p class="pipe-note">In this prototype every suggestion comes from a labelled stand-in, not a live model. The live connection exists and has not been tested on real documents. A case is visible to the people put on it and nobody else: a practice that is not on the case gets a 404, a share is one named version, and revoking it closes the file.</p>
+  </div>
+</section>
+
+<section id="buyer">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">Who pays</div>
+      <h2>The assessment is already paid work. We sell to the people doing it.</h2>
+      <p>Every one of these reports is written today by a competent person under I.S. 465, and somebody already pays them to write it. We are not asking a new budget to appear. We are selling a shorter week to the practice that carries the cost of the long one.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="num">BUYS IT</div>
+        <h3>The engineering practice.</h3>
+        <p>They carry the write-up. A morning at the house currently costs them the rest of the week at a desk. Priced per assessor, not per house, so a busy week costs them nothing extra.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">WANTS IT</div>
+        <h3>The lender and the insurer.</h3>
+        <p>A frozen, dated, sourced report is the artefact they need to price a house they currently cannot price. They do not buy the tool. They benefit from the output, which is why practices will be asked for it.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">OUTLASTS IT</div>
+        <h3>The standard, not the scheme.</h3>
+        <p>Grant schemes end. Building condition assessment does not, and defective concrete block is not the only defect that gets a standard and a report. The report structure is configurable for that reason.</p>
+      </div>
+    </div>
+    <p class="pipe-note">Not yet true: no practice has paid for this, and no price is set. The next real test is one practice running one live case, not another feature.</p>
   </div>
 </section>
 
@@ -695,6 +777,8 @@ border-bottom:1px solid var(--line);
           <tr><td>Hand the case to the next engineer, with lab results</td><td class="s built"><i></i>Built, synthetic lab</td></tr>
           <tr><td>Live AI model</td><td class="s part"><i></i>Wired, untested</td></tr>
           <tr><td>Real tablet in a real field</td><td class="s part"><i></i>Not yet run</td></tr>
+          <tr><td>Read by a practising I.S. 465 assessor</td><td class="s part"><i></i>Not yet</td></tr>
+          <tr><td>Irish-language report and interface</td><td class="s next"><i></i>Next</td></tr>
           <tr><td>Council channel</td><td class="s next"><i></i>Next</td></tr>
           <tr><td>Lab channel</td><td class="s next"><i></i>Next</td></tr>
         </tbody>
@@ -712,9 +796,9 @@ border-bottom:1px solid var(--line);
       </a>
     </div>
     <div class="meta">
-      <span>Mica Assess · Crintus &amp; Co</span>
+      <span>Releve · Crintus &amp; Co</span>
       <span>Prototype for the TechIreland National AI Challenge 2026</span>
-      <span>Follows the I.S. 465:2026 report structure. Not a formal assessment.</span>
+      <span>Follows the I.S. 465:2026 report structure. The competent person signs it. Not a formal assessment.</span>
       <span>Every house on this page is synthetic.</span>
     </div>
   </div>
@@ -800,6 +884,45 @@ border-bottom:1px solid var(--line);
   });
 
   render(range.value / MAX);
+})();
+
+// The correction in the problem headline. Runs once, when the line is well
+// inside the viewport, and is never replayed: a judge should see it happen,
+// not see it flicker every time the page is scrolled back. The class lands on
+// the headline itself, because the headline is what the new word shakes.
+(function () {
+  var fix = document.querySelector('#problem h2.fix');
+  if (!fix) return;
+  // Measure both words so the line does not sit open waiting for the new one.
+  // The old word is out of flow, so the slot would otherwise always be as wide
+  // as the word that has not arrived yet. offsetWidth, not the bounding box:
+  // the new word is set a degree or two off square and its box is wider than
+  // it is. Measured again once the webfont has loaded, because the first
+  // measurement happens in the fallback face and is wrong by a good 20px.
+  var swap = fix.querySelector('.swap');
+  var was = fix.querySelector('.was');
+  var now = fix.querySelector('.now');
+  function measure() {
+    if (!swap || !was || !now) return;
+    swap.style.setProperty('--w0', was.offsetWidth + 'px');
+    swap.style.setProperty('--w1', now.offsetWidth + 'px');
+  }
+  measure();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  window.addEventListener('resize', measure);
+  if (swap) swap.addEventListener('animationend', function (e) {
+    // Once the slot has opened, hand the width back to the text.
+    if (e.animationName === 'slot') swap.style.width = 'auto';
+  });
+  if (!('IntersectionObserver' in window)) { fix.classList.add('on'); return; }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      fix.classList.add('on');
+      io.disconnect();
+    });
+  }, { threshold: 0.9 });
+  io.observe(fix);
 })();
 </script>
 </body>
