@@ -96,6 +96,31 @@ border-bottom:1px solid var(--line);
   .hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
   .hero .fine{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
   .hero .fine i{color:var(--done);font-style:normal}
+  /* hero reel: 4 frames x 5s = 20s loop, pure CSS. Hover or focus pauses it. */
+  .reel{--n:4;--dur:20s}
+  .reel-frames{position:relative;aspect-ratio:1280/860;border:1px solid var(--line-2);background:var(--surface);overflow:hidden}
+  .reel-frames img{position:absolute;inset:0;border:0;opacity:0;animation:reel-fade var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
+  .reel-frames img:first-child{opacity:1}
+  .reel-frames img:first-child{animation-name:reel-fade-first}
+  .reel-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
+  .reel-bar i{display:block;height:2px;background:var(--line);overflow:hidden;position:relative}
+  .reel-bar i::after{content:"";position:absolute;inset:0;background:var(--accent);transform:scaleX(0);transform-origin:left;
+    animation:reel-bar var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
+  .reel-caps{position:relative;min-height:2.6em;margin-top:10px}
+  .reel-caps span{position:absolute;inset:0;opacity:0;animation:reel-fade var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
+  .reel-caps span:first-child{animation-name:reel-fade-first}
+  .reel-caps b{color:var(--accent-deep);font-weight:500;margin-right:6px}
+  .reel:hover *,.reel:focus-within *{animation-play-state:paused}
+  /* frame i is visible for 25% of the loop: fade in over 3%, hold, fade out over 3% */
+  @keyframes reel-fade{0%{opacity:0}3%{opacity:1}25%{opacity:1}28%{opacity:0}100%{opacity:0}}
+  /* first frame starts visible so the page never shows an empty box, and comes back at the end for the wrap-around */
+  @keyframes reel-fade-first{0%{opacity:1}25%{opacity:1}28%{opacity:0}97%{opacity:0}100%{opacity:1}}
+  @keyframes reel-bar{0%{transform:scaleX(0)}25%{transform:scaleX(1)}25.01%{transform:scaleX(0)}100%{transform:scaleX(0)}}
+  @media (prefers-reduced-motion:reduce){
+    .reel-frames img,.reel-caps span,.reel-bar i::after{animation:none}
+    .reel-frames img:first-child,.reel-caps span:first-child{opacity:1}
+    .reel-bar{display:none}
+  }
   .shot{margin:0;width:100%;max-width:520px;justify-self:center}
   .shot img{display:block;width:100%;height:auto;border:1px solid var(--line-2);border-radius:0;background:var(--surface)}
   .shot figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em;margin-top:10px;line-height:1.5}
@@ -341,9 +366,20 @@ border-bottom:1px solid var(--line);
       </div>
       <p class="fine"><i>●</i> The app behind this page is a private prototype: a server, a login, and synthetic cases only. The AI in it is a labelled fixture, not a live model. Nothing it produces is a formal assessment.</p>
     </div>
-    <figure class="shot hero-shot">
-      <img src="img/app-cases.png" width="1280" height="860" alt="The practice work list in the app: two synthetic cases, one capturing and one writing, with counts for assigned, capturing, writing and handed over." loading="eager">
-      <figcaption>The practice work list. How far the work is, whether it has synced, and what the scheme says about it are three separate things, on purpose.</figcaption>
+    <figure class="shot hero-shot reel" aria-label="Twenty-second loop through the app: open the case, capture on site, edit the draft, freeze a version.">
+      <div class="reel-frames">
+        <img src="img/app-cases.png" width="1280" height="860" alt="The practice work list in the app: two synthetic cases, one capturing and one writing." loading="eager" style="--i:0">
+        <img src="img/app-capture.png" width="1280" height="860" alt="Field capture: front elevation, rear elevation, sitting room and roof void, with photo and finding counts." loading="eager" style="--i:1">
+        <img src="img/app-report.png" width="1280" height="860" alt="The editable I.S. 465 draft beside its rendered preview, with a fixture-generated AI content warning." loading="eager" style="--i:2">
+        <img src="img/app-versions.png" width="1280" height="860" alt="Report versions: each download stays tied to a frozen snapshot." loading="eager" style="--i:3">
+      </div>
+      <div class="reel-bar" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
+      <figcaption class="reel-caps">
+        <span style="--i:0"><b>01</b> Open the case. Work state, sync state and scheme status stay separate.</span>
+        <span style="--i:1"><b>02</b> Capture on site. Photos first, upload when there is signal.</span>
+        <span style="--i:2"><b>03</b> Edit the draft. The sections fill in; the professional corrects them.</span>
+        <span style="--i:3"><b>04</b> Freeze a version. Every export is tied to an immutable snapshot.</span>
+      </figcaption>
     </figure>
   </div>
 </header>
