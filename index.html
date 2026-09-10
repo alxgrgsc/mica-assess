@@ -212,7 +212,54 @@ border-bottom:1px solid var(--line);
   .scrub-marks button:hover{color:var(--text)}
   .scrub-marks button[aria-current]{color:var(--accent-deep)}
   .scrub-marks button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-  .scrub-hint{margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted)}
+  .scrub-hint{margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);
+    display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
+  .scrub-hint b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}
+  .scrub-copy .num b{color:var(--text);font-weight:500;font-size:15px;letter-spacing:0;font-variant-numeric:tabular-nums;margin:0 2px}
+  .scrub-marks button small{display:block;font-size:10px;letter-spacing:.04em;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+  .scrub-marks button[aria-current] small{color:var(--text)}
+
+  /* ---- the same question, three ways ---- */
+  .ways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  @media (max-width:880px){.ways{grid-template-columns:1fr}}
+  .way{background:var(--surface);border:1px solid var(--line);border-radius:0;padding:22px;display:flex;flex-direction:column;gap:12px}
+  .way.here{border-color:var(--accent);background:var(--accent-soft)}
+  .way .answer{background:var(--ground);border:1px solid var(--line);padding:14px 16px;font-size:15.5px;line-height:1.45;min-height:150px}
+  .way.here .answer{border-color:var(--line-2)}
+  .way .answer .t{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+  .way .answer.field{display:flex;flex-direction:column;gap:7px;font-size:14px}
+  .way .answer.field .row{display:grid;grid-template-columns:92px 1fr;gap:10px}
+  .way .answer.field .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+  .way .answer.field .v i{display:block;font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-deep);margin-top:2px}
+  .way p{color:var(--muted);font-size:14.5px}
+  .way .trace{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
+  .way.here .trace{border-top-color:var(--line-2)}
+  .way .trace b{color:var(--text);font-weight:500}
+
+  /* ---- where the model stops ---- */
+  .stops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+  @media (max-width:880px){.stops{grid-template-columns:1fr}}
+  .stop{background:var(--surface);border:1px solid var(--line);border-radius:0;padding:22px;display:flex;flex-direction:column;gap:12px}
+  .stop .prop{background:var(--ground);border:1px solid var(--line);padding:12px 14px;display:flex;flex-direction:column;gap:5px}
+  .stop .prop .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .stop .prop .v{font-size:15px;line-height:1.4}
+  .stop .prop .v em{font-style:normal;background:var(--accent-soft);padding:0 5px}
+  .stop .halt{display:flex;align-items:flex-start;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-deep);line-height:1.5}
+  .stop .halt::before{content:"";flex:none;width:8px;height:8px;background:var(--accent);margin-top:4px}
+  .stop p{color:var(--muted);font-size:14.5px}
+  .stop .rule{border-left:2px solid var(--accent);padding:4px 0 4px 12px;font-size:15px;line-height:1.4}
+  .stop .rule b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
+  .stop .src{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:auto;padding-top:6px}
+  .stop .src span{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;border:1px solid var(--line-2);padding:3px 7px;color:var(--text)}
+  .stop .src span.k{border:0;padding-left:0;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:10px}
+
+  /* ---- dated log ---- */
+  .log{margin:0 0 24px;padding:0;list-style:none;border-top:1px solid var(--line)}
+  .log li{display:grid;grid-template-columns:140px 1fr;gap:20px;padding:14px 0;border-bottom:1px solid var(--line)}
+  @media (max-width:560px){.log li{grid-template-columns:1fr;gap:4px}}
+  .log time{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-deep);padding-top:3px}
+  .log b{font-weight:500}
+  .log p{color:var(--muted);font-size:14.5px;margin-top:2px;max-width:70ch}
 
   /* scene: every animation is 6s, paused, and scrubbed by the pin */
   .scene *{animation-duration:6s;animation-timing-function:linear;animation-fill-mode:both;animation-play-state:paused}
@@ -340,11 +387,11 @@ border-bottom:1px solid var(--line);
     <div class="head">
       <div class="label">One house, start to finish</div>
       <h2>Drag through one case.</h2>
-      <p>The pin is the clock. Pull it from the work list to the handover and the scene follows; let go and it settles on a step. Arrow keys work too.</p>
+      <p>The pin is the clock: one visit, from the desk in the morning to the last save at the house. Pull it and the scene follows; let go and it settles on a step. Arrow keys work too.</p>
     </div>
     <div class="scrub">
       <div class="scrub-copy" aria-live="polite">
-        <div class="num" id="scrub-num">01</div>
+        <div class="num"><span id="scrub-num">01</span> · <b id="scrub-time">08:40</b> · <span id="scrub-where">At the practice</span></div>
         <h3 id="scrub-label">Open the case.</h3>
         <p id="scrub-caption">A practice admin creates the case and allocates it. Work state and sync state stay separate.</p>
       </div>
@@ -478,13 +525,14 @@ border-bottom:1px solid var(--line);
         <div class="scrub-ticks" aria-hidden="true"></div>
         <input class="scrub-range" id="scrub" type="range" min="0" max="1000" value="83" step="1" aria-label="Walk through the six steps" aria-valuetext="Step 1 of 6: Open the case.">
         <ol class="scrub-marks" aria-label="Steps">
-          <li><button type="button" data-stage="0" aria-current="step">01</button></li>
-          <li><button type="button" data-stage="1">02</button></li>
-          <li><button type="button" data-stage="2">03</button></li>
-          <li><button type="button" data-stage="3">04</button></li>
-          <li><button type="button" data-stage="4">05</button></li>
-          <li><button type="button" data-stage="5">06</button></li>
+          <li><button type="button" data-stage="0" aria-current="step">01<small>08:40</small></button></li>
+          <li><button type="button" data-stage="1">02<small>08:55</small></button></li>
+          <li><button type="button" data-stage="2">03<small>10:30</small></button></li>
+          <li><button type="button" data-stage="3">04<small>12:10</small></button></li>
+          <li><button type="button" data-stage="4">05<small>12:40</small></button></li>
+          <li><button type="button" data-stage="5">06<small>12:55</small></button></li>
         </ol>
+        <p class="scrub-hint"><span>Times are one plausible visit, not a measurement.</span><span><b>19:00</b> · after the drive home: nothing left to write.</span></p>
       </div>
     </div>
   </div>
@@ -563,12 +611,74 @@ border-bottom:1px solid var(--line);
   </div>
 </section>
 
+<section id="three">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">The same question, three ways</div>
+      <h2>What did the left gable show?</h2>
+      <p>Ask it a week after the visit. The answer depends on where the evidence went. The first two answers are illustrative; the third is the prototype's synthetic case, as it appears in the walkthrough.</p>
+    </div>
+    <div class="ways">
+      <div class="way">
+        <div class="label">1 · Phone, notepad, Word template</div>
+        <div class="answer"><span class="t">From the report, written at the desk three days later</span>"Some cracking was observed to the left gable elevation."</div>
+        <p>Forty photos in a camera roll, a note that says "gable, cracks", and a template opened when there is time. The width is whatever the note says, if the note is found. The photo may or may not be the right wall.</p>
+        <div class="trace">Traceable to <b>memory</b></div>
+      </div>
+      <div class="way">
+        <div class="label">2 · A general chatbot, photos pasted in</div>
+        <div class="answer"><span class="t">From the chat</span>"The image appears to show cracking that may be consistent with deleterious material in the blockwork. I'd recommend a professional assessment."</div>
+        <p>Fluent, confident and untraceable. It does not know which wall this is, has no crack width, does not use the I.S. 465 defect list, and the homeowner's photos are now on someone else's server.</p>
+        <div class="trace">Traceable to <b>nothing</b></div>
+      </div>
+      <div class="way here">
+        <div class="label accent">3 · Mica Assess</div>
+        <div class="answer field">
+          <span class="t">Section E · left gable · 2 photos · inspected</span>
+          <div class="row"><span class="k">Widest crack</span><span class="v">2 mm<i>typed by the assessor</i></span></div>
+          <div class="row"><span class="k">Pattern</span><span class="v">Vertical, near corner</span></div>
+          <div class="row"><span class="k">Dictation</span><span class="v">0:14, transcript attached</span></div>
+          <div class="row"><span class="k">Alternative</span><span class="v">3 mm<i>fixture, filed, not applied</i></span></div>
+        </div>
+        <p>Captured at the wall on a tablet with no signal, with an id issued before any server saw it. Every value carries who typed it or which document proposed it. The version was frozen and hashed before anyone else read it.</p>
+        <div class="trace">Traceable to <b>photo 2, dictation 1, and the person who typed it</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="ai">
   <div class="wrap">
     <div class="head">
       <div class="label">The AI</div>
       <h2>The model proposes. The professional signs.</h2>
-      <p>A chartered engineer, chartered building surveyor or registered architect signs the initial BCA and carries the liability for it.</p>
+      <p>A chartered engineer, chartered building surveyor or registered architect signs the initial BCA and carries the liability for it. These are the three places the model stops, as designed. In the prototype every suggestion comes from a labelled fixture.</p>
+    </div>
+    <div class="stops">
+      <div class="stop">
+        <div class="label">Document to fields</div>
+        <div class="prop"><span class="k">B · Year built</span><span class="v"><em>2006</em></span><span class="k">Source · planning.pdf</span></div>
+        <div class="halt">It stops: a suggestion in a blank field</div>
+        <p>A blank field takes the suggestion and shows where it came from. A field a person typed keeps its value; a differing suggestion waits as an alternative.</p>
+        <div class="rule"><b>Rule</b>A suggestion never overwrites a person. Rerun as often as you like.</div>
+        <div class="src"><span class="k">Sourced from</span><span>planning.pdf</span><span>previous report</span><span>lab sheet</span></div>
+      </div>
+      <div class="stop">
+        <div class="label">Voice to findings</div>
+        <div class="prop"><span class="k">Left gable · dictation · 0:14</span><span class="v">"…vertical crack near the corner, about two mil…"</span><span class="k">Proposed · one observation, defect key from Figure 2</span></div>
+        <div class="halt">It stops: a proposed observation</div>
+        <p>The transcript and the proposed observation sit beside the recording. The assessor accepts, edits or discards it. The recording stays attached either way.</p>
+        <div class="rule"><b>Rule</b>Every draft can point at the documents and recordings that shaped it. Retrieval, not training.</div>
+        <div class="src"><span class="k">Sourced from</span><span>dictation 1</span><span>photo 2</span><span>I.S. 465 Figure 2</span></div>
+      </div>
+      <div class="stop">
+        <div class="label">Export</div>
+        <div class="prop"><span class="k">Professional's declaration</span><span class="v"><em>Empty</em> until the professional fills it</span><span class="k">Version 1 · draft marker · SHA-256</span></div>
+        <div class="halt">It stops: before the signature</div>
+        <p>The PDF is rendered, hashed and frozen with its warnings showing. Nothing in it is signed, approved or accepted until a person does that themselves.</p>
+        <div class="rule"><b>Rule</b>Export never manufactures a declaration or implies council acceptance.</div>
+        <div class="src"><span class="k">Sourced from</span><span>the frozen snapshot</span><span>photo hashes</span><span>the professional</span></div>
+      </div>
     </div>
     <div class="ai">
       <div class="col">
@@ -595,9 +705,17 @@ border-bottom:1px solid var(--line);
 <section id="status">
   <div class="wrap">
     <div class="head">
-      <div class="label">Status on 8 September 2026</div>
+      <div class="label">Status on 10 September 2026</div>
       <h2>What is built, and what is next.</h2>
+      <p>Dated, so the pace is visible. The table under it is the honest state of each part.</p>
     </div>
+    <ol class="log">
+      <li><time datetime="2026-09-05">5 Sept 2026</time><div><b>Entry switched to Mica Assess.</b><p>Field spike started: cases from a pasted council email, a 3D wall picker, a Django backend.</p></div></li>
+      <li><time datetime="2026-09-06">6 Sept 2026</time><div><b>Field spike finished and published.</b><p>Elevation picker, 13 backend tests, first public landing page. Kept under spikes for the record.</p></div></li>
+      <li><time datetime="2026-09-08">8 Sept 2026</time><div><b>Direction reset: reporting first.</b><p>Build specification written, then the reporting platform built against it: login, offline outbox, extraction with sources, report editor, immutable PDF versions, invitations, investigation handover. Django, unit and assembler suites pass locally; the browser suite has not yet been run on a second machine. Landing page restyled.</p></div></li>
+      <li><time datetime="2026-09-09">9 Sept 2026</time><div><b>Reporting platform merged.</b><p>One main branch. The spike is history; the platform is the product.</p></div></li>
+      <li><time datetime="2026-09-10">10 Sept 2026</time><div><b>This page, for judges.</b><p>The walkthrough on a clock, the same question three ways, and where the model stops.</p></div></li>
+    </ol>
     <div class="tablewrap">
       <table>
         <thead><tr><th>Stage</th><th>State</th></tr></thead>
@@ -641,19 +759,22 @@ border-bottom:1px solid var(--line);
 
 <script>
 (function () {
+  // [number, clock, place, title, caption]. The clock is one plausible visit.
   var stages = [
-    ['01', 'Open the case.', 'A practice admin creates the case and allocates it. Work state and sync state stay separate.'],
-    ['02', 'Prepare from what already exists.', 'Upload the planning file, an old report, the homeowner\u2019s photos. Extraction fills the blank fields and labels each value with its source.'],
-    ['03', 'Capture on site, offline.', 'A list of locations, not a 3D house. Photos and dictated notes get their id on the tablet and queue until there is signal.'],
-    ['04', 'Edit the report. Keep every human change.', 'Sections A to H, editable in place. A rerun never overwrites a value a person typed; the new one waits as an alternative.'],
-    ['05', 'Freeze a version.', 'Version 1 is rendered to PDF and hashed. Edit again and you get version 2; version 1 never changes.'],
-    ['06', 'Share, request, hand over.', 'Invite the homeowner to upload what is missing, share one chosen version, and hand the case to the investigation practice as a ZIP with a manifest.']
+    ['01', '08:40', 'At the practice', 'Open the case.', 'A practice admin creates the case and allocates it. Work state and sync state stay separate.'],
+    ['02', '08:55', 'At the practice', 'Prepare from what already exists.', 'Upload the planning file, an old report, the homeowner\u2019s photos. Extraction fills the blank fields and labels each value with its source.'],
+    ['03', '10:30', 'At the house, no signal', 'Capture on site, offline.', 'A list of locations, not a 3D house. Photos and dictated notes get their id on the tablet and queue until there is signal.'],
+    ['04', '12:10', 'At the house, in the van', 'Edit the report. Keep every human change.', 'Sections A to H, editable in place. A rerun never overwrites a value a person typed; the new one waits as an alternative.'],
+    ['05', '12:40', 'At the house, in the van', 'Freeze a version.', 'Version 1 is rendered to PDF and hashed. Edit again and you get version 2; version 1 never changes.'],
+    ['06', '12:55', 'Before the drive home, and weeks later', 'Share, request, hand over.', 'Invite the homeowner to upload what is missing, share one chosen version, and when the Agency directs an investigation, hand the case over as a ZIP with a manifest.']
   ];
   var range = document.getElementById('scrub');
   var scene = document.getElementById('scene');
   if (!range || !scene) return;
   var num = document.getElementById('scrub-num');
   var label = document.getElementById('scrub-label');
+  var clock = document.getElementById('scrub-time');
+  var where = document.getElementById('scrub-where');
   var caption = document.getElementById('scrub-caption');
   var marks = Array.prototype.slice.call(document.querySelectorAll('.scrub-marks button'));
   var N = stages.length, MAX = 1000, DURATION = 6000;
@@ -671,9 +792,11 @@ border-bottom:1px solid var(--line);
     if (k !== current) {
       current = k;
       num.textContent = stages[k][0];
-      label.textContent = stages[k][1];
-      caption.textContent = stages[k][2];
-      range.setAttribute('aria-valuetext', 'Step ' + (k + 1) + ' of ' + N + ': ' + stages[k][1]);
+      clock.textContent = stages[k][1];
+      where.textContent = stages[k][2];
+      label.textContent = stages[k][3];
+      caption.textContent = stages[k][4];
+      range.setAttribute('aria-valuetext', 'Step ' + (k + 1) + ' of ' + N + ', ' + stages[k][1] + ': ' + stages[k][3]);
       marks.forEach(function (b, i) { if (i === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
     }
   }
