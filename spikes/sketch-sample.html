@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sketch sample: step 03, capture at the house</title>
+<style>
+  :root{--ground:#fffef2;--surface:#f3f2e7;--surface-2:#e9e8dc;--line:#d1d0c6;--line-2:#bab9b0;--text:#191918;--muted:rgba(25,25,24,.6);--accent:#fcaa2d;--accent-soft:#fdeac4;--accent-deep:#a36404;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;--sans:'Inter',system-ui,sans-serif}
+  body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans);padding:40px}
+  .frame{max-width:720px;margin:0 auto}
+  .scene{border:1px solid var(--line);background:var(--surface);aspect-ratio:16/10}
+  svg{display:block;width:100%;height:100%}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+  button{all:unset;cursor:pointer;background:var(--accent);color:var(--text);padding:8px 14px;font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+
+  /* sketch vocabulary */
+  .ink{fill:none;stroke:var(--text);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .ink2{fill:none;stroke:var(--text);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;opacity:.45}
+  .fill{stroke:none}
+  .amber{fill:var(--accent)}
+  .amber-soft{fill:var(--accent-soft)}
+  .grey{fill:var(--surface-2)}
+  .crack{fill:none;stroke:var(--accent-deep);stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+  .t{font-family:var(--mono);font-size:10px;letter-spacing:.12em;fill:var(--text)}
+  .t.m{fill:var(--muted)}
+
+  /* draw-on: every stroked path has pathLength=1, so dashoffset 1 -> 0 draws it */
+  .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.4s cubic-bezier(.4,0,.2,1) forwards}
+  .fills{opacity:0;animation:fade .5s ease forwards}
+  .g-house .draw{animation-delay:.1s}
+  .g-house .fills{animation-delay:1.2s}
+  .g-crack .draw{animation-delay:1.6s;animation-duration:.9s}
+  .g-tablet{opacity:0;transform:translateY(18px);animation:rise .6s cubic-bezier(.2,.8,.2,1) 2.4s forwards}
+  .g-tablet .draw{animation-delay:2.5s;animation-duration:1s}
+  .g-label{opacity:0;animation:fade .3s ease 3.3s forwards}
+  .g-label .draw{animation-delay:3.3s;animation-duration:.5s}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes fade{to{opacity:1}}
+  @keyframes rise{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="scene">
+    <svg viewBox="0 0 640 400" role="img" aria-label="A bungalow sketched on, a crack appearing on the gable, then a tablet with the photo queued.">
+      <!-- ground -->
+      <path class="ink draw" pathLength="1" d="M36 334 C 140 331, 300 336, 420 333 S 590 330, 606 333"/>
+
+      <g class="g-house">
+        <!-- flat colour, offset like a marker that missed the line -->
+        <g class="fills">
+          <path class="fill grey" d="M100 224 L166 156 L334 154 L390 222 Z" transform="translate(5,4)"/>
+          <path class="fill amber-soft" d="M376 218 L424 142 L474 200 L474 302 L376 322 Z" transform="translate(6,3)"/>
+          <path class="fill amber-soft" d="M152 254 L190 253 L191 320 L153 321 Z" transform="translate(3,3)"/>
+        </g>
+        <!-- walls and roof -->
+        <path class="ink draw" pathLength="1" d="M110 216 L109 322 L371 320 L372 214"/>
+        <path class="ink draw" pathLength="1" d="M96 219 L160 150 L330 148 L387 216 L96 219"/>
+        <path class="ink draw" pathLength="1" d="M372 214 L420 138 L471 196 L470 300 L371 320"/>
+        <path class="ink draw" pathLength="1" d="M330 148 L420 138"/>
+        <!-- second, lighter pass: the sketch double-line -->
+        <path class="ink2 draw" pathLength="1" d="M114 220 L113 318 M100 222 L162 154 L328 152 M376 218 L422 143 L468 198"/>
+        <!-- chimney -->
+        <path class="ink draw" pathLength="1" d="M204 168 L204 132 L226 131 L226 164"/>
+        <!-- door and windows -->
+        <path class="ink draw" pathLength="1" d="M152 320 L152 254 L190 253 L191 320"/>
+        <path class="ink draw" pathLength="1" d="M222 242 L272 241 L273 282 L222 283 Z M247 242 L247 282 M222 262 L273 262"/>
+        <path class="ink draw" pathLength="1" d="M302 241 L352 240 L353 281 L302 282 Z M327 241 L327 281 M302 261 L353 261"/>
+        <text class="t m" x="110" y="356">LEFT GABLE · 2 PHOTOS · INSPECTED</text>
+      </g>
+
+      <!-- the crack, drawn last, in amber ink -->
+      <g class="g-crack">
+        <path class="crack draw" pathLength="1" d="M446 206 l3 12 l-6 10 l7 15 l-4 12 l6 11 l-3 15 l4 8"/>
+      </g>
+
+      <!-- tablet rising into the foreground -->
+      <g class="g-tablet">
+        <path class="fill grey" d="M488 244 L612 244 L612 372 L488 372 Z" transform="translate(4,4)"/>
+        <path class="ink draw" pathLength="1" d="M486 246 L610 244 L612 370 L488 372 Z"/>
+        <path class="ink2 draw" pathLength="1" d="M496 256 L601 255 L602 345 L497 346 Z"/>
+        <!-- the photo on screen: the same gable, tiny -->
+        <path class="ink draw" pathLength="1" d="M520 320 L520 290 L548 262 L578 292 L578 320"/>
+        <path class="crack draw" pathLength="1" d="M556 288 l2 8 l-4 7 l4 9 l-2 8"/>
+        <rect class="fill amber" x="522" y="352" width="58" height="13"/>
+        <text class="t" x="527" y="362">QUEUED</text>
+      </g>
+
+      <!-- the label, with its leader line -->
+      <g class="g-label">
+        <path class="ink draw" pathLength="1" d="M452 232 L520 200"/>
+        <rect class="fill amber" x="520" y="186" width="98" height="18"/>
+        <text class="t" x="527" y="198">2 MM · TYPED</text>
+      </g>
+    </svg>
+  </div>
+  <div class="row">
+    <span>Step 03 · 10:30 · at the house, no signal</span>
+    <button onclick="location.reload()">Replay</button>
+  </div>
+</div>
+</body>
+</html>

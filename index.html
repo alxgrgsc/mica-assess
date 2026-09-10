@@ -54,7 +54,7 @@
   .label.done{color:var(--done)}
   h1,h2,h3{margin:0;font-family:var(--sans);font-weight:400;letter-spacing:-.045em;line-height:1.1}
   h1{font-size:clamp(36px,5.6vw,64px)}
-  h2{font-size:clamp(26px,3.6vw,38px);max-width:22ch}
+  h2{font-size:clamp(28px,4vw,46px);max-width:20ch}
   h3{font-size:20px;line-height:1.3;letter-spacing:-.02em}
   .lede{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:56ch}
   .lede b{color:var(--text);font-weight:500}
@@ -138,7 +138,7 @@ border-bottom:1px solid var(--line);
   /* ---- sections ---- */
   section{padding:clamp(56px,7vw,96px) 0;border-bottom:1px solid var(--line)}
   section .head{display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(28px,4vw,48px)}
-  section .head p{color:var(--muted);max-width:62ch;font-size:16.5px}
+  section .head p{color:var(--muted);max-width:56ch;font-size:clamp(16.5px,1.5vw,19px)}
 
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:0;overflow:hidden}
   @media (max-width:720px){.stats{grid-template-columns:1fr}}
@@ -147,52 +147,21 @@ border-bottom:1px solid var(--line);
   .stat .n small{font-size:14px;color:var(--muted);letter-spacing:0;margin-left:6px}
   .stat .d{color:var(--muted);font-size:14px}
 
-  .pipe{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;margin-top:8px}
-  .pipe .step{
-    flex:1 1 110px;min-width:110px;background:var(--surface);border:1px solid var(--line);border-radius:0;
-    padding:12px 12px 11px;display:flex;flex-direction:column;gap:5px;position:relative;
-  }
-  .pipe .step .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-  .pipe .step .v{font-size:14px;font-weight:500;line-height:1.3}
-  .pipe .step.here{border-color:var(--accent);background:var(--accent-soft)}
-  .pipe .step.here .k{color:var(--accent)}
-  .pipe .step.here::after{
-    content:"Mica Assess";position:absolute;left:10px;bottom:-11px;
-    background:var(--text);color:var(--ground);font-family:var(--mono);font-size:9.5px;
-    letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:3px 7px;border-radius:0;
-  }
-  .pipe .step.dim{opacity:.55}
-  .pipe-note{margin-top:34px;color:var(--muted);max-width:66ch;font-size:16px}
-  .pipe-note b{color:var(--text);font-weight:500}
 
+  .pipe-note{margin-top:28px;color:var(--muted);max-width:66ch;font-size:clamp(16px,1.4vw,18px)}
+  .pipe-note b{color:var(--text);font-weight:500}
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .steps.four,.hands{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media (max-width:980px){.steps.four,.hands{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.steps.four,.hands{grid-template-columns:1fr}}
+  .hands .num{letter-spacing:.16em}
   @media (max-width:880px){.steps{grid-template-columns:repeat(2,1fr)}}
   @media (max-width:560px){.steps{grid-template-columns:1fr}}
   .step-card{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:0;padding:22px 22px 24px;display:flex;flex-direction:column;gap:10px}
   .step-card .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
-  .step-card p{color:var(--muted);font-size:14.5px}
+  .step-card p{color:var(--muted);font-size:15.5px}
 
-  .diff{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-  @media (max-width:720px){.diff{grid-template-columns:1fr}}
-  .diff .card{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:0;padding:24px;display:flex;flex-direction:column;gap:10px}
-  .diff .card p{color:var(--muted);font-size:15px}
-  .diff .card code{font-family:var(--mono);font-size:12.5px;color:var(--text);background:var(--surface-2);padding:1px 6px;border-radius:0}
 
-  .ai{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media (max-width:720px){.ai{grid-template-columns:1fr}}
-  .ai .col{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:0;padding:24px;display:flex;flex-direction:column;gap:14px}
-  .ai .col.now{border-color:var(--line-2)}
-  .ai ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
-  .ai li{color:var(--muted);font-size:15px;padding-left:18px;position:relative}
-  .ai li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--accent)}
-  .ai .now li::before{background:var(--done)}
-  .ai li b{color:var(--text);font-weight:500}
-  blockquote{
-    margin:32px 0 0;padding:22px 26px;border-left:2px solid var(--accent);
-    background:var(--surface);border-radius:0;
-    font-family:var(--serif);font-size:clamp(18px,1.8vw,23px);line-height:1.45;max-width:58ch;
-  }
-  blockquote span{display:block;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 
   .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:0;background:var(--surface)}
   table{width:100%;border-collapse:collapse;font-size:15px}
@@ -250,95 +219,129 @@ border-bottom:1px solid var(--line);
   .scrub-marks button small{display:block;font-size:10px;letter-spacing:.04em;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
   .scrub-marks button[aria-current] small{color:var(--text)}
 
-  /* ---- the same question, three ways ---- */
-  .ways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-  @media (max-width:880px){.ways{grid-template-columns:1fr}}
-  .way{background:var(--surface);border:1px solid var(--line);border-radius:0;padding:22px;display:flex;flex-direction:column;gap:12px}
-  .way.here{border-color:var(--accent);background:var(--accent-soft)}
-  .way .answer{background:var(--ground);border:1px solid var(--line);padding:14px 16px;font-size:15.5px;line-height:1.45;min-height:150px}
-  .way.here .answer{border-color:var(--line-2)}
-  .way .answer .t{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
-  .way .answer.field{display:flex;flex-direction:column;gap:7px;font-size:14px}
-  .way .answer.field .row{display:grid;grid-template-columns:92px 1fr;gap:10px}
-  .way .answer.field .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-top:3px}
-  .way .answer.field .v i{display:block;font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-deep);margin-top:2px}
-  .way p{color:var(--muted);font-size:14.5px}
-  .way .trace{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
-  .way.here .trace{border-top-color:var(--line-2)}
-  .way .trace b{color:var(--text);font-weight:500}
-
-  /* ---- where the model stops ---- */
-  .stops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
-  @media (max-width:880px){.stops{grid-template-columns:1fr}}
-  .stop{background:var(--surface);border:1px solid var(--line);border-radius:0;padding:22px;display:flex;flex-direction:column;gap:12px}
-  .stop .prop{background:var(--ground);border:1px solid var(--line);padding:12px 14px;display:flex;flex-direction:column;gap:5px}
-  .stop .prop .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-  .stop .prop .v{font-size:15px;line-height:1.4}
-  .stop .prop .v em{font-style:normal;background:var(--accent-soft);padding:0 5px}
-  .stop .halt{display:flex;align-items:flex-start;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-deep);line-height:1.5}
-  .stop .halt::before{content:"";flex:none;width:8px;height:8px;background:var(--accent);margin-top:4px}
-  .stop p{color:var(--muted);font-size:14.5px}
-  .stop .rule{border-left:2px solid var(--accent);padding:4px 0 4px 12px;font-size:15px;line-height:1.4}
-  .stop .rule b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
-  .stop .src{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:auto;padding-top:6px}
-  .stop .src span{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;border:1px solid var(--line-2);padding:3px 7px;color:var(--text)}
-  .stop .src span.k{border:0;padding-left:0;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:10px}
-
-  /* ---- dated log ---- */
-  .log{margin:0 0 24px;padding:0;list-style:none;border-top:1px solid var(--line)}
-  .log li{display:grid;grid-template-columns:140px 1fr;gap:20px;padding:14px 0;border-bottom:1px solid var(--line)}
-  @media (max-width:560px){.log li{grid-template-columns:1fr;gap:4px}}
-  .log time{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-deep);padding-top:3px}
-  .log b{font-weight:500}
-  .log p{color:var(--muted);font-size:14.5px;margin-top:2px;max-width:70ch}
-
-  /* scene: every animation is 6s, paused, and scrubbed by the pin */
+  /* scene: every animation is 6s, paused, and scrubbed by the pin.
+     The drawing is stroke-dashoffset on paths carrying pathLength="1", so one
+     pair of keyframes works whatever the real length of the line is. Class
+     d43 means stage 4, slot 3; the numbers are generated, not typed. */
   .scene *{animation-duration:6s;animation-timing-function:linear;animation-fill-mode:both;animation-play-state:paused}
-  .scene .ink{fill:none;stroke:var(--text);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
-  .scene .thin{fill:none;stroke:var(--line-2);stroke-width:1;stroke-linejoin:round}
-  .scene .paper{fill:var(--ground);stroke:var(--text);stroke-width:1.5}
-  .scene .panel{fill:var(--ground);stroke:var(--line-2);stroke-width:1}
+  .scene .ink{fill:none;stroke:var(--text);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .scene .ink2{fill:none;stroke:var(--text);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;opacity:.4}
+  .scene .crack{fill:none;stroke:var(--accent-deep);stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+  .scene .dr{stroke-dasharray:1}
+  .scene .fill{stroke:none}
   .scene .amber{fill:var(--accent)}
   .scene .soft{fill:var(--accent-soft)}
-  .scene .fillline{fill:var(--line)}
-  .scene .t{font-family:var(--mono);font-size:10px;letter-spacing:.12em;fill:var(--text)}
+  .scene .grey{fill:var(--surface-2)}
+  .scene .t{font-family:var(--mono);font-size:12px;letter-spacing:.1em;fill:var(--text)}
   .scene .t.m{fill:var(--muted)}
   .scene .t.a{fill:var(--accent-deep)}
-  .scene .u{font-family:var(--sans);font-size:12.5px;fill:var(--text)}
+  .scene .u{font-family:var(--sans);font-size:14px;fill:var(--text)}
   .scene .u.m{fill:var(--muted)}
   .scene .st{opacity:0}
   .scene .st1{animation-name:st1}.scene .st2{animation-name:st2}.scene .st3{animation-name:st3}
   .scene .st4{animation-name:st4}.scene .st5{animation-name:st5}.scene .st6{animation-name:st6}
-  .scene .s1row{animation-name:s1row}.scene .s1state{animation-name:s1state}
-  .scene .s2doc{animation-name:s2doc}.scene .s2fill{animation-name:s2fill}.scene .s2src{animation-name:s2src}
-  .scene .s3photo{animation-name:s3photo}.scene .s3wave{animation-name:s3wave}
-  .scene .s3queued{animation-name:s3queued}.scene .s3uploaded{animation-name:s3uploaded}
-  .scene .s4typed{animation-name:s4typed}.scene .s4alt{animation-name:s4alt}.scene .s4kept{animation-name:s4kept}
-  .scene .s5v2{animation-name:s5v2}.scene .s5lock{animation-name:s5lock}
-  .scene .s6invite{animation-name:s6invite}.scene .s6tick{animation-name:s6tick}.scene .s6zip{animation-name:s6zip}
+  .scene .d11{animation-name:d11}.scene .f11{animation-name:f11}.scene .r11{animation-name:r11}
+  .scene .d12{animation-name:d12}.scene .f12{animation-name:f12}.scene .r12{animation-name:r12}
+  .scene .d13{animation-name:d13}.scene .f13{animation-name:f13}.scene .r13{animation-name:r13}
+  .scene .d14{animation-name:d14}.scene .f14{animation-name:f14}.scene .r14{animation-name:r14}
+  .scene .d21{animation-name:d21}.scene .f21{animation-name:f21}.scene .r21{animation-name:r21}
+  .scene .d22{animation-name:d22}.scene .f22{animation-name:f22}.scene .r22{animation-name:r22}
+  .scene .d23{animation-name:d23}.scene .f23{animation-name:f23}.scene .r23{animation-name:r23}
+  .scene .d24{animation-name:d24}.scene .f24{animation-name:f24}.scene .r24{animation-name:r24}
+  .scene .d31{animation-name:d31}.scene .f31{animation-name:f31}.scene .r31{animation-name:r31}
+  .scene .d32{animation-name:d32}.scene .f32{animation-name:f32}.scene .r32{animation-name:r32}
+  .scene .d33{animation-name:d33}.scene .f33{animation-name:f33}.scene .r33{animation-name:r33}
+  .scene .d34{animation-name:d34}.scene .f34{animation-name:f34}.scene .r34{animation-name:r34}
+  .scene .d41{animation-name:d41}.scene .f41{animation-name:f41}.scene .r41{animation-name:r41}
+  .scene .d42{animation-name:d42}.scene .f42{animation-name:f42}.scene .r42{animation-name:r42}
+  .scene .d43{animation-name:d43}.scene .f43{animation-name:f43}.scene .r43{animation-name:r43}
+  .scene .d44{animation-name:d44}.scene .f44{animation-name:f44}.scene .r44{animation-name:r44}
+  .scene .d51{animation-name:d51}.scene .f51{animation-name:f51}.scene .r51{animation-name:r51}
+  .scene .d52{animation-name:d52}.scene .f52{animation-name:f52}.scene .r52{animation-name:r52}
+  .scene .d53{animation-name:d53}.scene .f53{animation-name:f53}.scene .r53{animation-name:r53}
+  .scene .d54{animation-name:d54}.scene .f54{animation-name:f54}.scene .r54{animation-name:r54}
+  .scene .d61{animation-name:d61}.scene .f61{animation-name:f61}.scene .r61{animation-name:r61}
+  .scene .d62{animation-name:d62}.scene .f62{animation-name:f62}.scene .r62{animation-name:r62}
+  .scene .d63{animation-name:d63}.scene .f63{animation-name:f63}.scene .r63{animation-name:r63}
+  .scene .d64{animation-name:d64}.scene .f64{animation-name:f64}.scene .r64{animation-name:r64}
   @keyframes st1{0%,15.33%{opacity:1}16.67%,100%{opacity:0}}
   @keyframes st2{0%,16.67%{opacity:0}18.0%,32.0%{opacity:1}33.33%,100%{opacity:0}}
   @keyframes st3{0%,33.33%{opacity:0}34.67%,48.67%{opacity:1}50.0%,100%{opacity:0}}
   @keyframes st4{0%,50.0%{opacity:0}51.33%,65.33%{opacity:1}66.67%,100%{opacity:0}}
   @keyframes st5{0%,66.67%{opacity:0}68.0%,82.0%{opacity:1}83.33%,100%{opacity:0}}
   @keyframes st6{0%,83.33%{opacity:0}84.67%,98.67%{opacity:1}}
-  @keyframes s1row{0%,0.83%{transform:translateY(18px);opacity:0}5.83%,100%{transform:none;opacity:1}}
-  @keyframes s1state{0%,5.0%{opacity:0}7.5%,100%{opacity:1}}
-  @keyframes s2doc{0%,17.33%{transform:none}21.67%,100%{transform:translateX(150px)}}
-  @keyframes s2fill{0%,21.33%{opacity:0}23.67%,100%{opacity:1}}
-  @keyframes s2src{0%,23.33%{opacity:0}24.67%,100%{opacity:1}}
-  @keyframes s3photo{0%,34.33%{transform:translateY(16px);opacity:0}38.33%,100%{transform:none;opacity:1}}
-  @keyframes s3wave{0%,36.67%{opacity:0}39.0%,100%{opacity:1}}
-  @keyframes s3queued{0%,39.0%{opacity:1}40.33%,100%{opacity:0}}
-  @keyframes s3uploaded{0%,39.67%{opacity:0}41.0%,100%{opacity:1}}
-  @keyframes s4typed{0%,50.83%{opacity:0}53.33%,100%{opacity:1}}
-  @keyframes s4alt{0%,54.0%{transform:translateY(12px);opacity:0}57.0%,100%{transform:none;opacity:1}}
-  @keyframes s4kept{0%,56.33%{opacity:0}58.0%,100%{opacity:1}}
-  @keyframes s5v2{0%,68.33%{transform:translateY(30px);opacity:0}73.0%,100%{transform:none;opacity:1}}
-  @keyframes s5lock{0%,72.33%{opacity:0}74.33%,100%{opacity:1}}
-  @keyframes s6invite{0%,83.83%{transform:translateY(16px);opacity:0}86.67%,100%{transform:none;opacity:1}}
-  @keyframes s6tick{0%,87.0%{opacity:0}88.67%,100%{opacity:1}}
-  @keyframes s6zip{0%,88.33%{transform:none}91.33%,100%{transform:translateX(80px)}}
+  @keyframes d11{0%,1.33%{stroke-dashoffset:1}4.13%,100%{stroke-dashoffset:0}}
+  @keyframes f11{0%,1.33%{opacity:0}4.13%,100%{opacity:1}}
+  @keyframes r11{0%,1.33%{opacity:0;transform:translateY(20px)}4.13%,100%{opacity:1;transform:none}}
+  @keyframes d12{0%,3.29%{stroke-dashoffset:1}5.53%,100%{stroke-dashoffset:0}}
+  @keyframes f12{0%,3.29%{opacity:0}5.53%,100%{opacity:1}}
+  @keyframes r12{0%,3.29%{opacity:0;transform:translateY(20px)}5.53%,100%{opacity:1;transform:none}}
+  @keyframes d13{0%,4.97%{stroke-dashoffset:1}6.93%,100%{stroke-dashoffset:0}}
+  @keyframes f13{0%,4.97%{opacity:0}6.93%,100%{opacity:1}}
+  @keyframes r13{0%,4.97%{opacity:0;transform:translateY(20px)}6.93%,100%{opacity:1;transform:none}}
+  @keyframes d14{0%,6.37%{stroke-dashoffset:1}8.05%,100%{stroke-dashoffset:0}}
+  @keyframes f14{0%,6.37%{opacity:0}8.05%,100%{opacity:1}}
+  @keyframes r14{0%,6.37%{opacity:0;transform:translateY(20px)}8.05%,100%{opacity:1;transform:none}}
+  @keyframes d21{0%,18.0%{stroke-dashoffset:1}20.8%,100%{stroke-dashoffset:0}}
+  @keyframes f21{0%,18.0%{opacity:0}20.8%,100%{opacity:1}}
+  @keyframes r21{0%,18.0%{opacity:0;transform:translateY(20px)}20.8%,100%{opacity:1;transform:none}}
+  @keyframes d22{0%,19.96%{stroke-dashoffset:1}22.2%,100%{stroke-dashoffset:0}}
+  @keyframes f22{0%,19.96%{opacity:0}22.2%,100%{opacity:1}}
+  @keyframes r22{0%,19.96%{opacity:0;transform:translateY(20px)}22.2%,100%{opacity:1;transform:none}}
+  @keyframes d23{0%,21.64%{stroke-dashoffset:1}23.6%,100%{stroke-dashoffset:0}}
+  @keyframes f23{0%,21.64%{opacity:0}23.6%,100%{opacity:1}}
+  @keyframes r23{0%,21.64%{opacity:0;transform:translateY(20px)}23.6%,100%{opacity:1;transform:none}}
+  @keyframes d24{0%,23.04%{stroke-dashoffset:1}24.72%,100%{stroke-dashoffset:0}}
+  @keyframes f24{0%,23.04%{opacity:0}24.72%,100%{opacity:1}}
+  @keyframes r24{0%,23.04%{opacity:0;transform:translateY(20px)}24.72%,100%{opacity:1;transform:none}}
+  @keyframes d31{0%,34.66%{stroke-dashoffset:1}37.46%,100%{stroke-dashoffset:0}}
+  @keyframes f31{0%,34.66%{opacity:0}37.46%,100%{opacity:1}}
+  @keyframes r31{0%,34.66%{opacity:0;transform:translateY(20px)}37.46%,100%{opacity:1;transform:none}}
+  @keyframes d32{0%,36.62%{stroke-dashoffset:1}38.86%,100%{stroke-dashoffset:0}}
+  @keyframes f32{0%,36.62%{opacity:0}38.86%,100%{opacity:1}}
+  @keyframes r32{0%,36.62%{opacity:0;transform:translateY(20px)}38.86%,100%{opacity:1;transform:none}}
+  @keyframes d33{0%,38.3%{stroke-dashoffset:1}40.26%,100%{stroke-dashoffset:0}}
+  @keyframes f33{0%,38.3%{opacity:0}40.26%,100%{opacity:1}}
+  @keyframes r33{0%,38.3%{opacity:0;transform:translateY(20px)}40.26%,100%{opacity:1;transform:none}}
+  @keyframes d34{0%,39.7%{stroke-dashoffset:1}41.38%,100%{stroke-dashoffset:0}}
+  @keyframes f34{0%,39.7%{opacity:0}41.38%,100%{opacity:1}}
+  @keyframes r34{0%,39.7%{opacity:0;transform:translateY(20px)}41.38%,100%{opacity:1;transform:none}}
+  @keyframes d41{0%,51.33%{stroke-dashoffset:1}54.13%,100%{stroke-dashoffset:0}}
+  @keyframes f41{0%,51.33%{opacity:0}54.13%,100%{opacity:1}}
+  @keyframes r41{0%,51.33%{opacity:0;transform:translateY(20px)}54.13%,100%{opacity:1;transform:none}}
+  @keyframes d42{0%,53.29%{stroke-dashoffset:1}55.53%,100%{stroke-dashoffset:0}}
+  @keyframes f42{0%,53.29%{opacity:0}55.53%,100%{opacity:1}}
+  @keyframes r42{0%,53.29%{opacity:0;transform:translateY(20px)}55.53%,100%{opacity:1;transform:none}}
+  @keyframes d43{0%,54.97%{stroke-dashoffset:1}56.93%,100%{stroke-dashoffset:0}}
+  @keyframes f43{0%,54.97%{opacity:0}56.93%,100%{opacity:1}}
+  @keyframes r43{0%,54.97%{opacity:0;transform:translateY(20px)}56.93%,100%{opacity:1;transform:none}}
+  @keyframes d44{0%,56.37%{stroke-dashoffset:1}58.05%,100%{stroke-dashoffset:0}}
+  @keyframes f44{0%,56.37%{opacity:0}58.05%,100%{opacity:1}}
+  @keyframes r44{0%,56.37%{opacity:0;transform:translateY(20px)}58.05%,100%{opacity:1;transform:none}}
+  @keyframes d51{0%,68.0%{stroke-dashoffset:1}70.8%,100%{stroke-dashoffset:0}}
+  @keyframes f51{0%,68.0%{opacity:0}70.8%,100%{opacity:1}}
+  @keyframes r51{0%,68.0%{opacity:0;transform:translateY(20px)}70.8%,100%{opacity:1;transform:none}}
+  @keyframes d52{0%,69.96%{stroke-dashoffset:1}72.2%,100%{stroke-dashoffset:0}}
+  @keyframes f52{0%,69.96%{opacity:0}72.2%,100%{opacity:1}}
+  @keyframes r52{0%,69.96%{opacity:0;transform:translateY(20px)}72.2%,100%{opacity:1;transform:none}}
+  @keyframes d53{0%,71.64%{stroke-dashoffset:1}73.6%,100%{stroke-dashoffset:0}}
+  @keyframes f53{0%,71.64%{opacity:0}73.6%,100%{opacity:1}}
+  @keyframes r53{0%,71.64%{opacity:0;transform:translateY(20px)}73.6%,100%{opacity:1;transform:none}}
+  @keyframes d54{0%,73.04%{stroke-dashoffset:1}74.72%,100%{stroke-dashoffset:0}}
+  @keyframes f54{0%,73.04%{opacity:0}74.72%,100%{opacity:1}}
+  @keyframes r54{0%,73.04%{opacity:0;transform:translateY(20px)}74.72%,100%{opacity:1;transform:none}}
+  @keyframes d61{0%,84.66%{stroke-dashoffset:1}87.46%,100%{stroke-dashoffset:0}}
+  @keyframes f61{0%,84.66%{opacity:0}87.46%,100%{opacity:1}}
+  @keyframes r61{0%,84.66%{opacity:0;transform:translateY(20px)}87.46%,100%{opacity:1;transform:none}}
+  @keyframes d62{0%,86.62%{stroke-dashoffset:1}88.86%,100%{stroke-dashoffset:0}}
+  @keyframes f62{0%,86.62%{opacity:0}88.86%,100%{opacity:1}}
+  @keyframes r62{0%,86.62%{opacity:0;transform:translateY(20px)}88.86%,100%{opacity:1;transform:none}}
+  @keyframes d63{0%,88.3%{stroke-dashoffset:1}90.26%,100%{stroke-dashoffset:0}}
+  @keyframes f63{0%,88.3%{opacity:0}90.26%,100%{opacity:1}}
+  @keyframes r63{0%,88.3%{opacity:0;transform:translateY(20px)}90.26%,100%{opacity:1;transform:none}}
+  @keyframes d64{0%,89.7%{stroke-dashoffset:1}91.38%,100%{stroke-dashoffset:0}}
+  @keyframes f64{0%,89.7%{opacity:0}91.38%,100%{opacity:1}}
+  @keyframes r64{0%,89.7%{opacity:0;transform:translateY(20px)}91.38%,100%{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -347,9 +350,9 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <a class="brand" href="#top"><b>Mica Assess</b><span>I.S. 465 reporting</span></a>
     <div class="links">
-      <a class="txt" href="#walkthrough">Walkthrough</a>
+      <a class="txt" href="#walkthrough">One visit</a>
+      <a class="txt" href="#hands">One case</a>
       <a class="txt" href="#how">How it works</a>
-      <a class="txt" href="#different">What is different</a>
       <a class="txt" href="#ai">The AI</a>
       <a class="btn primary" href="#walkthrough">Drag through it
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
@@ -362,15 +365,15 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="copy">
       <div class="label accent">TechIreland National AI Challenge 2026 · Prototype</div>
-      <h1>The I.S. 465 report, drafted before you leave the house.</h1>
-      <p class="lede">Mica Assess is a reporting workspace for the <b>assessment practices</b> doing Defective Concrete Block work. Photos, voice notes and the homeowner's old documents go in on a tablet. The draft report comes out as a frozen PDF, edited by the professional who signs it. On site, with or without signal.</p>
+      <h1>The report is written while the work is done.</h1>
+      <p class="lede">Photos, voice notes and the homeowner's old paperwork go in on a tablet. The draft report comes out at the house. The assessor corrects it and signs it. Then everyone who needs it sees the same case.</p>
       <div class="actions">
-        <a class="btn primary" href="#walkthrough">Drag through it
+        <a class="btn primary" href="#walkthrough">Drag through one visit
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
-        <a class="btn ghost" href="#how">How it works</a>
+        <a class="btn ghost" href="#hands">Who sees it</a>
       </div>
-      <p class="fine"><i>●</i> The app behind this page is a private prototype: a server, a login, and synthetic cases only. The AI in it is a labelled fixture, not a live model. Nothing it produces is a formal assessment.</p>
+      <p class="fine"><i>●</i> Private prototype. Synthetic houses only. The AI in the demo is a stand-in, not a live model.</p>
     </div>
     <figure class="shot hero-shot reel" aria-label="Twenty-second loop through the app: open the case, capture on site, edit the draft, freeze a version.">
       <div class="reel-frames">
@@ -382,10 +385,10 @@ border-bottom:1px solid var(--line);
       <div class="reel-tag" aria-hidden="true"><i></i>20-second walk through the app <span>· hover to hold a frame</span></div>
       <div class="reel-bar" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
       <figcaption class="reel-caps">
-        <span style="--i:0"><b>01</b> Open the case. Work state, sync state and scheme status stay separate.</span>
-        <span style="--i:1"><b>02</b> Capture on site. Photos first, upload when there is signal.</span>
-        <span style="--i:2"><b>03</b> Edit the draft. The sections fill in; the professional corrects them.</span>
-        <span style="--i:3"><b>04</b> Freeze a version. Every export is tied to an immutable snapshot.</span>
+        <span style="--i:0"><b>01</b> Open the case. One list of houses, and who has each one.</span>
+        <span style="--i:1"><b>02</b> Capture at the house. Photos and voice notes, with or without signal.</span>
+        <span style="--i:2"><b>03</b> The draft fills itself in. The assessor corrects it.</span>
+        <span style="--i:3"><b>04</b> Freeze a version and share it. It never changes afterwards.</span>
       </figcaption>
     </figure>
   </div>
@@ -395,172 +398,206 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">The problem</div>
-      <h2>Thousands of houses. One report each, written up after the drive home.</h2>
-      <p>Defective concrete block damage is a rural, one-house-at-a-time problem. The professional photographs the house on a phone, dictates or scribbles notes, and writes the report at a desk days later from whatever can be found. The backlog is in the write-up, not the visit. The tool that fixes it has to work in a field in Donegal with no signal, and still produce a document a council will take.</p>
+      <h2>Thousands of houses. One report each. Written days later, from memory.</h2>
+      <p>The visit takes a morning. The write-up takes the week, at a desk, from a camera roll and a notebook. Then the lab, the council and the homeowner each get their own copy, and each asks for something that is missing.</p>
     </div>
     <div class="stats">
-      <div class="stat"><div class="n">~9,500<small>confirmed homes</small></div><div class="d">Estimates run as high as 20,000 across the affected counties.</div></div>
-      <div class="stat"><div class="n">5<small>counties</small></div><div class="d">Donegal, Mayo, Clare, Limerick and Sligo. Mostly bungalows, dormers and two-storey detached houses.</div></div>
-      <div class="stat"><div class="n">1<small>mm</small></div><div class="d">The pattern-cracking width that separates Group 2 minor damage from Group 3 damage in I.S. 465 Table 1, on any one elevation.</div></div>
+      <div class="stat"><div class="n">~9,500<small>homes</small></div><div class="d">Confirmed so far. Estimates run to 20,000.</div></div>
+      <div class="stat"><div class="n">5<small>counties</small></div><div class="d">Donegal, Mayo, Clare, Limerick and Sligo. Rural, one house at a time.</div></div>
+      <div class="stat"><div class="n">4<small>people per case</small></div><div class="d">Assessor, lab, council, homeowner. Today, four versions of the truth.</div></div>
     </div>
   </div>
 </section>
 
-<section id="where">
+<section id="hands">
   <div class="wrap">
     <div class="head">
-      <div class="label">Where it sits</div>
-      <h2>Before the application, and again after the Agency decides.</h2>
+      <div class="label">One case, many hands</div>
+      <h2>Everyone sees the same case. Nobody re-types it.</h2>
     </div>
-    <div class="pipe">
-      <div class="step dim"><div class="k">1</div><div class="v">Homeowner appoints a building professional</div></div>
-      <div class="step here"><div class="k">2</div><div class="v">Initial Building Condition Assessment</div></div>
-      <div class="step dim"><div class="k">3</div><div class="v">Application to the council</div></div>
-      <div class="step dim"><div class="k">4</div><div class="v">Housing Agency threshold decision</div></div>
-      <div class="step here"><div class="k">5</div><div class="v">Investigation, cores to a lab</div></div>
-      <div class="step dim"><div class="k">6</div><div class="v">Remediation option and grant</div></div>
-      <div class="step dim"><div class="k">7</div><div class="v">Remedial works and certification</div></div>
+    <div class="hands">
+      <div class="step-card"><div class="num">ASSESSOR</div><h3>Writes it at the house.</h3><p>Photos, voice notes and old paperwork become the draft. They correct it and sign it.</p></div>
+      <div class="step-card"><div class="num">LAB</div><h3>Adds the results.</h3><p>Core samples and test sheets land in the same case, not in an email thread.</p></div>
+      <div class="step-card"><div class="num">COUNCIL</div><h3>Gets the same PDF it gets today.</h3><p>Frozen, dated, and the same file next year. No new portal to learn.</p></div>
+      <div class="step-card"><div class="num">HOMEOWNER</div><h3>Sees where their house stands.</h3><p>A one-time link to upload what is missing and read the version they were sent. Nothing else.</p></div>
     </div>
-    <p class="pipe-note">We built for the <b>practice</b>. Two of the seven boxes are professional reports: the initial BCA a homeowner commissions before applying, and the investigation the Agency directs later. Mica Assess keeps them as separate assessments in one case, because the second must not borrow the first's conclusions. Council and Agency get no login; they receive the PDF, as they do today. <b>The case-scoped requests and handover packages</b> exist to cut the missing-information loops, not to replace the council's portal.</p>
+    <p class="pipe-note">Nobody re-types. Nobody chases. Nobody gets a login they did not ask for.</p>
   </div>
 </section>
 
 <section id="walkthrough">
   <div class="wrap">
     <div class="head">
-      <div class="label">One house, start to finish</div>
-      <h2>Drag through one case.</h2>
-      <p>The pin is the clock: one visit, from the desk in the morning to the last save at the house. Pull it and the scene follows; let go and it settles on a step. Arrow keys work too.</p>
+      <div class="label">One visit</div>
+      <h2>Drag through one morning.</h2>
+      <p>The pin is the clock. Pull it from the desk at 08:40 to the last save at the house at 12:55.</p>
     </div>
     <div class="scrub">
       <div class="scrub-copy" aria-live="polite">
         <div class="num"><span id="scrub-num">01</span> · <b id="scrub-time">08:40</b> · <span id="scrub-where">At the practice</span></div>
         <h3 id="scrub-label">Open the case.</h3>
-        <p id="scrub-caption">A practice admin creates the case and allocates it. Work state and sync state stay separate.</p>
+        <p id="scrub-caption">The practice creates the case and hands it to an assessor.</p>
       </div>
       <div class="scrub-scene">
         <svg class="scene" id="scene" viewBox="0 0 640 400" role="img" aria-labelledby="scene-title">
-          <title id="scene-title">Animated scene for the current step</title>
+          <title id="scene-title">A sketch of the current step, drawn on as the pin moves</title>
 
-          <!-- 01 open the case -->
+          <!-- 01 open the case: the day's list on a clipboard -->
           <g class="st st1">
-            <text class="t m" x="80" y="70">PRACTICE WORK LIST</text>
-            <text class="t m" x="80" y="112">CASE</text><text class="t m" x="330" y="112">WORKSTREAM</text><text class="t m" x="470" y="112">WORK STATE</text>
-            <line class="thin" x1="80" y1="122" x2="560" y2="122"/>
-            <g class="s1row">
-              <rect class="soft" x="72" y="134" width="496" height="58"/>
-              <text class="t a" x="86" y="160">DEMO-BCA-001</text>
-              <text class="u m" x="86" y="180">12 Example View, County Donegal</text>
-              <rect class="panel" x="330" y="150" width="88" height="20"/><text class="t" x="338" y="164">INITIAL BCA</text>
-              <g class="s1state"><rect class="panel" x="470" y="150" width="76" height="20"/><text class="t" x="478" y="164">ASSIGNED</text></g>
+            <path class="ink dr d11" pathLength="1" d="M150 78 L488 73 L494 344 L156 349 Z"/>
+            <path class="ink dr d11" pathLength="1" d="M286 76 L286 50 L352 49 L353 75"/>
+            <g class="f12"><text class="t m" x="172" y="118">PRACTICE WORK LIST</text></g>
+            <path class="ink2 dr d12" pathLength="1" d="M172 132 L470 128"/>
+            <path class="ink dr d12" pathLength="1" d="M186 200 L186 178 L208 158 L230 178 L230 200 Z"/>
+            <g class="f12">
+              <text class="t" x="252" y="180">DEMO-BCA-002</text>
+              <text class="u m" x="252" y="202">Incomplete synthetic case</text>
             </g>
-            <line class="thin" x1="80" y1="204" x2="560" y2="204"/>
-            <text class="t" x="86" y="232">DEMO-BCA-002</text>
-            <text class="u m" x="86" y="252">Incomplete Synthetic Case</text>
-            <rect class="panel" x="330" y="222" width="88" height="20"/><text class="t" x="338" y="236">INITIAL BCA</text>
-            <rect class="panel" x="470" y="222" width="80" height="20"/><text class="t" x="478" y="236">CAPTURING</text>
-            <line class="thin" x1="80" y1="276" x2="560" y2="276"/>
-            <text class="t m" x="80" y="330">WORK STATE · SYNC STATE · SCHEME STATUS: KEPT APART</text>
+            <path class="ink2 dr d13" pathLength="1" d="M172 224 L470 220"/>
+            <g class="f13"><path class="fill soft" d="M176 236 L474 232 L476 310 L178 314 Z"/></g>
+            <path class="ink dr d13" pathLength="1" d="M186 290 L186 268 L208 248 L230 268 L230 290 Z"/>
+            <g class="f13">
+              <text class="t a" x="252" y="270">DEMO-BCA-001</text>
+              <text class="u" x="252" y="292">12 Example View, County Donegal</text>
+            </g>
+            <g class="f14">
+              <rect class="fill amber" x="350" y="320" width="98" height="22"/>
+              <text class="t" x="358" y="335">ASSIGNED</text>
+            </g>
           </g>
 
-          <!-- 02 prepare from documents -->
+          <!-- 02 prepare: the homeowner's old paperwork fills the blank fields -->
           <g class="st st2">
-            <g class="s2doc">
-              <rect class="paper" x="60" y="120" width="76" height="98"/><text class="t m" x="70" y="140">PDF</text>
-              <text class="u" x="70" y="200">Planning</text>
-              <rect class="paper" x="60" y="236" width="76" height="98"/><text class="t m" x="70" y="256">PDF</text>
-              <text class="u" x="70" y="316">Old report</text>
+            <g class="f23"><path class="fill grey" d="M64 146 L156 132 L178 274 L86 288 Z"/></g>
+            <path class="ink dr d21" pathLength="1" d="M60 140 L152 126 L174 268 L82 282 Z"/>
+            <path class="ink2 dr d21" pathLength="1" d="M76 166 L146 156 M79 188 L149 178 M82 210 L134 202"/>
+            <path class="ink dr d21" pathLength="1" d="M46 196 L136 184 L156 316 L66 328 Z"/>
+            <path class="ink2 dr d22" pathLength="1" d="M62 222 L130 212 M65 244 L133 234 M68 266 L118 258"/>
+            <g class="f22"><text class="t m" x="46" y="352">PLANNING FILE · OLD REPORT</text></g>
+            <path class="ink dr d22" pathLength="1" d="M186 224 L246 224 M232 212 L246 224 L232 236"/>
+            <path class="ink dr d22" pathLength="1" d="M272 88 L588 88 L588 336 L272 336 Z"/>
+            <g class="f23">
+              <text class="t m" x="292" y="122">YEAR BUILT</text>
+              <path class="fill soft" d="M292 134 L568 134 L568 162 L292 162 Z"/>
+              <text class="t m" x="292" y="200">FLOOR AREA</text>
+              <path class="fill soft" d="M292 212 L568 212 L568 240 L292 240 Z"/>
+              <text class="t m" x="292" y="278">CONSTRUCTION</text>
+              <path class="fill soft" d="M292 290 L568 290 L568 318 L292 318 Z"/>
             </g>
-            <polyline class="ink" points="240,220 300,220 292,212"/><polyline class="ink" points="300,220 292,228"/>
-            <rect class="panel" x="330" y="90" width="250" height="250"/>
-            <text class="t m" x="346" y="116">B · BUILDING INFORMATION</text>
-            <text class="t m" x="346" y="150">YEAR BUILT</text><rect class="fillline" x="346" y="158" width="216" height="14"/>
-            <text class="t m" x="346" y="196">FLOOR AREA</text><rect class="fillline" x="346" y="204" width="216" height="14"/>
-            <text class="t m" x="346" y="242">CONSTRUCTION</text><rect class="fillline" x="346" y="250" width="216" height="14"/>
-            <g class="s2fill">
-              <rect class="soft" x="346" y="158" width="216" height="14"/><text class="u" x="352" y="170">2006</text>
-              <rect class="soft" x="346" y="204" width="216" height="14"/><text class="u" x="352" y="216">142 m²</text>
-              <rect class="soft" x="346" y="250" width="216" height="14"/><text class="u" x="352" y="262">Cavity wall, rendered</text>
+            <g class="f24">
+              <text class="u" x="302" y="154">2006</text>
+              <text class="u" x="302" y="232">142 m&#178;</text>
+              <text class="u" x="302" y="310">Cavity wall, rendered</text>
+              <rect class="fill amber" x="272" y="352" width="212" height="22"/>
+              <text class="t" x="280" y="367">SOURCE · PLANNING.PDF</text>
             </g>
-            <g class="s2src"><rect class="amber" x="346" y="290" width="164" height="16"/><text class="t" x="353" y="301">SOURCE · PLANNING.PDF</text></g>
           </g>
 
-          <!-- 03 capture on site, offline -->
+          <!-- 03 capture: the house, the crack, the tablet with no signal -->
           <g class="st st3">
-            <text class="t m" x="70" y="70">LOCATIONS</text>
-            <rect class="panel" x="70" y="84" width="230" height="52"/><rect class="soft" x="78" y="92" width="36" height="36"/><text class="u" x="124" y="108">Front elevation</text><text class="t m" x="124" y="124">4 PHOTOS · INSPECTED</text>
-            <rect class="panel" x="70" y="144" width="230" height="52"/><rect class="soft" x="78" y="152" width="36" height="36"/><text class="u" x="124" y="168">Left gable</text><text class="t m" x="124" y="184">2 PHOTOS · INSPECTED</text>
-            <rect class="panel" x="70" y="204" width="230" height="52"/><rect class="fillline" x="78" y="212" width="36" height="36"/><text class="u" x="124" y="228">Kitchen</text><text class="t m" x="124" y="244">1 PHOTO · IN PROGRESS</text>
-            <rect class="panel" x="70" y="264" width="230" height="52"/><rect class="fillline" x="78" y="272" width="36" height="36"/><text class="u" x="124" y="288">Roof void</text><text class="t m" x="124" y="304">NOT INSPECTED · REASON</text>
-            <g class="s3photo">
-              <rect class="paper" x="340" y="100" width="230" height="200"/>
-              <rect class="thin" x="352" y="112" width="206" height="100"/>
-              <polyline class="ink" points="380,196 410,160 404,142 440,122"/>
-              <text class="t" x="352" y="236">KITCHEN · PHOTO 1</text>
-              <g class="s3wave"><polyline class="ink" points="352,270 360,258 368,282 376,252 384,286 392,262 400,276 408,256 416,280 424,264 432,272"/><text class="t m" x="444" y="274">DICTATED · 0:14</text></g>
-              <g class="s3queued"><rect class="soft" x="500" y="222" width="58" height="16"/><text class="t a" x="507" y="233">QUEUED</text></g>
-              <g class="s3uploaded"><rect class="amber" x="486" y="222" width="72" height="16"/><text class="t" x="493" y="233">UPLOADED</text></g>
+            <path class="ink dr d31" pathLength="1" d="M36 334 C 140 331, 300 336, 420 333 S 590 330, 606 333"/>
+            <g class="f33">
+              <path class="fill grey" d="M100 224 L166 156 L334 154 L390 222 Z" transform="translate(5,4)"/>
+              <path class="fill soft" d="M376 218 L424 142 L474 200 L474 302 L376 322 Z" transform="translate(6,3)"/>
+              <path class="fill soft" d="M152 254 L190 253 L191 320 L153 321 Z" transform="translate(3,3)"/>
             </g>
-            <text class="t m" x="70" y="350">ID ISSUED ON THE TABLET · SAVED LOCALLY FIRST</text>
+            <path class="ink dr d31" pathLength="1" d="M110 216 L109 322 L371 320 L372 214"/>
+            <path class="ink dr d31" pathLength="1" d="M96 219 L160 150 L330 148 L387 216 L96 219"/>
+            <path class="ink dr d32" pathLength="1" d="M372 214 L420 138 L471 196 L470 300 L371 320"/>
+            <path class="ink dr d32" pathLength="1" d="M330 148 L420 138"/>
+            <path class="ink2 dr d32" pathLength="1" d="M114 220 L113 318 M100 222 L162 154 L328 152 M376 218 L422 143 L468 198"/>
+            <path class="ink dr d32" pathLength="1" d="M204 168 L204 132 L226 131 L226 164"/>
+            <path class="ink dr d32" pathLength="1" d="M152 320 L152 254 L190 253 L191 320"/>
+            <path class="ink dr d32" pathLength="1" d="M222 242 L272 241 L273 282 L222 283 Z M247 242 L247 282 M222 262 L273 262"/>
+            <path class="ink dr d32" pathLength="1" d="M302 241 L352 240 L353 281 L302 282 Z M327 241 L327 281 M302 261 L353 261"/>
+            <path class="crack dr d33" pathLength="1" d="M446 206 l3 12 l-6 10 l7 15 l-4 12 l6 11 l-3 15 l4 8"/>
+            <g class="f33"><text class="t m" x="96" y="360">LEFT GABLE · 2 PHOTOS · NO SIGNAL</text></g>
+            <g class="r34">
+              <g class="f34"><path class="fill grey" d="M492 248 L616 248 L616 376 L492 376 Z"/></g>
+              <path class="ink dr d34" pathLength="1" d="M486 246 L610 244 L612 370 L488 372 Z"/>
+              <path class="ink2 dr d34" pathLength="1" d="M496 256 L601 255 L602 345 L497 346 Z"/>
+              <path class="ink dr d34" pathLength="1" d="M520 320 L520 290 L548 262 L578 292 L578 320"/>
+              <path class="crack dr d34" pathLength="1" d="M556 288 l2 8 l-4 7 l4 9 l-2 8"/>
+              <g class="f34">
+                <rect class="fill amber" x="518" y="352" width="66" height="18"/>
+                <text class="t" x="524" y="365">QUEUED</text>
+              </g>
+            </g>
           </g>
 
-          <!-- 04 edit the report -->
+          <!-- 04 correct: your value stands, the machine's waits beside it -->
           <g class="st st4">
-            <g class="t m"><text x="70" y="70">A</text><text x="100" y="70">B</text><text x="130" y="70">C</text><text x="160" y="70">D</text><text x="220" y="70">F</text><text x="250" y="70">G</text><text x="280" y="70">H</text></g>
-            <rect class="amber" x="186" y="58" width="16" height="16"/><text class="t" x="190" y="70">E</text>
-            <line class="thin" x1="70" y1="82" x2="570" y2="82"/>
-            <text class="t m" x="70" y="112">E · EXTERNAL DAMAGE</text>
-            <text class="t m" x="70" y="150">WIDEST CRACK, LEFT GABLE</text>
-            <rect class="panel" x="70" y="160" width="220" height="30"/>
-            <g class="s4typed"><text class="u" x="80" y="180">2 mm</text><rect class="amber" x="112" y="167" width="2" height="16"/><text class="t m" x="304" y="180">TYPED BY THE ASSESSOR</text></g>
-            <text class="t m" x="70" y="228">PATTERN</text>
-            <rect class="panel" x="70" y="238" width="220" height="30"/><text class="u" x="80" y="258">Vertical, near corner</text>
-            <g class="s4alt">
-              <rect class="paper" x="70" y="296" width="330" height="54"/>
-              <text class="t a" x="82" y="318">ALTERNATIVE · FIXTURE SUGGESTS 3 MM</text>
-              <text class="u m" x="82" y="338">Rerun after your edit. Accept, or leave it filed.</text>
+            <path class="ink dr d41" pathLength="1" d="M100 58 L470 54 L476 348 L106 352 Z"/>
+            <path class="ink2 dr d41" pathLength="1" d="M124 118 L452 115"/>
+            <g class="f42"><rect class="fill amber" x="246" y="82" width="26" height="26"/></g>
+            <g class="f42">
+              <text class="t m" x="128" y="102">A</text><text class="t m" x="168" y="102">B</text>
+              <text class="t m" x="208" y="102">C</text><text class="t" x="252" y="102">E</text>
+              <text class="t m" x="290" y="102">F</text><text class="t m" x="330" y="102">G</text>
+              <text class="t m" x="370" y="102">H</text>
             </g>
-            <g class="s4kept"><rect class="amber" x="420" y="306" width="120" height="16"/><text class="t" x="427" y="317">HUMAN VALUE KEPT</text></g>
+            <g class="f42"><text class="t m" x="124" y="156">WIDEST CRACK, LEFT GABLE</text></g>
+            <path class="ink dr d42" pathLength="1" d="M124 168 L330 166 L331 206 L125 208 Z"/>
+            <g class="f43">
+              <text class="u" x="138" y="192">2 mm</text>
+              <rect class="fill amber" x="182" y="174" width="3" height="24"/>
+              <text class="t m" x="348" y="192">TYPED BY YOU</text>
+              <rect class="fill amber" x="124" y="224" width="150" height="22"/>
+              <text class="t" x="132" y="239">YOUR VALUE KEPT</text>
+            </g>
+            <g class="r44">
+              <path class="ink dr d44" pathLength="1" d="M124 266 L392 263 L394 336 L126 339 Z"/>
+              <g class="f44">
+                <text class="t a" x="140" y="296">ALTERNATIVE · 3 MM</text>
+                <text class="u m" x="140" y="320">Filed beside it. Never applied.</text>
+              </g>
+            </g>
           </g>
 
-          <!-- 05 freeze a version -->
+          <!-- 05 freeze: version 1 is stamped and never moves again -->
           <g class="st st5">
-            <rect class="paper" x="110" y="80" width="170" height="230"/>
-            <g class="thin"><line x1="130" y1="112" x2="260" y2="112"/><line x1="130" y1="132" x2="260" y2="132"/><line x1="130" y1="152" x2="230" y2="152"/><line x1="130" y1="190" x2="260" y2="190"/><line x1="130" y1="210" x2="260" y2="210"/></g>
-            <text class="t" x="130" y="250">VERSION 1 · DRAFT</text>
-            <text class="t m" x="130" y="270">SHA-256 80F9…DCA3</text>
-            <g class="s5lock"><rect class="amber" x="130" y="284" width="96" height="16"/><text class="t" x="137" y="295">NEVER CHANGES</text></g>
-            <g class="s5v2">
-              <rect class="paper" x="340" y="80" width="170" height="230"/>
-              <g class="thin"><line x1="360" y1="112" x2="490" y2="112"/><line x1="360" y1="132" x2="490" y2="132"/><line x1="360" y1="152" x2="470" y2="152"/><line x1="360" y1="190" x2="490" y2="190"/><line x1="360" y1="210" x2="440" y2="210"/></g>
-              <rect class="soft" x="360" y="204" width="130" height="14"/>
-              <text class="t" x="360" y="250">VERSION 2 · DRAFT</text>
-              <text class="t m" x="360" y="270">SHA-256 785B…89E3</text>
+            <g class="f52"><path class="fill grey" d="M144 108 L316 106 L320 344 L148 346 Z"/></g>
+            <path class="ink dr d51" pathLength="1" d="M138 102 L310 100 L314 338 L142 340 Z"/>
+            <path class="ink2 dr d51" pathLength="1" d="M158 140 L290 138 M158 166 L290 164 M158 192 L250 190"/>
+            <path class="ink dr d52" pathLength="1" d="M192 254 a34 34 0 1 1 68 0 a34 34 0 1 1 -68 0"/>
+            <path class="ink2 dr d52" pathLength="1" d="M200 254 a26 26 0 1 1 52 0 a26 26 0 1 1 -52 0"/>
+            <g class="f53">
+              <text class="t a" x="212" y="260">V1</text>
+              <text class="t m" x="152" y="320">FINGERPRINT 80F9…DCA3</text>
+              <rect class="fill amber" x="146" y="360" width="164" height="22"/>
+              <text class="t" x="154" y="375">NEVER CHANGES</text>
             </g>
-            <text class="t m" x="110" y="350">HEADLESS RENDER · PHOTO BYTES RE-CHECKED · NO SIGN-OFF LOCK</text>
+            <g class="r54">
+              <g class="f54"><path class="fill grey" d="M366 84 L534 82 L536 308 L368 310 Z"/></g>
+              <path class="ink dr d54" pathLength="1" d="M362 80 L530 78 L532 304 L364 306 Z"/>
+              <path class="ink2 dr d54" pathLength="1" d="M382 116 L510 114 M382 142 L510 140 M382 168 L472 166"/>
+              <g class="f54"><text class="t" x="382" y="264">VERSION 2</text><text class="u m" x="382" y="288">Edit again, get a new file</text></g>
+            </g>
           </g>
 
-          <!-- 06 share, request, hand over -->
+          <!-- 06 hand over: one case, three hands -->
           <g class="st st6">
-            <g class="s6invite">
-              <rect class="paper" x="60" y="80" width="250" height="110"/>
-              <text class="t" x="74" y="104">INVITE · HOMEOWNER</text>
-              <text class="u m" x="74" y="126">One-time link. Inbox only, no case list.</text>
-              <text class="t m" x="74" y="156">REQUESTED · PLANNING GRANT</text>
-              <g class="s6tick"><rect class="amber" x="74" y="164" width="72" height="16"/><text class="t" x="81" y="175">UPLOADED</text></g>
+            <g class="f62"><path class="fill soft" d="M64 168 L228 166 L230 314 L66 316 Z"/></g>
+            <path class="ink dr d61" pathLength="1" d="M58 162 L120 162 L134 142 L222 141 L224 308 L60 310 Z"/>
+            <g class="f62">
+              <text class="t" x="76" y="200">DEMO-BCA-001</text>
+              <text class="u m" x="76" y="226">12 Example View</text>
             </g>
-            <text class="t m" x="60" y="230">SHARE ONE VERSION · REVOKE ANY TIME</text>
-            <g class="s6zip">
-              <rect class="paper" x="60" y="260" width="180" height="70"/>
-              <text class="t" x="74" y="284">HANDOVER.ZIP</text>
-              <text class="t m" x="74" y="304">V1.PDF · CHOSEN EVIDENCE</text>
-              <text class="t m" x="74" y="320">MANIFEST.JSON · HASHES</text>
+            <path class="ink dr d62" pathLength="1" d="M240 218 L300 130 M290 136 L300 130 L302 142"/>
+            <path class="ink dr d62" pathLength="1" d="M240 232 L300 232 M290 222 L300 232 L290 242"/>
+            <path class="ink dr d62" pathLength="1" d="M240 246 L300 334 M290 328 L300 334 L302 322"/>
+            <path class="ink dr d63" pathLength="1" d="M318 92 L426 92 L426 156 L318 156 Z M318 92 L372 130 L426 92"/>
+            <path class="ink dr d63" pathLength="1" d="M318 196 L400 196 L400 276 L318 276 Z"/>
+            <path class="ink2 dr d63" pathLength="1" d="M332 218 L386 218 M332 236 L386 236 M332 254 L368 254"/>
+            <path class="ink dr d63" pathLength="1" d="M318 306 L360 288 L410 302 L410 356 L360 374 L318 356 Z M318 306 L360 322 L410 302 M360 322 L360 374"/>
+            <g class="f64">
+              <text class="t" x="450" y="118">HOMEOWNER</text>
+              <text class="u m" x="450" y="142">One-time link</text>
+              <text class="t" x="450" y="230">COUNCIL</text>
+              <text class="u m" x="450" y="254">The same PDF</text>
+              <text class="t" x="450" y="330">NEXT ENGINEER</text>
+              <text class="u m" x="450" y="354">The case and evidence</text>
             </g>
-            <polyline class="ink" points="332,295 368,295 360,287"/><polyline class="ink" points="368,295 360,303"/>
-            <rect class="panel" x="380" y="250" width="190" height="90"/>
-            <text class="t" x="394" y="276">INVESTIGATION PRACTICE</text>
-            <text class="u m" x="394" y="298">Separate assessment.</text>
-            <text class="u m" x="394" y="316">Cannot read the BCA's notes.</text>
           </g>
         </svg>
       </div>
@@ -575,7 +612,7 @@ border-bottom:1px solid var(--line);
           <li><button type="button" data-stage="4">05<small>12:40</small></button></li>
           <li><button type="button" data-stage="5">06<small>12:55</small></button></li>
         </ol>
-        <p class="scrub-hint"><span>Times are one plausible visit, not a measurement.</span><span><b>19:00</b> · after the drive home: nothing left to write.</span></p>
+        <p class="scrub-hint"><span>One typical visit.</span><span><b>19:00</b> · home. Nothing left to write.</span></p>
       </div>
     </div>
   </div>
@@ -585,106 +622,28 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">How it works</div>
-      <h2>Prepare, capture, autofill, edit, export.</h2>
-      <p>Every step below runs in the prototype on synthetic cases. Where a step is simulated, it says so. The order is the order of a real job.</p>
+      <h2>Prepare. Capture. Correct. Freeze.</h2>
     </div>
-    <div class="steps">
+    <div class="steps four">
       <div class="step-card">
         <div class="num">01</div>
-        <h3>Open the case.</h3>
-        <p>A practice administrator creates the case and allocates an assessor. The initial BCA and any later investigation are separate assessments inside it, so the second never inherits the first's conclusions. The work list keeps three things apart: how far the work is, whether it has synced, and what the scheme says about it.</p>
+        <h3>Prepare from what exists.</h3>
+        <p>Upload the planning file and any old report. The blank fields fill in, each one showing which document it came from.</p>
       </div>
       <div class="step-card">
         <div class="num">02</div>
-        <h3>Prepare from what already exists.</h3>
-        <p>The professional uploads what the homeowner already has: the planning file, a previous engineer's report, old photos. An extraction job reads the readable ones and fills blank fields in sections A to D, each value labelled with its source document. An unreadable file is kept as an original and flagged, not silently dropped.</p>
+        <h3>Capture at the house.</h3>
+        <p>Walk the walls and rooms. Photos and voice notes save on the tablet first and upload when there is signal.</p>
       </div>
       <div class="step-card">
         <div class="num">03</div>
-        <h3>Capture on site, offline.</h3>
-        <p>Locations are a list with thumbnails and inspection states: front elevation, left gable, kitchen, the roof void you could not get into and why. Each photo and dictated note gets its id on the tablet, is written to local storage first, and queues until there is signal. The same upload arriving twice is the same row.</p>
+        <h3>Correct the draft.</h3>
+        <p>The report is already written. Fix what is wrong. Anything you type is never overwritten by the machine.</p>
       </div>
       <div class="step-card">
         <div class="num">04</div>
-        <h3>Edit the report. Keep every human change.</h3>
-        <p>The report follows the I.S. 465 Annex A structure, sections A to H, edited in place with a live preview. Rerunning extraction never overwrites something a person typed; the differing value is filed as an alternative to accept or ignore. A missing field shows a warning and does not block a draft.</p>
-      </div>
-      <div class="step-card">
-        <div class="num">05</div>
-        <h3>Freeze a version.</h3>
-        <p>Create version 1 and it is rendered to PDF by a headless browser, hashed, and stored with its snapshot. Edit and create version 2; version 1 is byte for byte what it was. There is no sign-off lock and no approval queue, because the declaration is the professional's, not the software's.</p>
-      </div>
-      <div class="step-card">
-        <div class="num">06</div>
-        <h3>Share, request, hand over.</h3>
-        <p>Invite the homeowner or a helper with a one-time link; they see an inbox, not the practice's cases. Request the documents the desk study needs, share one chosen version, revoke either. When the Agency directs an investigation, hand the case to that practice as a ZIP with a manifest and only the evidence you selected.</p>
-      </div>
-      <figure class="shot wide">
-        <img src="img/app-report.png" width="1280" height="860" alt="The report editor in the app: section tabs A to H, typed fields with their source, and the assembled preview beside them." loading="lazy">
-        <figcaption>Step 04 in the prototype: the report editor, one section at a time, with the assembled preview alongside. The same assembler renders the preview and the PDF, so what you see is what freezes. The <a href="spikes/elevation-picker.html">6 September field spike</a> with the 3D house picker is kept for the record.</figcaption>
-      </figure>
-    </div>
-  </div>
-</section>
-
-<section id="different">
-  <div class="wrap">
-    <div class="head">
-      <div class="label">What is different</div>
-      <h2>Built for the write-up, and for a tablet with no signal.</h2>
-    </div>
-    <div class="diff">
-      <div class="card">
-        <h3>The tablet issues the ids.</h3>
-        <p>A photo, a note or a document has an identity the moment it is captured, before any server has seen it. Every upload is an idempotent <code>PUT</code> with a key the server remembers, so the same thing arriving twice is the same row. Flight mode mid-visit breaks nothing. The queue drains when signal returns, and nothing is deleted locally until the server has it.</p>
-      </div>
-      <div class="card">
-        <h3>Drafts export with their warnings showing.</h3>
-        <p>There is no approval queue and no lock. A missing field is a visible warning on the draft and in the PDF, not a closed door. Export never manufactures a declaration or implies the council accepted anything. The professional's declaration is a field they fill themselves.</p>
-      </div>
-      <div class="card">
-        <h3>Suggestions never overwrite a person.</h3>
-        <p>Extraction and transcription produce typed suggestions. A blank field takes the suggestion and shows where it came from. A field someone typed keeps its value, and a differing suggestion is filed as an alternative. Rerun as often as you like; the human edits survive every time.</p>
-      </div>
-      <div class="card">
-        <h3>Versions are immutable, and can prove it.</h3>
-        <p>Each report version freezes its snapshot and checks every photo's bytes against their stored hash, before and after rendering, then stores the PDF's own hash. Handover ZIPs carry a manifest with the same hashes. Download version 1 next year and it matches.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="three">
-  <div class="wrap">
-    <div class="head">
-      <div class="label">The same question, three ways</div>
-      <h2>What did the left gable show?</h2>
-      <p>Ask it a week after the visit. The answer depends on where the evidence went. The first two answers are illustrative; the third is the prototype's synthetic case, as it appears in the walkthrough.</p>
-    </div>
-    <div class="ways">
-      <div class="way">
-        <div class="label">1 · Phone, notepad, Word template</div>
-        <div class="answer"><span class="t">From the report, written at the desk three days later</span>"Some cracking was observed to the left gable elevation."</div>
-        <p>Forty photos in a camera roll, a note that says "gable, cracks", and a template opened when there is time. The width is whatever the note says, if the note is found. The photo may or may not be the right wall.</p>
-        <div class="trace">Traceable to <b>memory</b></div>
-      </div>
-      <div class="way">
-        <div class="label">2 · A general chatbot, photos pasted in</div>
-        <div class="answer"><span class="t">From the chat</span>"The image appears to show cracking that may be consistent with deleterious material in the blockwork. I'd recommend a professional assessment."</div>
-        <p>Fluent, confident and untraceable. It does not know which wall this is, has no crack width, does not use the I.S. 465 defect list, and the homeowner's photos are now on someone else's server.</p>
-        <div class="trace">Traceable to <b>nothing</b></div>
-      </div>
-      <div class="way here">
-        <div class="label accent">3 · Mica Assess</div>
-        <div class="answer field">
-          <span class="t">Section E · left gable · 2 photos · inspected</span>
-          <div class="row"><span class="k">Widest crack</span><span class="v">2 mm<i>typed by the assessor</i></span></div>
-          <div class="row"><span class="k">Pattern</span><span class="v">Vertical, near corner</span></div>
-          <div class="row"><span class="k">Dictation</span><span class="v">0:14, transcript attached</span></div>
-          <div class="row"><span class="k">Alternative</span><span class="v">3 mm<i>fixture, filed, not applied</i></span></div>
-        </div>
-        <p>Captured at the wall on a tablet with no signal, with an id issued before any server saw it. Every value carries who typed it or which document proposed it. The version was frozen and hashed before anyone else read it.</p>
-        <div class="trace">Traceable to <b>photo 2, dictation 1, and the person who typed it</b></div>
+        <h3>Freeze and share.</h3>
+        <p>Version 1 becomes a PDF that never changes. Send it to the council, the lab or the homeowner. Edit again and you get version 2.</p>
       </div>
     </div>
   </div>
@@ -694,54 +653,26 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">The AI</div>
-      <h2>The model proposes. The professional signs.</h2>
-      <p>A chartered engineer, chartered building surveyor or registered architect signs the initial BCA and carries the liability for it. These are the three places the model stops, as designed. In the prototype every suggestion comes from a labelled fixture.</p>
+      <h2>The model proposes. The assessor signs.</h2>
     </div>
-    <div class="stops">
-      <div class="stop">
-        <div class="label">Document to fields</div>
-        <div class="prop"><span class="k">B · Year built</span><span class="v"><em>2006</em></span><span class="k">Source · planning.pdf</span></div>
-        <div class="halt">It stops: a suggestion in a blank field</div>
-        <p>A blank field takes the suggestion and shows where it came from. A field a person typed keeps its value; a differing suggestion waits as an alternative.</p>
-        <div class="rule"><b>Rule</b>A suggestion never overwrites a person. Rerun as often as you like.</div>
-        <div class="src"><span class="k">Sourced from</span><span>planning.pdf</span><span>previous report</span><span>lab sheet</span></div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="num">IT PROPOSES</div>
+        <h3>Every suggestion shows its source.</h3>
+        <p>"Year built: 2006, from planning.pdf." "Vertical crack near the corner, from your voice note." Nothing appears without a where-from.</p>
       </div>
-      <div class="stop">
-        <div class="label">Voice to findings</div>
-        <div class="prop"><span class="k">Left gable · dictation · 0:14</span><span class="v">"…vertical crack near the corner, about two mil…"</span><span class="k">Proposed · one observation, defect key from Figure 2</span></div>
-        <div class="halt">It stops: a proposed observation</div>
-        <p>The transcript and the proposed observation sit beside the recording. The assessor accepts, edits or discards it. The recording stays attached either way.</p>
-        <div class="rule"><b>Rule</b>Every draft can point at the documents and recordings that shaped it. Retrieval, not training.</div>
-        <div class="src"><span class="k">Sourced from</span><span>dictation 1</span><span>photo 2</span><span>I.S. 465 Figure 2</span></div>
+      <div class="step-card">
+        <div class="num">YOU DECIDE</div>
+        <h3>It never overwrites a person.</h3>
+        <p>A blank field takes the suggestion. A field you typed keeps your value. Run it again as often as you like.</p>
       </div>
-      <div class="stop">
-        <div class="label">Export</div>
-        <div class="prop"><span class="k">Professional's declaration</span><span class="v"><em>Empty</em> until the professional fills it</span><span class="k">Version 1 · draft marker · SHA-256</span></div>
-        <div class="halt">It stops: before the signature</div>
-        <p>The PDF is rendered, hashed and frozen with its warnings showing. Nothing in it is signed, approved or accepted until a person does that themselves.</p>
-        <div class="rule"><b>Rule</b>Export never manufactures a declaration or implies council acceptance.</div>
-        <div class="src"><span class="k">Sourced from</span><span>the frozen snapshot</span><span>photo hashes</span><span>the professional</span></div>
+      <div class="step-card">
+        <div class="num">YOU SIGN</div>
+        <h3>Nothing is signed by a machine.</h3>
+        <p>The declaration is empty until the assessor fills it. The PDF says "draft" until they say otherwise.</p>
       </div>
     </div>
-    <div class="ai">
-      <div class="col">
-        <div class="label accent">In the design</div>
-        <ul>
-          <li><b>Document to fields.</b> Reads the planning file, prior reports and lab sheets, and proposes values for the report's typed fields with the source they came from.</li>
-          <li><b>Voice to findings.</b> A note dictated at the wall becomes a transcript and a proposed observation, with defect keys from the I.S. 465 Figure 2 list.</li>
-          <li><b>Retrieval, not training.</b> No fine-tuning on assessor history. Every draft can point at the documents and recordings that shaped it, which matters in a grant process.</li>
-        </ul>
-      </div>
-      <div class="col now">
-        <div class="label done">In this prototype</div>
-        <ul>
-          <li><b>A labelled fixture.</b> Every suggestion in the demo comes from a deterministic fake adapter reading a fixture file. The UI and the PDF mark it as simulated.</li>
-          <li><b>The live adapter exists and is unverified.</b> A provider adapter sits behind the same interface and has not been run against real documents. No claim is made for its quality.</li>
-          <li><b>Nothing here is a formal assessment.</b> Exports carry a draft marker. Lab results in the demo are synthetic and say so on the page.</li>
-        </ul>
-      </div>
-    </div>
-    <blockquote>"Gaps and AI suggestions remain visible, and draft export stays available with incomplete fields. Export must not manufacture a professional declaration or imply council acceptance."<span>Decision log, 8 September 2026</span></blockquote>
+    <p class="pipe-note">In this prototype every suggestion comes from a labelled stand-in, not a live model. The live connection exists and has not been tested on real documents.</p>
   </div>
 </section>
 
@@ -750,32 +681,22 @@ border-bottom:1px solid var(--line);
     <div class="head">
       <div class="label">Status on 10 September 2026</div>
       <h2>What is built, and what is next.</h2>
-      <p>Dated, so the pace is visible. The table under it is the honest state of each part.</p>
     </div>
-    <ol class="log">
-      <li><time datetime="2026-09-05">5 Sept 2026</time><div><b>Entry switched to Mica Assess.</b><p>Field spike started: cases from a pasted council email, a 3D wall picker, a Django backend.</p></div></li>
-      <li><time datetime="2026-09-06">6 Sept 2026</time><div><b>Field spike finished and published.</b><p>Elevation picker, 13 backend tests, first public landing page. Kept under spikes for the record.</p></div></li>
-      <li><time datetime="2026-09-08">8 Sept 2026</time><div><b>Direction reset: reporting first.</b><p>Build specification written, then the reporting platform built against it: login, offline outbox, extraction with sources, report editor, immutable PDF versions, invitations, investigation handover. Django, unit and assembler suites pass locally; the browser suite has not yet been run on a second machine. Landing page restyled.</p></div></li>
-      <li><time datetime="2026-09-09">9 Sept 2026</time><div><b>Reporting platform merged.</b><p>One main branch. The spike is history; the platform is the product.</p></div></li>
-      <li><time datetime="2026-09-10">10 Sept 2026</time><div><b>This page, for judges.</b><p>The walkthrough on a clock, the same question three ways, and where the model stops.</p></div></li>
-    </ol>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>Stage</th><th>State</th></tr></thead>
+        <thead><tr><th>Part</th><th>State</th></tr></thead>
         <tbody>
-          <tr><td>Practices, cases, allocation and the work list</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Document upload and extraction into sections A to D, with sources</td><td class="s built"><i></i>Built, fixture AI</td></tr>
-          <tr><td>Locations, photos, dictation, offline outbox</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Report editor, sections A to H, live preview</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Immutable PDF versions with hashes</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Homeowner and helper invitations, document requests, report shares</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Separate investigation assessment, samples, lab documents</td><td class="s built"><i></i>Built, synthetic lab</td></tr>
-          <tr><td>Handover package as a ZIP with a manifest</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Live AI provider</td><td class="s part"><i></i>Wired, unverified</td></tr>
-          <tr><td>Real tablet over private HTTPS</td><td class="s part"><i></i>Not yet run</td></tr>
-          <tr><td>Council and Agency channel</td><td class="s next"><i></i>Next</td></tr>
-          <tr><td>Laboratory integration</td><td class="s next"><i></i>Next</td></tr>
-          <tr><td>Login by professional registration number</td><td class="s next"><i></i>Next</td></tr>
+          <tr><td>Cases, work list, who has what</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Old documents fill the blank fields, with sources</td><td class="s built"><i></i>Built, stand-in AI</td></tr>
+          <tr><td>Photos and voice notes at the house, offline</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Report editor with live preview</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Frozen PDF versions</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Homeowner links, document requests, shares</td><td class="s built"><i></i>Built</td></tr>
+          <tr><td>Hand the case to the next engineer, with lab results</td><td class="s built"><i></i>Built, synthetic lab</td></tr>
+          <tr><td>Live AI model</td><td class="s part"><i></i>Wired, untested</td></tr>
+          <tr><td>Real tablet in a real field</td><td class="s part"><i></i>Not yet run</td></tr>
+          <tr><td>Council channel</td><td class="s next"><i></i>Next</td></tr>
+          <tr><td>Lab channel</td><td class="s next"><i></i>Next</td></tr>
         </tbody>
       </table>
     </div>
@@ -785,7 +706,7 @@ border-bottom:1px solid var(--line);
 <footer>
   <div class="wrap">
     <div class="cta">
-      <h2>Prepare. Capture. Edit. Export.</h2>
+      <h2>Written at the house. Seen by everyone.</h2>
       <a class="btn primary" href="#walkthrough">Drag through it
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
@@ -793,9 +714,8 @@ border-bottom:1px solid var(--line);
     <div class="meta">
       <span>Mica Assess · Crintus &amp; Co</span>
       <span>Prototype for the TechIreland National AI Challenge 2026</span>
-      <span>Built against I.S. 465:2026</span>
-      <span>Not a formal assessment</span>
-      <span>Screenshots show synthetic cases only. No client material appears on this page.</span>
+      <span>Follows the I.S. 465:2026 report structure. Not a formal assessment.</span>
+      <span>Every house on this page is synthetic.</span>
     </div>
   </div>
 </footer>
@@ -804,12 +724,12 @@ border-bottom:1px solid var(--line);
 (function () {
   // [number, clock, place, title, caption]. The clock is one plausible visit.
   var stages = [
-    ['01', '08:40', 'At the practice', 'Open the case.', 'A practice admin creates the case and allocates it. Work state and sync state stay separate.'],
-    ['02', '08:55', 'At the practice', 'Prepare from what already exists.', 'Upload the planning file, an old report, the homeowner\u2019s photos. Extraction fills the blank fields and labels each value with its source.'],
-    ['03', '10:30', 'At the house, no signal', 'Capture on site, offline.', 'A list of locations, not a 3D house. Photos and dictated notes get their id on the tablet and queue until there is signal.'],
-    ['04', '12:10', 'At the house, in the van', 'Edit the report. Keep every human change.', 'Sections A to H, editable in place. A rerun never overwrites a value a person typed; the new one waits as an alternative.'],
-    ['05', '12:40', 'At the house, in the van', 'Freeze a version.', 'Version 1 is rendered to PDF and hashed. Edit again and you get version 2; version 1 never changes.'],
-    ['06', '12:55', 'Before the drive home, and weeks later', 'Share, request, hand over.', 'Invite the homeowner to upload what is missing, share one chosen version, and when the Agency directs an investigation, hand the case over as a ZIP with a manifest.']
+    ['01', '08:40', 'At the practice', 'Open the case.', 'The practice creates the case and hands it to an assessor.'],
+    ['02', '08:55', 'At the practice', 'Prepare from what exists.', 'Upload the planning file and the old report. The blank fields fill in, each showing where it came from.'],
+    ['03', '10:30', 'At the house, no signal', 'Capture at the house.', 'Photos and voice notes save on the tablet first, and upload when there is signal.'],
+    ['04', '12:10', 'At the house, in the van', 'Correct the draft.', 'The report is already written. Fix what is wrong. Your edits are never overwritten.'],
+    ['05', '12:40', 'At the house, in the van', 'Freeze a version.', 'Version 1 becomes a PDF that never changes. Edit again and you get version 2.'],
+    ['06', '12:55', 'Before the drive home', 'Share and hand over.', 'Send the homeowner a link for what is missing. Send the council the PDF. Hand the case to the next engineer.']
   ];
   var range = document.getElementById('scrub');
   var scene = document.getElementById('scene');
