@@ -102,8 +102,13 @@ border-bottom:1px solid var(--line);
   .reel-frames img{position:absolute;inset:0;border:0;opacity:0;animation:reel-fade var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
   .reel-frames img:first-child{opacity:1}
   .reel-frames img:first-child{animation-name:reel-fade-first}
-  .reel-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
-  .reel-bar i{display:block;height:2px;background:var(--line);overflow:hidden;position:relative}
+  .reel-tag{display:flex;align-items:center;gap:8px;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+  .reel-tag span{color:var(--muted)}
+  .reel-tag i{width:7px;height:7px;background:var(--accent);animation:reel-blink 1.2s ease-in-out infinite}
+  .reel:hover .reel-tag i,.reel:focus-within .reel-tag i{animation:none;opacity:1}
+  @keyframes reel-blink{0%,100%{opacity:1}50%{opacity:.25}}
+  .reel-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
+  .reel-bar i{display:block;height:3px;background:var(--line);overflow:hidden;position:relative}
   .reel-bar i::after{content:"";position:absolute;inset:0;background:var(--accent);transform:scaleX(0);transform-origin:left;
     animation:reel-bar var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
   .reel-caps{position:relative;min-height:2.6em;margin-top:10px}
@@ -117,7 +122,8 @@ border-bottom:1px solid var(--line);
   @keyframes reel-fade-first{0%{opacity:1}25%{opacity:1}28%{opacity:0}97%{opacity:0}100%{opacity:1}}
   @keyframes reel-bar{0%{transform:scaleX(0)}25%{transform:scaleX(1)}25.01%{transform:scaleX(0)}100%{transform:scaleX(0)}}
   @media (prefers-reduced-motion:reduce){
-    .reel-frames img,.reel-caps span,.reel-bar i::after{animation:none}
+    .reel-frames img,.reel-caps span,.reel-bar i::after,.reel-tag i{animation:none}
+    .reel-tag{display:none}
     .reel-frames img:first-child,.reel-caps span:first-child{opacity:1}
     .reel-bar{display:none}
   }
@@ -373,6 +379,7 @@ border-bottom:1px solid var(--line);
         <img src="img/app-report.png" width="1280" height="860" alt="The editable I.S. 465 draft beside its rendered preview, with a fixture-generated AI content warning." loading="eager" style="--i:2">
         <img src="img/app-versions.png" width="1280" height="860" alt="Report versions: each download stays tied to a frozen snapshot." loading="eager" style="--i:3">
       </div>
+      <div class="reel-tag" aria-hidden="true"><i></i>20-second walk through the app <span>· hover to hold a frame</span></div>
       <div class="reel-bar" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
       <figcaption class="reel-caps">
         <span style="--i:0"><b>01</b> Open the case. Work state, sync state and scheme status stay separate.</span>
