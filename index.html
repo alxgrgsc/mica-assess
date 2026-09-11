@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23fcaa2d' stroke-width='9' stroke-linecap='square'%3E%3Cpath d='M10 20h44'/%3E%3Cpath d='M32 52V28'/%3E%3Cpath d='M17 52 32 28l15 24'/%3E%3C/svg%3E">
-<title>Releve — the I.S. 465 report, drafted at the house</title>
-<meta name="description" content="Releve is a reporting workspace for the assessment practices doing Defective Concrete Block work: photos, voice notes and the homeowner's old documents go in on a tablet, and the draft I.S. 465 report comes out as a frozen PDF, edited by the professional who signs it. Prototype for the TechIreland National AI Challenge 2026.">
+<title>Releve — the BCA report, drafted at the house</title>
+<meta name="description" content="Releve drafts the Building Condition Assessment for Ireland's Defective Concrete Blocks grant at the house, from the evidence gathered there, with a source for every value. The professional corrects it and signs it. Prototype by Crintus &amp; Co for the TechIreland National AI Challenge 2026.">
 <meta name="theme-color" content="#fffef2">
 <style>
   /* Look follows relace.ai: cream ground, near-black ink, one amber accent,
@@ -33,7 +33,7 @@
     --serif:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
     --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
     --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',SFMono-Regular,Menlo,monospace;
-    --wrap:1080px;
+    --wrap:1280px;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -59,6 +59,7 @@
   h3{font-size:20px;line-height:1.3;letter-spacing:-.02em}
   .lede{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:56ch}
   .lede b{color:var(--text);font-weight:500}
+  .hero .lede b{display:block;margin-top:12px}
 
   .btn{
     display:inline-flex;align-items:center;gap:10px;
@@ -88,157 +89,221 @@ border-bottom:1px solid var(--line);
   nav .links{display:flex;gap:22px;align-items:center}
   nav .links a.txt{font-family:var(--sans);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);text-decoration:none}
   nav .links a.txt:hover{color:var(--accent-deep)}
-  @media (max-width:720px){nav .links a.txt{display:none}.brand span{display:none}}
+  .brand b,nav .btn{white-space:nowrap}
+  @media (max-width:720px){nav .links a.txt{display:none}.brand span{display:none}nav .btn{padding:10px 14px}}
 
   /* ---- hero ---- */
   .hero{padding:clamp(56px,9vw,120px) 0 clamp(48px,7vw,96px);border-bottom:1px solid var(--line)}
-  .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center}
+  .hero .wrap{max-width:1440px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(24px,3vw,48px);align-items:center}
+  @media (max-width:1180px){.hero .wrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
   @media (max-width:880px){.hero .wrap{grid-template-columns:1fr}}
   .hero .copy{display:flex;flex-direction:column;gap:22px}
   .hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
   .hero .fine{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
   .hero .fine i{color:var(--done);font-style:normal}
-  /* The correction in the problem headline. The resting state, and what
-     shows without JS or with reduced motion, is the true one: Thousands.
-     With JS the old word is laid over the same slot, struck by hand, then
-     dropped out of the line while the new one falls in from above and
-     knocks the line about on landing. It settles a degree or two off
-     square, like something set down by hand rather than typeset. */
-  .swap{position:relative;display:inline-block;white-space:nowrap}
-  .was{display:none;text-decoration:none}
-  .was .rub{position:absolute;left:-1%;top:.54em;width:102%;height:.4em;overflow:visible;pointer-events:none}
-  .was .rub path{fill:none;stroke:var(--accent-deep);stroke-width:3;stroke-linecap:round;
-    vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:0}
-  .now{display:inline-block;text-decoration:none;color:var(--accent-deep);transform:rotate(-1.8deg)}
-  .js .swap{width:var(--w0)}
-  .js .was{display:inline-block;position:absolute;left:0;top:0;white-space:nowrap;color:var(--text)}
-  .js .was .rub path{stroke-dashoffset:1}
-  .js .now{opacity:0}
-  .js h2.fix.on .was .rub path{animation:rub .45s cubic-bezier(.4,0,.2,1) 1s forwards}
-  .js h2.fix.on .was{animation:drop-out .5s cubic-bezier(.55,0,.9,.45) 1.45s forwards}
-  .js h2.fix.on .swap{animation:slot .4s cubic-bezier(.5,0,.6,1) 1.45s forwards}
-  .js h2.fix.on .now{animation:drop-in .5s cubic-bezier(.5,0,.6,1) 1.55s forwards}
-  .js h2.fix.on{animation:ground .34s ease-out 2s}
-  @keyframes rub{to{stroke-dashoffset:0}}
-  @keyframes slot{to{width:var(--w1)}}
-  @keyframes drop-out{
-    0%{opacity:1;transform:translateY(0) rotate(0)}
-    100%{opacity:0;transform:translateY(.85em) rotate(-5deg)}}
-  @keyframes drop-in{
-    0%{opacity:0;transform:translateY(-1.3em) rotate(5deg)}
-    12%{opacity:1}
-    72%{transform:translateY(.07em) rotate(-2.8deg)}
-    88%{transform:translateY(-.03em) rotate(-1.1deg)}
-    100%{opacity:1;transform:translateY(0) rotate(-1.8deg)}}
-  @keyframes ground{
-    0%{transform:translateY(0)}
-    18%{transform:translateY(3px)}
-    38%{transform:translateY(-2px)}
-    58%{transform:translateY(2px)}
-    78%{transform:translateY(-1px)}
-    100%{transform:translateY(0)}}
-  @media (prefers-reduced-motion:reduce){
-    .js .was{display:none}
-    .js .swap{width:auto}
-    .js .now{opacity:1}
-    .js h2.fix.on,.js h2.fix.on .was,.js h2.fix.on .now,.js h2.fix.on .was .rub path{animation:none}
-  }
-  .hero .say{font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--muted);margin:-8px 0 0}
-  .hero .say b{color:var(--text);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
-  .hero .say i{font-style:normal;color:var(--accent-deep);letter-spacing:.06em;text-transform:uppercase}
-  /* hero reel: 4 frames x 5s = 20s loop, pure CSS. Hover or focus pauses it. */
-  .reel{--n:4;--dur:20s}
-  .reel-frames{position:relative;aspect-ratio:1280/860;border:1px solid var(--line-2);background:var(--surface);overflow:hidden}
-  .reel-frames img{position:absolute;inset:0;border:0;opacity:0;animation:reel-fade var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
-  .reel-frames img:first-child{opacity:1}
-  .reel-frames img:first-child{animation-name:reel-fade-first}
-  .reel-tag{display:flex;align-items:center;gap:8px;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
-  .reel-tag span{color:var(--muted)}
-  .reel-tag i{width:7px;height:7px;background:var(--accent);animation:reel-blink 1.2s ease-in-out infinite}
-  .reel:hover .reel-tag i,.reel:focus-within .reel-tag i{animation:none;opacity:1}
-  @keyframes reel-blink{0%,100%{opacity:1}50%{opacity:.25}}
-  .reel-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
-  .reel-bar i{display:block;height:3px;background:var(--line);overflow:hidden;position:relative}
-  .reel-bar i::after{content:"";position:absolute;inset:0;background:var(--accent);transform:scaleX(0);transform-origin:left;
-    animation:reel-bar var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
-  .reel-caps{position:relative;min-height:2.6em;margin-top:10px}
-  .reel-caps span{position:absolute;inset:0;opacity:0;animation:reel-fade var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
-  .reel-caps span:first-child{animation-name:reel-fade-first}
-  .reel-caps b{color:var(--accent-deep);font-weight:500;margin-right:6px}
-  .reel:hover *,.reel:focus-within *{animation-play-state:paused}
-  /* frame i is visible for 25% of the loop: fade in over 3%, hold, fade out over 3% */
-  @keyframes reel-fade{0%{opacity:0}3%{opacity:1}25%{opacity:1}28%{opacity:0}100%{opacity:0}}
-  /* first frame starts visible so the page never shows an empty box, and comes back at the end for the wrap-around */
-  @keyframes reel-fade-first{0%{opacity:1}25%{opacity:1}28%{opacity:0}97%{opacity:0}100%{opacity:1}}
-  @keyframes reel-bar{0%{transform:scaleX(0)}25%{transform:scaleX(1)}25.01%{transform:scaleX(0)}100%{transform:scaleX(0)}}
-  @media (prefers-reduced-motion:reduce){
-    .reel-frames img,.reel-caps span,.reel-bar i::after,.reel-tag i{animation:none}
-    .reel-tag{display:none}
-    .reel-frames img:first-child,.reel-caps span:first-child{opacity:1}
-    .reel-bar{display:none}
-  }
-  .shot{margin:0;width:100%;max-width:520px;justify-self:center}
-  .shot img{display:block;width:100%;height:auto;border:1px solid var(--line-2);border-radius:0;background:var(--surface)}
-  .shot figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em;margin-top:10px;line-height:1.5}
-  .shot.wide{max-width:none;grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:center;padding:8px 0}
-  .shot.wide img{max-width:560px}
-  .shot.wide figcaption{margin-top:0;font-family:var(--sans);font-size:15px;color:var(--text-2,var(--muted));letter-spacing:0;line-height:1.55}
-  @media (max-width:880px){.shot.wide{grid-template-columns:1fr}}
+  /* The product name leads the hero, so nobody has to hunt for it. */
+  .hero .name{display:flex;align-items:center;gap:14px;margin:0}
+  .hero .name svg{width:clamp(34px,3.6vw,44px);height:clamp(34px,3.6vw,44px);flex:0 0 auto;color:var(--accent)}
+  .hero .name b{font-size:clamp(32px,3.6vw,44px);font-weight:600;letter-spacing:-.045em;line-height:1}
+  .hero h1{font-size:clamp(34px,4.4vw,64px);text-wrap:balance}
+  .hero h1 .fix{color:var(--accent-deep)}
+  /* hero illustration: the paper is keyed out to transparent, so only the ink sits on the page */
+  .hero-art{margin:0}
+  .hero-art img{display:block;width:100%;height:auto}
+  .source-note{margin-top:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;line-height:1.6;color:var(--muted);max-width:80ch}
 
   /* ---- sections ---- */
   section{padding:clamp(56px,7vw,96px) 0;border-bottom:1px solid var(--line)}
   section .head{display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(28px,4vw,48px)}
   section .head p{color:var(--muted);max-width:56ch;font-size:clamp(16.5px,1.5vw,19px)}
 
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:0;overflow:hidden}
-  @media (max-width:720px){.stats{grid-template-columns:1fr}}
-  .stat{background:var(--surface);padding:22px 22px 20px;display:flex;flex-direction:column;gap:6px}
-  .stat .n{font-family:var(--mono);font-size:clamp(28px,3vw,36px);font-weight:500;letter-spacing:-.02em;color:var(--text);font-variant-numeric:tabular-nums}
-  .stat .n small{font-size:14px;color:var(--muted);letter-spacing:0;margin-left:6px}
-  .stat .d{color:var(--muted);font-size:14px}
+  /* hero: the scale of the problem, straight under the headline */
+  .scale{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:clamp(22px,4vw,48px);padding-top:18px;border-top:1px solid var(--line)}
+  .scale b{display:block;font-size:clamp(28px,3vw,38px);font-weight:500;letter-spacing:-.04em;line-height:1.05;font-variant-numeric:tabular-nums}
+  .scale span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .scale-src{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--muted);margin-top:-12px}
 
+  /* bottleneck: the split bar. Visit and write-up at their real proportions (about half a working
+     day against about ten). Fills checked with the dataviz palette validator: #a36404 / #e8a13a pass
+     lightness, chroma and colour-blind separation. Labels stay in ink; the swatch carries identity. */
+  .split{margin:0}
+  .split-bar{display:flex;gap:2px;height:24px}
+  .seg{position:relative;display:block;height:100%}
+  .seg.visit{flex:0 0 4.8%;min-width:12px;background:#a36404;border-radius:4px 0 0 4px}
+  .seg.desk{flex:1 1 auto;border-radius:0 4px 4px 0;
+    background:repeating-linear-gradient(45deg,rgba(25,25,24,.14) 0 1px,transparent 1px 7px),#e8a13a}
+  .seg::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:0;padding:6px 9px;white-space:nowrap;
+    background:var(--text);color:var(--ground);font:500 11px/1.2 var(--mono);letter-spacing:.04em;opacity:0;pointer-events:none;transition:opacity .15s}
+  .seg.desk::after{left:auto;right:0}
+  .seg:hover::after{opacity:1}
+  /* each label reads as a sentence: "The site visit takes a morning." / "The write-up takes ~2 weeks." */
+  .split-labels{display:flex;justify-content:space-between;gap:12px 24px;margin-top:14px}
+  .split-labels > div{display:flex;align-items:center;gap:10px;font-size:clamp(16px,1.5vw,20px);letter-spacing:-.01em;color:var(--text)}
+  .split-labels b{color:var(--text);font-weight:600}
+  .split-labels .sw{width:10px;height:10px;flex:0 0 auto;border-radius:2px;background:#a36404}
+  .split-labels .desk .sw{background:#e8a13a}
+  @media (max-width:640px){.split-labels{flex-direction:column}}
+
+  /* the hourglass sits beside the heading and the time line; paper keyed out like the hero cottage */
+  /* hourglass on the left, so the section doesn't mirror the hero's picture-on-the-right */
+  .bn-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.8fr);gap:clamp(24px,4vw,64px);align-items:center;margin-bottom:clamp(36px,5vw,56px)}
+  .bn-art{order:-1;margin:0;justify-self:center;width:100%;max-width:310px}
+  .bn-art img{display:block;width:100%;height:auto}
+  @media (max-width:880px){.bn-top{grid-template-columns:1fr}.bn-art{order:0;max-width:240px}}
+
+  /* short factor cards: a big figure on a rule, its source underneath */
+  .factors{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(28px,3.5vw,44px) clamp(20px,3vw,40px)}
+  @media (max-width:980px){.factors{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.factors{grid-template-columns:1fr}}
+  .factor{border-top:2px solid var(--text);padding-top:16px;display:flex;flex-direction:column;gap:10px}
+  .factor.hl{border-top-color:var(--accent)}
+  .factor .fig{font-size:clamp(40px,4.6vw,58px);letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+  .factor .fig small{font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:.04em;margin-left:8px}
+  .factor.hl .fig{color:var(--accent-deep)}
+  .factor p{color:var(--muted);font-size:15px}
+  .factor cite{margin-top:auto;padding-top:4px;font-family:var(--mono);font-size:10.5px;font-style:normal;letter-spacing:.04em;color:var(--muted)}
 
   .pipe-note{margin-top:28px;color:var(--muted);max-width:66ch;font-size:clamp(16px,1.4vw,18px)}
   .pipe-note b{color:var(--text);font-weight:500}
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  .steps.four,.hands{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  @media (max-width:980px){.steps.four,.hands{grid-template-columns:repeat(2,1fr)}}
-  @media (max-width:560px){.steps.four,.hands{grid-template-columns:1fr}}
-  .hands .num{letter-spacing:.16em}
-  @media (max-width:880px){.steps{grid-template-columns:repeat(2,1fr)}}
-  @media (max-width:560px){.steps{grid-template-columns:1fr}}
-  .step-card{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:0;padding:22px 22px 24px;display:flex;flex-direction:column;gap:10px}
-  .step-card .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
-  .step-card p{color:var(--muted);font-size:15.5px}
 
+  /* the difference: a dark band. Source -> facts -> report, and the trace running back */
+  section.dark{background:var(--text);color:var(--ground);border-bottom-color:var(--text)}
+  .dark .label{color:rgba(255,254,242,.55)}
+  .dark .head p{color:rgba(255,254,242,.85)}
+  .dark .pipe-note{color:rgba(255,254,242,.82)}
+  .dark .pipe-note b{color:var(--ground)}
+  /* the trace: sources -> facts -> report, top-aligned, with live connector lines drawn between
+     whichever line is active. It cycles on its own until someone hovers, clicks or tabs into it. */
+  .trace{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr) 72px minmax(0,1fr);align-items:start}
+  .trace-col{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px}
+  .trace-col .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:rgba(255,254,242,.72);margin-bottom:4px}
+  .trace-col .k b{color:var(--accent);font-weight:500;margin-right:8px}
+  .gutter{padding-top:1px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,254,242,.6);text-align:center}
+  .doc,.rep,.voice{background:var(--ground);color:var(--text);padding:16px 18px 18px}
+  .doc .fn,.rep .fn,.voice .fn{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px}
+  .doc{font-size:13.5px;line-height:1.75}
+  .doc .ln{display:block;color:rgba(25,25,24,.45);padding:0 6px;margin:0 -6px;transition:background .25s,box-shadow .25s}
+  .doc .ln.t{color:var(--text);cursor:pointer}
+  .voice .wave{display:block;width:100%;height:28px;margin:2px 0 10px;fill:rgba(25,25,24,.5)}
+  .voice .quote{display:block;font-size:13.5px;line-height:1.6;color:var(--text);padding:2px 6px;margin:0 -6px;cursor:pointer;transition:background .25s,box-shadow .25s}
+  .doc .ln.on,.voice .quote.on{background:var(--accent-soft);box-shadow:inset 2px 0 0 var(--accent)}
+  .fact{all:unset;box-sizing:border-box;display:block;width:100%;text-align:left;cursor:pointer;border:1px solid rgba(255,254,242,.22);
+    padding:11px 13px;font-size:14.5px;color:var(--ground);transition:border-color .25s,background .25s}
+  .fact small{display:block;font-family:var(--mono);font-size:10.5px;color:rgba(255,254,242,.66);margin-top:3px;letter-spacing:.04em}
+  .fact:hover{border-color:rgba(255,254,242,.45)}
+  .fact.on{border-color:var(--accent);background:rgba(252,170,45,.12)}
+  .fact.on small{color:var(--accent)}
+  .rep .row{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;gap:12px;cursor:pointer;
+    width:calc(100% + 16px);margin:0 -8px;padding:10px 8px;border-bottom:1px solid var(--line);font-size:14px;transition:background .25s}
+  .rep .row:hover{background:var(--surface)}
+  .rep .row.on{background:var(--accent-soft)}
+  .rep .src{font-family:var(--mono);font-size:10.5px;color:var(--accent-deep);white-space:nowrap}
+  .fact:focus-visible,.rep .row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .trace-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:2}
+  .trace-links path{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-dasharray:4 4;animation:trace-flow 1s linear infinite}
+  .trace-links circle{fill:var(--accent)}
+  @keyframes trace-flow{to{stroke-dashoffset:-16}}
+  .traceback{grid-column:1 / -1;display:flex;align-items:center;gap:14px;margin-top:22px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+  .traceback::before,.traceback::after{content:"";flex:1;border-top:1.5px dashed var(--accent)}
+  @media (max-width:880px){
+    .trace{grid-template-columns:1fr;gap:22px}
+    .gutter,.trace-links{display:none}
+    .traceback{white-space:normal;text-align:center}
+  }
+  @media (prefers-reduced-motion:reduce){.trace-links path{animation:none}}
+  /* chatbot vs Releve: the same answer twice. One comes out of a literal black box with nothing
+     attached; the other carries its source. */
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,2vw,24px);margin-top:clamp(40px,5vw,64px);align-items:stretch}
+  @media (max-width:760px){.versus{grid-template-columns:1fr}}
+  .vs{display:flex;flex-direction:column;gap:14px;padding:24px 24px 20px}
+  .vs .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em}
+  .vs.bot{background:#0c0c0b;border:1px solid rgba(255,254,242,.14)}
+  .vs.bot .k{color:rgba(255,254,242,.75)}
+  .vs.us{background:var(--ground);color:var(--text)}
+  .vs.us .k{color:var(--accent-deep)}
+  .vs .fn{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .vs .ask{align-self:flex-end;max-width:85%;padding:9px 13px;border-radius:12px 12px 2px 12px;background:rgba(255,254,242,.13);color:var(--ground);font-size:14px}
+  .vs .bubble{align-self:flex-start;max-width:85%;padding:11px 14px;border-radius:12px 12px 12px 2px;background:rgba(255,254,242,.06);
+    border:1px solid rgba(255,254,242,.18);color:var(--ground);font-size:15.5px}
+  .vs .line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 12px;background:var(--accent-soft);box-shadow:inset 2px 0 0 var(--accent);font-size:15.5px}
+  .vs .chip{font-family:var(--mono);font-size:11px;color:var(--accent-deep);white-space:nowrap}
+  .vs .line span:first-child{white-space:nowrap}
+  .vs .verdict{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500}
+  .vs .verdict i{display:grid;place-items:center;flex:0 0 auto;width:22px;height:22px;border-radius:50%;font-style:normal;font-family:var(--mono);font-size:12px}
+  .vs.bot .verdict{color:var(--ground)}
+  .vs.bot .verdict i{border:1.5px solid rgba(255,254,242,.55);color:rgba(255,254,242,.85)}
+  .vs.us .verdict i{background:var(--accent);color:var(--accent-ink)}
+  .vs ul{list-style:none;margin:auto 0 0;padding:4px 0 0}
+  .vs li{display:grid;grid-template-columns:10px 1fr;gap:12px;padding:9px 0;border-top:1px solid;font-size:14.5px}
+  .vs.bot li{border-color:rgba(255,254,242,.12);color:rgba(255,254,242,.85)}
+  .vs.bot li::before{content:"";width:9px;height:1.5px;margin-top:11px;background:rgba(255,254,242,.5)}
+  .vs.us li{border-color:var(--line)}
+  .vs.us li::before{content:"";width:9px;height:9px;margin-top:7px;background:var(--accent)}
+  /* the prototype caveat as a tag and one line, not a paragraph */
+  .stand-in{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:28px;max-width:none;font-size:15px;color:rgba(255,254,242,.85)}
+  .stand-in .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--accent);color:var(--accent)}
 
+  /* who pays: documents flow in, the report flows out, the practice in the middle pays */
+  .flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.15fr) auto minmax(0,1fr);align-items:stretch}
+  .node{border:1px solid var(--line-2);padding:24px 22px 26px;display:flex;flex-direction:column;gap:10px}
+  .node .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
+  .node p{color:var(--muted);font-size:15px}
+  .node.buyer{background:var(--accent);border-color:var(--accent)}
+  .node.buyer .num,.node.buyer p{color:var(--accent-ink)}
+  .node.buyer h3{font-weight:500}
+  .arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 12px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .arrow svg{width:44px;height:14px;color:var(--text)}
+  @media (max-width:880px){
+    .flow{grid-template-columns:1fr}
+    .arrow{flex-direction:row;padding:12px 0}
+    .arrow svg{transform:rotate(90deg);width:28px}
+  }
 
-  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:0;background:var(--surface)}
-  table{width:100%;border-collapse:collapse;font-size:15px}
-  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
-  th{font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
-  tr:last-child td{border-bottom:0}
-  td.s{font-family:var(--mono);font-size:12px;letter-spacing:.06em;white-space:nowrap;width:1%}
-  td.s i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
-  td.s.built{color:var(--done)}td.s.built i{background:var(--done)}
-  td.s.next{color:var(--muted)}td.s.next i{background:var(--line-2)}
-  td.s.part{color:var(--accent-deep)}td.s.part i{background:var(--accent)}
+  /* how it scales: rising steps, the north star in ink */
+  .ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:end}
+  @media (max-width:880px){.ladder{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.ladder{grid-template-columns:1fr}}
+  .rung{border:1px solid var(--line-2);padding:22px 20px 24px;display:flex;flex-direction:column;gap:10px;min-height:calc(180px + var(--k) * 44px)}
+  @media (max-width:880px){.rung{min-height:0}}
+  .rung .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
+  .rung p{color:var(--muted);font-size:15px}
+  .rung.now{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+  .rung.star{background:var(--text);color:var(--ground);border-color:var(--text)}
+  .rung.star .num{color:var(--accent)}
+  .rung.star p{color:rgba(255,254,242,.62)}
 
-  /* ---- footer ---- */
-  footer{padding:clamp(48px,6vw,80px) 0 40px}
-  footer .cta{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;padding-bottom:40px;border-bottom:1px solid var(--line);margin-bottom:28px}
-  footer .cta h2{max-width:none}
-  footer .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--muted)}
+  /* status: two lists, built and not yet */
+  .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,32px)}
+  @media (max-width:760px){.status-grid{grid-template-columns:1fr}}
+  .status-col{border-top:2px solid var(--accent);padding-top:16px}
+  .status-col.next{border-top-color:var(--line-2)}
+  .status-col h3{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px}
+  .status-col h3 small{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .status-col ul{list-style:none;margin:0;padding:0}
+  .status-col li{display:grid;grid-template-columns:10px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);font-size:15.5px}
+  .status-col li::before{content:"";width:10px;height:10px;margin-top:7px;background:var(--accent)}
+  .status-col.next li::before{background:none;border:1.5px solid var(--line-2)}
+  .status-col li span{color:var(--muted)}
 
-  /* ---- walkthrough: drag the pin, the scene follows ---- */
-  .scrub{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:28px 48px;align-items:center}
+  /* how it works: drag the pin, the screen and caption follow. Brought back from the original walkthrough. */
+  .scrub{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:28px clamp(32px,4vw,56px);align-items:center}
   @media (max-width:880px){.scrub{grid-template-columns:1fr}}
-  .scrub-copy{display:flex;flex-direction:column;gap:12px;min-height:170px}
-  .scrub-copy .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
-  .scrub-copy h3{font-size:clamp(22px,2.4vw,28px);letter-spacing:-.03em;max-width:18ch}
-  .scrub-copy p{color:var(--muted);font-size:16px;max-width:44ch}
-  .scrub-scene{border:1px solid var(--line);background:var(--surface);aspect-ratio:16/10}
-  .scrub-scene svg{display:block;width:100%;height:100%}
+  .scrub-copy{display:flex;flex-direction:column;gap:12px;min-height:190px}
+  .scrub-copy .num{font-family:var(--mono);font-size:clamp(13px,1.1vw,15px);font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep)}
+  /* the heading follows the slider: every step in ink, the current one in brown */
+  #how .head{align-items:center;text-align:center;margin-bottom:clamp(24px,3.5vw,40px)}
+  #how .head h2{max-width:none}
+  #how .head p{color:var(--text)}
+  .scrub-title span{color:var(--text);cursor:pointer;transition:color .3s ease}
+  .scrub-title span.done{color:var(--text)}
+  .scrub-title span.on{color:var(--accent-deep)}
+  .scrub-copy h3{font-size:clamp(24px,2.6vw,34px);letter-spacing:-.03em;max-width:18ch}
+  .scrub-copy p{color:var(--muted);font-size:16px;max-width:40ch}
+  .scrub-scene{position:relative;aspect-ratio:1440/1000;border:1px solid var(--line-2);background:var(--surface);overflow:hidden}
+  .scrub-scene img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s ease}
+  .scrub-scene img.on{opacity:1}
   .scrub-track{grid-column:1 / -1;position:relative;margin-top:8px;touch-action:none;user-select:none;-webkit-user-select:none}
   .scrub-ticks{height:44px;pointer-events:none;
     background:
@@ -256,157 +321,35 @@ border-bottom:1px solid var(--line);
   .scrub-range:focus{outline:none}
   .scrub-range:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent);outline-offset:-2px}
   .scrub-range:focus-visible::-moz-range-thumb{outline:2px solid var(--accent);outline-offset:-2px}
-  .scrub-marks{display:grid;grid-template-columns:repeat(6,1fr);margin:6px 0 0;padding:0;list-style:none}
+  .scrub-marks{display:grid;grid-template-columns:repeat(4,1fr);margin:6px 0 0;padding:0;list-style:none}
   .scrub-marks button{all:unset;display:block;cursor:pointer;text-align:center;padding:8px 0;
-    font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted)}
+    font-family:var(--mono);font-size:clamp(12px,1.1vw,15px);font-weight:500;letter-spacing:.12em;color:var(--muted)}
   .scrub-marks button:hover{color:var(--text)}
   .scrub-marks button[aria-current]{color:var(--accent-deep)}
   .scrub-marks button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .scrub-hint{margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);
     display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
-  .scrub-hint b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}
-  .scrub-copy .num b{color:var(--text);font-weight:500;font-size:15px;letter-spacing:0;font-variant-numeric:tabular-nums;margin:0 2px}
-  .scrub-marks button small{display:block;font-size:10px;letter-spacing:.04em;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
-  .scrub-marks button[aria-current] small{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){.scrub-scene img{transition:none}}
 
-  /* scene: every animation is 6s, paused, and scrubbed by the pin.
-     The drawing is stroke-dashoffset on paths carrying pathLength="1", so one
-     pair of keyframes works whatever the real length of the line is. Class
-     d43 means stage 4, slot 3; the numbers are generated, not typed. */
-  .scene *{animation-duration:6s;animation-timing-function:linear;animation-fill-mode:both;animation-play-state:paused}
-  .scene .ink{fill:none;stroke:var(--text);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-  .scene .ink2{fill:none;stroke:var(--text);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;opacity:.4}
-  .scene .crack{fill:none;stroke:var(--accent-deep);stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
-  .scene .dr{stroke-dasharray:1}
-  .scene .fill{stroke:none}
-  .scene .amber{fill:var(--accent)}
-  .scene .soft{fill:var(--accent-soft)}
-  .scene .grey{fill:var(--surface-2)}
-  .scene .t{font-family:var(--mono);font-size:12px;letter-spacing:.1em;fill:var(--text)}
-  .scene .t.m{fill:var(--muted)}
-  .scene .t.a{fill:var(--accent-deep)}
-  .scene .u{font-family:var(--sans);font-size:14px;fill:var(--text)}
-  .scene .u.m{fill:var(--muted)}
-  .scene .st{opacity:0}
-  .scene .st1{animation-name:st1}.scene .st2{animation-name:st2}.scene .st3{animation-name:st3}
-  .scene .st4{animation-name:st4}.scene .st5{animation-name:st5}.scene .st6{animation-name:st6}
-  .scene .d11{animation-name:d11}.scene .f11{animation-name:f11}.scene .r11{animation-name:r11}
-  .scene .d12{animation-name:d12}.scene .f12{animation-name:f12}.scene .r12{animation-name:r12}
-  .scene .d13{animation-name:d13}.scene .f13{animation-name:f13}.scene .r13{animation-name:r13}
-  .scene .d14{animation-name:d14}.scene .f14{animation-name:f14}.scene .r14{animation-name:r14}
-  .scene .d21{animation-name:d21}.scene .f21{animation-name:f21}.scene .r21{animation-name:r21}
-  .scene .d22{animation-name:d22}.scene .f22{animation-name:f22}.scene .r22{animation-name:r22}
-  .scene .d23{animation-name:d23}.scene .f23{animation-name:f23}.scene .r23{animation-name:r23}
-  .scene .d24{animation-name:d24}.scene .f24{animation-name:f24}.scene .r24{animation-name:r24}
-  .scene .d31{animation-name:d31}.scene .f31{animation-name:f31}.scene .r31{animation-name:r31}
-  .scene .d32{animation-name:d32}.scene .f32{animation-name:f32}.scene .r32{animation-name:r32}
-  .scene .d33{animation-name:d33}.scene .f33{animation-name:f33}.scene .r33{animation-name:r33}
-  .scene .d34{animation-name:d34}.scene .f34{animation-name:f34}.scene .r34{animation-name:r34}
-  .scene .d41{animation-name:d41}.scene .f41{animation-name:f41}.scene .r41{animation-name:r41}
-  .scene .d42{animation-name:d42}.scene .f42{animation-name:f42}.scene .r42{animation-name:r42}
-  .scene .d43{animation-name:d43}.scene .f43{animation-name:f43}.scene .r43{animation-name:r43}
-  .scene .d44{animation-name:d44}.scene .f44{animation-name:f44}.scene .r44{animation-name:r44}
-  .scene .d51{animation-name:d51}.scene .f51{animation-name:f51}.scene .r51{animation-name:r51}
-  .scene .d52{animation-name:d52}.scene .f52{animation-name:f52}.scene .r52{animation-name:r52}
-  .scene .d53{animation-name:d53}.scene .f53{animation-name:f53}.scene .r53{animation-name:r53}
-  .scene .d54{animation-name:d54}.scene .f54{animation-name:f54}.scene .r54{animation-name:r54}
-  .scene .d61{animation-name:d61}.scene .f61{animation-name:f61}.scene .r61{animation-name:r61}
-  .scene .d62{animation-name:d62}.scene .f62{animation-name:f62}.scene .r62{animation-name:r62}
-  .scene .d63{animation-name:d63}.scene .f63{animation-name:f63}.scene .r63{animation-name:r63}
-  .scene .d64{animation-name:d64}.scene .f64{animation-name:f64}.scene .r64{animation-name:r64}
-  @keyframes st1{0%,15.33%{opacity:1}16.67%,100%{opacity:0}}
-  @keyframes st2{0%,16.67%{opacity:0}18.0%,32.0%{opacity:1}33.33%,100%{opacity:0}}
-  @keyframes st3{0%,33.33%{opacity:0}34.67%,48.67%{opacity:1}50.0%,100%{opacity:0}}
-  @keyframes st4{0%,50.0%{opacity:0}51.33%,65.33%{opacity:1}66.67%,100%{opacity:0}}
-  @keyframes st5{0%,66.67%{opacity:0}68.0%,82.0%{opacity:1}83.33%,100%{opacity:0}}
-  @keyframes st6{0%,83.33%{opacity:0}84.67%,98.67%{opacity:1}}
-  @keyframes d11{0%,1.33%{stroke-dashoffset:1}4.13%,100%{stroke-dashoffset:0}}
-  @keyframes f11{0%,1.33%{opacity:0}4.13%,100%{opacity:1}}
-  @keyframes r11{0%,1.33%{opacity:0;transform:translateY(20px)}4.13%,100%{opacity:1;transform:none}}
-  @keyframes d12{0%,3.29%{stroke-dashoffset:1}5.53%,100%{stroke-dashoffset:0}}
-  @keyframes f12{0%,3.29%{opacity:0}5.53%,100%{opacity:1}}
-  @keyframes r12{0%,3.29%{opacity:0;transform:translateY(20px)}5.53%,100%{opacity:1;transform:none}}
-  @keyframes d13{0%,4.97%{stroke-dashoffset:1}6.93%,100%{stroke-dashoffset:0}}
-  @keyframes f13{0%,4.97%{opacity:0}6.93%,100%{opacity:1}}
-  @keyframes r13{0%,4.97%{opacity:0;transform:translateY(20px)}6.93%,100%{opacity:1;transform:none}}
-  @keyframes d14{0%,6.37%{stroke-dashoffset:1}8.05%,100%{stroke-dashoffset:0}}
-  @keyframes f14{0%,6.37%{opacity:0}8.05%,100%{opacity:1}}
-  @keyframes r14{0%,6.37%{opacity:0;transform:translateY(20px)}8.05%,100%{opacity:1;transform:none}}
-  @keyframes d21{0%,18.0%{stroke-dashoffset:1}20.8%,100%{stroke-dashoffset:0}}
-  @keyframes f21{0%,18.0%{opacity:0}20.8%,100%{opacity:1}}
-  @keyframes r21{0%,18.0%{opacity:0;transform:translateY(20px)}20.8%,100%{opacity:1;transform:none}}
-  @keyframes d22{0%,19.96%{stroke-dashoffset:1}22.2%,100%{stroke-dashoffset:0}}
-  @keyframes f22{0%,19.96%{opacity:0}22.2%,100%{opacity:1}}
-  @keyframes r22{0%,19.96%{opacity:0;transform:translateY(20px)}22.2%,100%{opacity:1;transform:none}}
-  @keyframes d23{0%,21.64%{stroke-dashoffset:1}23.6%,100%{stroke-dashoffset:0}}
-  @keyframes f23{0%,21.64%{opacity:0}23.6%,100%{opacity:1}}
-  @keyframes r23{0%,21.64%{opacity:0;transform:translateY(20px)}23.6%,100%{opacity:1;transform:none}}
-  @keyframes d24{0%,23.04%{stroke-dashoffset:1}24.72%,100%{stroke-dashoffset:0}}
-  @keyframes f24{0%,23.04%{opacity:0}24.72%,100%{opacity:1}}
-  @keyframes r24{0%,23.04%{opacity:0;transform:translateY(20px)}24.72%,100%{opacity:1;transform:none}}
-  @keyframes d31{0%,34.66%{stroke-dashoffset:1}37.46%,100%{stroke-dashoffset:0}}
-  @keyframes f31{0%,34.66%{opacity:0}37.46%,100%{opacity:1}}
-  @keyframes r31{0%,34.66%{opacity:0;transform:translateY(20px)}37.46%,100%{opacity:1;transform:none}}
-  @keyframes d32{0%,36.62%{stroke-dashoffset:1}38.86%,100%{stroke-dashoffset:0}}
-  @keyframes f32{0%,36.62%{opacity:0}38.86%,100%{opacity:1}}
-  @keyframes r32{0%,36.62%{opacity:0;transform:translateY(20px)}38.86%,100%{opacity:1;transform:none}}
-  @keyframes d33{0%,38.3%{stroke-dashoffset:1}40.26%,100%{stroke-dashoffset:0}}
-  @keyframes f33{0%,38.3%{opacity:0}40.26%,100%{opacity:1}}
-  @keyframes r33{0%,38.3%{opacity:0;transform:translateY(20px)}40.26%,100%{opacity:1;transform:none}}
-  @keyframes d34{0%,39.7%{stroke-dashoffset:1}41.38%,100%{stroke-dashoffset:0}}
-  @keyframes f34{0%,39.7%{opacity:0}41.38%,100%{opacity:1}}
-  @keyframes r34{0%,39.7%{opacity:0;transform:translateY(20px)}41.38%,100%{opacity:1;transform:none}}
-  @keyframes d41{0%,51.33%{stroke-dashoffset:1}54.13%,100%{stroke-dashoffset:0}}
-  @keyframes f41{0%,51.33%{opacity:0}54.13%,100%{opacity:1}}
-  @keyframes r41{0%,51.33%{opacity:0;transform:translateY(20px)}54.13%,100%{opacity:1;transform:none}}
-  @keyframes d42{0%,53.29%{stroke-dashoffset:1}55.53%,100%{stroke-dashoffset:0}}
-  @keyframes f42{0%,53.29%{opacity:0}55.53%,100%{opacity:1}}
-  @keyframes r42{0%,53.29%{opacity:0;transform:translateY(20px)}55.53%,100%{opacity:1;transform:none}}
-  @keyframes d43{0%,54.97%{stroke-dashoffset:1}56.93%,100%{stroke-dashoffset:0}}
-  @keyframes f43{0%,54.97%{opacity:0}56.93%,100%{opacity:1}}
-  @keyframes r43{0%,54.97%{opacity:0;transform:translateY(20px)}56.93%,100%{opacity:1;transform:none}}
-  @keyframes d44{0%,56.37%{stroke-dashoffset:1}58.05%,100%{stroke-dashoffset:0}}
-  @keyframes f44{0%,56.37%{opacity:0}58.05%,100%{opacity:1}}
-  @keyframes r44{0%,56.37%{opacity:0;transform:translateY(20px)}58.05%,100%{opacity:1;transform:none}}
-  @keyframes d51{0%,68.0%{stroke-dashoffset:1}70.8%,100%{stroke-dashoffset:0}}
-  @keyframes f51{0%,68.0%{opacity:0}70.8%,100%{opacity:1}}
-  @keyframes r51{0%,68.0%{opacity:0;transform:translateY(20px)}70.8%,100%{opacity:1;transform:none}}
-  @keyframes d52{0%,69.96%{stroke-dashoffset:1}72.2%,100%{stroke-dashoffset:0}}
-  @keyframes f52{0%,69.96%{opacity:0}72.2%,100%{opacity:1}}
-  @keyframes r52{0%,69.96%{opacity:0;transform:translateY(20px)}72.2%,100%{opacity:1;transform:none}}
-  @keyframes d53{0%,71.64%{stroke-dashoffset:1}73.6%,100%{stroke-dashoffset:0}}
-  @keyframes f53{0%,71.64%{opacity:0}73.6%,100%{opacity:1}}
-  @keyframes r53{0%,71.64%{opacity:0;transform:translateY(20px)}73.6%,100%{opacity:1;transform:none}}
-  @keyframes d54{0%,73.04%{stroke-dashoffset:1}74.72%,100%{stroke-dashoffset:0}}
-  @keyframes f54{0%,73.04%{opacity:0}74.72%,100%{opacity:1}}
-  @keyframes r54{0%,73.04%{opacity:0;transform:translateY(20px)}74.72%,100%{opacity:1;transform:none}}
-  @keyframes d61{0%,84.66%{stroke-dashoffset:1}87.46%,100%{stroke-dashoffset:0}}
-  @keyframes f61{0%,84.66%{opacity:0}87.46%,100%{opacity:1}}
-  @keyframes r61{0%,84.66%{opacity:0;transform:translateY(20px)}87.46%,100%{opacity:1;transform:none}}
-  @keyframes d62{0%,86.62%{stroke-dashoffset:1}88.86%,100%{stroke-dashoffset:0}}
-  @keyframes f62{0%,86.62%{opacity:0}88.86%,100%{opacity:1}}
-  @keyframes r62{0%,86.62%{opacity:0;transform:translateY(20px)}88.86%,100%{opacity:1;transform:none}}
-  @keyframes d63{0%,88.3%{stroke-dashoffset:1}90.26%,100%{stroke-dashoffset:0}}
-  @keyframes f63{0%,88.3%{opacity:0}90.26%,100%{opacity:1}}
-  @keyframes r63{0%,88.3%{opacity:0;transform:translateY(20px)}90.26%,100%{opacity:1;transform:none}}
-  @keyframes d64{0%,89.7%{stroke-dashoffset:1}91.38%,100%{stroke-dashoffset:0}}
-  @keyframes f64{0%,89.7%{opacity:0}91.38%,100%{opacity:1}}
-  @keyframes r64{0%,89.7%{opacity:0;transform:translateY(20px)}91.38%,100%{opacity:1;transform:none}}
+  /* ---- footer ---- */
+  footer{padding:clamp(48px,6vw,80px) 0 40px}
+  footer .cta{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;padding-bottom:40px;border-bottom:1px solid var(--line);margin-bottom:28px}
+  footer .cta h2{max-width:none}
+  footer .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--muted)}
+
 </style>
 </head>
 <body>
-<script>document.documentElement.className+=" js"</script>
-
 <nav>
   <div class="wrap">
-    <a class="brand" href="#top"><svg class="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><b>Releve</b><span>I.S. 465 reporting</span></a>
+    <a class="brand" href="#top"><svg class="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><b>Releve</b><span>BCA reporting</span></a>
     <div class="links">
-      <a class="txt" href="#walkthrough">One visit</a>
-      <a class="txt" href="#hands">One case</a>
+      <a class="txt" href="#problem">The bottleneck</a>
       <a class="txt" href="#how">How it works</a>
-      <a class="txt" href="#ai">The AI</a>
+      <a class="txt" href="#trace">Traceable</a>
       <a class="txt" href="#buyer">Who pays</a>
-      <a class="btn primary" href="#walkthrough">Drag through it
+      <a class="txt" href="#scale">How it scales</a>
+      <a class="btn primary" href="#how">See it working
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
     </div>
@@ -417,257 +360,73 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="copy">
       <div class="label accent">TechIreland National AI Challenge 2026 · Prototype</div>
-      <h1>The report is written while the work is done.</h1>
-      <p class="say"><b>Releve</b> <i>rel-uh-VAY</i> · French for a survey reading, and for one shift handing over to the next.</p>
-      <p class="lede">Photos, voice notes and the homeowner's old paperwork go in on a tablet. The draft report comes out at the house. The assessor corrects it and signs it. Then everyone who needs it sees the same case.</p>
+      <p class="name"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><b>Releve</b></p>
+      <h1>Your defective block assessments,<br> <span class="fix">drafted before you leave the site.</span></h1>
+      <p class="lede">The Building Condition Assessment every application to the Defective Concrete Blocks Grant Scheme needs. The visit takes a morning; the write-up can take two weeks. <b>Releve builds the draft on site from your photos, voice notes and the homeowner's paperwork.</b></p>
+      <div class="scale">
+        <div><b>9,500</b><span>Homes affected</span></div>
+        <div><b>3,598</b><span>Applications so far</span></div>
+        <div><b>542</b><span>Homes fixed</span></div>
+      </div>
+      <p class="scale-src">CCMA to the Oireachtas, 2026 · Dept. of Housing, to June 2026</p>
       <div class="actions">
-        <a class="btn primary" href="#walkthrough">Drag through one visit
+        <a class="btn primary" href="#how">See how it works
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
-        <a class="btn ghost" href="#hands">Who sees it</a>
+        <a class="btn ghost" href="#trace">Why it's traceable</a>
       </div>
-      <p class="fine"><i>●</i> Private prototype. Synthetic houses only. The AI in the demo is a stand-in, not a live model.</p>
     </div>
-    <figure class="shot hero-shot reel" aria-label="Twenty-second loop through the app: open the case, capture on site, edit the draft, freeze a version.">
-      <div class="reel-frames">
-        <img src="img/app-cases.png" width="1280" height="860" alt="The practice work list in the app: two synthetic cases, one capturing and one writing." loading="eager" style="--i:0">
-        <img src="img/app-capture.png" width="1280" height="860" alt="Field capture: front elevation, rear elevation, sitting room and roof void, with photo and finding counts." loading="eager" style="--i:1">
-        <img src="img/app-report.png" width="1280" height="860" alt="The editable I.S. 465 draft beside its rendered preview, with a fixture-generated AI content warning." loading="eager" style="--i:2">
-        <img src="img/app-versions.png" width="1280" height="860" alt="Report versions: each download stays tied to a frozen snapshot." loading="eager" style="--i:3">
-      </div>
-      <div class="reel-tag" aria-hidden="true"><i></i>20-second walk through the app <span>· hover to hold a frame</span></div>
-      <div class="reel-bar" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
-      <figcaption class="reel-caps">
-        <span style="--i:0"><b>01</b> Open the case. One list of houses, and who has each one.</span>
-        <span style="--i:1"><b>02</b> Capture at the house. Photos and voice notes, with or without signal.</span>
-        <span style="--i:2"><b>03</b> The draft fills itself in. The assessor corrects it.</span>
-        <span style="--i:3"><b>04</b> Freeze a version and share it. It never changes afterwards.</span>
-      </figcaption>
+    <figure class="hero-art">
+      <img src="img/hero-cottage.png" width="1060" height="570" alt="Pen sketch of a single-storey Irish cottage with a long crack running down its gable wall." loading="eager">
     </figure>
   </div>
 </header>
 
 <section id="problem">
   <div class="wrap">
+    <div class="bn-top">
+    <div class="bn-copy">
     <div class="head">
-      <div class="label">The problem</div>
-      <h2 class="fix"><span class="swap"><del class="was">Hundreds<svg class="rub" viewBox="0 0 120 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9 C 26 4, 48 11, 70 6 S 104 9, 117 4"/></svg></del><ins class="now">Thousands</ins></span> of houses. One report each. Written days later, from memory.</h2>
-      <p>The visit takes a morning. The write-up takes the week, at a desk, from a camera roll and a notebook. Then the lab, the council and the homeowner each get their own copy, and each asks for something that is missing.</p>
+      <div class="label">The bottleneck</div>
+      <h2>Every application to the scheme starts with this report.</h2>
+      <p>A registered engineer, architect or surveyor must inspect the house and sign a Building Condition Assessment before the homeowner can apply.</p>
     </div>
-    <div class="stats">
-      <div class="stat"><div class="n">~9,500<small>homes</small></div><div class="d">Confirmed so far. Estimates run to 20,000.</div></div>
-      <div class="stat"><div class="n">5<small>counties</small></div><div class="d">Donegal, Mayo, Clare, Limerick and Sligo. Rural, one house at a time.</div></div>
-      <div class="stat"><div class="n">4<small>people per case</small></div><div class="d">Assessor, lab, council, homeowner. Today, four versions of the truth.</div></div>
-    </div>
-  </div>
-</section>
-
-<section id="hands">
-  <div class="wrap">
-    <div class="head">
-      <div class="label">One case, many hands</div>
-      <h2>Everyone sees the same case. Nobody re-types it.</h2>
-    </div>
-    <div class="hands">
-      <div class="step-card"><div class="num">ASSESSOR</div><h3>Writes it at the house.</h3><p>Photos, voice notes and old paperwork become the draft. They correct it and sign it.</p></div>
-      <div class="step-card"><div class="num">LAB</div><h3>Adds the results.</h3><p>Core samples and test sheets land in the same case, not in an email thread.</p></div>
-      <div class="step-card"><div class="num">COUNCIL</div><h3>Gets the same PDF it gets today.</h3><p>Frozen, dated, and the same file next year. No new portal to learn.</p></div>
-      <div class="step-card"><div class="num">HOMEOWNER</div><h3>Sees where their house stands.</h3><p>A one-time link to upload what is missing and read the version they were sent. Nothing else.</p></div>
-    </div>
-    <p class="pipe-note">Nobody re-types. Nobody chases. Nobody gets a login they did not ask for.</p>
-  </div>
-</section>
-
-<section id="walkthrough">
-  <div class="wrap">
-    <div class="head">
-      <div class="label">One visit</div>
-      <h2>Drag through one morning.</h2>
-      <p>The pin is the clock. Pull it from the desk at 08:40 to the last save at the house at 12:55.</p>
-    </div>
-    <div class="scrub">
-      <div class="scrub-copy" aria-live="polite">
-        <div class="num"><span id="scrub-num">01</span> · <b id="scrub-time">08:40</b> · <span id="scrub-where">At the practice</span></div>
-        <h3 id="scrub-label">Open the case.</h3>
-        <p id="scrub-caption">The practice creates the case and hands it to an assessor.</p>
+    <figure class="split" role="img" aria-label="The site visit takes about half a working day; the write-up takes about ten working days, roughly twenty times as long.">
+      <div class="split-bar" aria-hidden="true">
+        <span class="seg visit" data-tip="Site visit · about half a day"></span>
+        <span class="seg desk" data-tip="Write-up · about 10 working days"></span>
       </div>
-      <div class="scrub-scene">
-        <svg class="scene" id="scene" viewBox="0 0 640 400" role="img" aria-labelledby="scene-title">
-          <title id="scene-title">A sketch of the current step, drawn on as the pin moves</title>
-
-          <!-- 01 open the case: the day's list on a clipboard -->
-          <g class="st st1">
-            <path class="ink dr d11" pathLength="1" d="M150 78 L488 73 L494 344 L156 349 Z"/>
-            <path class="ink dr d11" pathLength="1" d="M286 76 L286 50 L352 49 L353 75"/>
-            <g class="f12"><text class="t m" x="172" y="118">PRACTICE WORK LIST</text></g>
-            <path class="ink2 dr d12" pathLength="1" d="M172 132 L470 128"/>
-            <path class="ink dr d12" pathLength="1" d="M186 200 L186 178 L208 158 L230 178 L230 200 Z"/>
-            <g class="f12">
-              <text class="t" x="252" y="180">DEMO-BCA-002</text>
-              <text class="u m" x="252" y="202">Incomplete synthetic case</text>
-            </g>
-            <path class="ink2 dr d13" pathLength="1" d="M172 224 L470 220"/>
-            <g class="f13"><path class="fill soft" d="M176 236 L474 232 L476 310 L178 314 Z"/></g>
-            <path class="ink dr d13" pathLength="1" d="M186 290 L186 268 L208 248 L230 268 L230 290 Z"/>
-            <g class="f13">
-              <text class="t a" x="252" y="270">DEMO-BCA-001</text>
-              <text class="u" x="252" y="292">12 Example View, County Donegal</text>
-            </g>
-            <g class="f14">
-              <rect class="fill amber" x="350" y="320" width="98" height="22"/>
-              <text class="t" x="358" y="335">ASSIGNED</text>
-            </g>
-          </g>
-
-          <!-- 02 prepare: the homeowner's old paperwork fills the blank fields -->
-          <g class="st st2">
-            <g class="f23"><path class="fill grey" d="M64 146 L156 132 L178 274 L86 288 Z"/></g>
-            <path class="ink dr d21" pathLength="1" d="M60 140 L152 126 L174 268 L82 282 Z"/>
-            <path class="ink2 dr d21" pathLength="1" d="M76 166 L146 156 M79 188 L149 178 M82 210 L134 202"/>
-            <path class="ink dr d21" pathLength="1" d="M46 196 L136 184 L156 316 L66 328 Z"/>
-            <path class="ink2 dr d22" pathLength="1" d="M62 222 L130 212 M65 244 L133 234 M68 266 L118 258"/>
-            <g class="f22"><text class="t m" x="46" y="352">PLANNING FILE · OLD REPORT</text></g>
-            <path class="ink dr d22" pathLength="1" d="M186 224 L246 224 M232 212 L246 224 L232 236"/>
-            <path class="ink dr d22" pathLength="1" d="M272 88 L588 88 L588 336 L272 336 Z"/>
-            <g class="f23">
-              <text class="t m" x="292" y="122">YEAR BUILT</text>
-              <path class="fill soft" d="M292 134 L568 134 L568 162 L292 162 Z"/>
-              <text class="t m" x="292" y="200">FLOOR AREA</text>
-              <path class="fill soft" d="M292 212 L568 212 L568 240 L292 240 Z"/>
-              <text class="t m" x="292" y="278">CONSTRUCTION</text>
-              <path class="fill soft" d="M292 290 L568 290 L568 318 L292 318 Z"/>
-            </g>
-            <g class="f24">
-              <text class="u" x="302" y="154">2006</text>
-              <text class="u" x="302" y="232">142 m&#178;</text>
-              <text class="u" x="302" y="310">Cavity wall, rendered</text>
-              <rect class="fill amber" x="272" y="352" width="212" height="22"/>
-              <text class="t" x="280" y="367">SOURCE · PLANNING.PDF</text>
-            </g>
-          </g>
-
-          <!-- 03 capture: the house, the crack, the tablet with no signal -->
-          <g class="st st3">
-            <path class="ink dr d31" pathLength="1" d="M36 334 C 140 331, 300 336, 420 333 S 590 330, 606 333"/>
-            <g class="f33">
-              <path class="fill grey" d="M100 224 L166 156 L334 154 L390 222 Z" transform="translate(5,4)"/>
-              <path class="fill soft" d="M376 218 L424 142 L474 200 L474 302 L376 322 Z" transform="translate(6,3)"/>
-              <path class="fill soft" d="M152 254 L190 253 L191 320 L153 321 Z" transform="translate(3,3)"/>
-            </g>
-            <path class="ink dr d31" pathLength="1" d="M110 216 L109 322 L371 320 L372 214"/>
-            <path class="ink dr d31" pathLength="1" d="M96 219 L160 150 L330 148 L387 216 L96 219"/>
-            <path class="ink dr d32" pathLength="1" d="M372 214 L420 138 L471 196 L470 300 L371 320"/>
-            <path class="ink dr d32" pathLength="1" d="M330 148 L420 138"/>
-            <path class="ink2 dr d32" pathLength="1" d="M114 220 L113 318 M100 222 L162 154 L328 152 M376 218 L422 143 L468 198"/>
-            <path class="ink dr d32" pathLength="1" d="M204 168 L204 132 L226 131 L226 164"/>
-            <path class="ink dr d32" pathLength="1" d="M152 320 L152 254 L190 253 L191 320"/>
-            <path class="ink dr d32" pathLength="1" d="M222 242 L272 241 L273 282 L222 283 Z M247 242 L247 282 M222 262 L273 262"/>
-            <path class="ink dr d32" pathLength="1" d="M302 241 L352 240 L353 281 L302 282 Z M327 241 L327 281 M302 261 L353 261"/>
-            <path class="crack dr d33" pathLength="1" d="M446 206 l3 12 l-6 10 l7 15 l-4 12 l6 11 l-3 15 l4 8"/>
-            <g class="f33"><text class="t m" x="96" y="360">LEFT GABLE · 2 PHOTOS · NO SIGNAL</text></g>
-            <g class="r34">
-              <g class="f34"><path class="fill grey" d="M492 248 L616 248 L616 376 L492 376 Z"/></g>
-              <path class="ink dr d34" pathLength="1" d="M486 246 L610 244 L612 370 L488 372 Z"/>
-              <path class="ink2 dr d34" pathLength="1" d="M496 256 L601 255 L602 345 L497 346 Z"/>
-              <path class="ink dr d34" pathLength="1" d="M520 320 L520 290 L548 262 L578 292 L578 320"/>
-              <path class="crack dr d34" pathLength="1" d="M556 288 l2 8 l-4 7 l4 9 l-2 8"/>
-              <g class="f34">
-                <rect class="fill amber" x="518" y="352" width="66" height="18"/>
-                <text class="t" x="524" y="365">QUEUED</text>
-              </g>
-            </g>
-          </g>
-
-          <!-- 04 correct: your value stands, the machine's waits beside it -->
-          <g class="st st4">
-            <path class="ink dr d41" pathLength="1" d="M100 58 L470 54 L476 348 L106 352 Z"/>
-            <path class="ink2 dr d41" pathLength="1" d="M124 118 L452 115"/>
-            <g class="f42"><rect class="fill amber" x="246" y="82" width="26" height="26"/></g>
-            <g class="f42">
-              <text class="t m" x="128" y="102">A</text><text class="t m" x="168" y="102">B</text>
-              <text class="t m" x="208" y="102">C</text><text class="t" x="252" y="102">E</text>
-              <text class="t m" x="290" y="102">F</text><text class="t m" x="330" y="102">G</text>
-              <text class="t m" x="370" y="102">H</text>
-            </g>
-            <g class="f42"><text class="t m" x="124" y="156">WIDEST CRACK, LEFT GABLE</text></g>
-            <path class="ink dr d42" pathLength="1" d="M124 168 L330 166 L331 206 L125 208 Z"/>
-            <g class="f43">
-              <text class="u" x="138" y="192">2 mm</text>
-              <rect class="fill amber" x="182" y="174" width="3" height="24"/>
-              <text class="t m" x="348" y="192">TYPED BY YOU</text>
-              <rect class="fill amber" x="124" y="224" width="150" height="22"/>
-              <text class="t" x="132" y="239">YOUR VALUE KEPT</text>
-            </g>
-            <g class="r44">
-              <path class="ink dr d44" pathLength="1" d="M124 266 L392 263 L394 336 L126 339 Z"/>
-              <g class="f44">
-                <text class="t a" x="140" y="296">ALTERNATIVE · 3 MM</text>
-                <text class="u m" x="140" y="320">Filed beside it. Never applied.</text>
-              </g>
-            </g>
-          </g>
-
-          <!-- 05 freeze: version 1 is stamped and never moves again -->
-          <g class="st st5">
-            <g class="f52"><path class="fill grey" d="M144 108 L316 106 L320 344 L148 346 Z"/></g>
-            <path class="ink dr d51" pathLength="1" d="M138 102 L310 100 L314 338 L142 340 Z"/>
-            <path class="ink2 dr d51" pathLength="1" d="M158 140 L290 138 M158 166 L290 164 M158 192 L250 190"/>
-            <path class="ink dr d52" pathLength="1" d="M192 254 a34 34 0 1 1 68 0 a34 34 0 1 1 -68 0"/>
-            <path class="ink2 dr d52" pathLength="1" d="M200 254 a26 26 0 1 1 52 0 a26 26 0 1 1 -52 0"/>
-            <g class="f53">
-              <text class="t a" x="212" y="260">V1</text>
-              <text class="t m" x="152" y="320">FINGERPRINT 80F9…DCA3</text>
-              <rect class="fill amber" x="146" y="360" width="164" height="22"/>
-              <text class="t" x="154" y="375">NEVER CHANGES</text>
-            </g>
-            <g class="r54">
-              <g class="f54"><path class="fill grey" d="M366 84 L534 82 L536 308 L368 310 Z"/></g>
-              <path class="ink dr d54" pathLength="1" d="M362 80 L530 78 L532 304 L364 306 Z"/>
-              <path class="ink2 dr d54" pathLength="1" d="M382 116 L510 114 M382 142 L510 140 M382 168 L472 166"/>
-              <g class="f54"><text class="t" x="382" y="264">VERSION 2</text><text class="u m" x="382" y="288">Edit again, get a new file</text></g>
-            </g>
-          </g>
-
-          <!-- 06 hand over: one case, three hands -->
-          <g class="st st6">
-            <g class="f62"><path class="fill soft" d="M64 168 L228 166 L230 314 L66 316 Z"/></g>
-            <path class="ink dr d61" pathLength="1" d="M58 162 L120 162 L134 142 L222 141 L224 308 L60 310 Z"/>
-            <g class="f62">
-              <text class="t" x="76" y="200">DEMO-BCA-001</text>
-              <text class="u m" x="76" y="226">12 Example View</text>
-            </g>
-            <path class="ink dr d62" pathLength="1" d="M240 218 L300 130 M290 136 L300 130 L302 142"/>
-            <path class="ink dr d62" pathLength="1" d="M240 232 L300 232 M290 222 L300 232 L290 242"/>
-            <path class="ink dr d62" pathLength="1" d="M240 246 L300 334 M290 328 L300 334 L302 322"/>
-            <path class="ink dr d63" pathLength="1" d="M318 92 L426 92 L426 156 L318 156 Z M318 92 L372 130 L426 92"/>
-            <path class="ink dr d63" pathLength="1" d="M318 196 L400 196 L400 276 L318 276 Z"/>
-            <path class="ink2 dr d63" pathLength="1" d="M332 218 L386 218 M332 236 L386 236 M332 254 L368 254"/>
-            <path class="ink dr d63" pathLength="1" d="M318 306 L360 288 L410 302 L410 356 L360 374 L318 356 Z M318 306 L360 322 L410 302 M360 322 L360 374"/>
-            <g class="f64">
-              <text class="t" x="450" y="118">HOMEOWNER</text>
-              <text class="u m" x="450" y="142">One-time link</text>
-              <text class="t" x="450" y="230">COUNCIL</text>
-              <text class="u m" x="450" y="254">The same PDF</text>
-              <text class="t" x="450" y="330">NEXT ENGINEER</text>
-              <text class="u m" x="450" y="354">The case and evidence</text>
-            </g>
-          </g>
-        </svg>
+      <figcaption class="split-labels">
+        <div class="visit"><i class="sw" aria-hidden="true"></i><span>The site visit takes <b>a morning</b>.</span></div>
+        <div class="desk"><i class="sw" aria-hidden="true"></i><span>The write-up takes <b>~2 weeks</b>.</span></div>
+      </figcaption>
+    </figure>
+    </div>
+    <figure class="bn-art">
+      <img src="img/bottleneck-hourglass.png" width="660" height="1250" loading="lazy" alt="Pen sketch of an hourglass: the top crammed with photos, notes, planning drawings, a voice recorder and tiny cottages; a single amber sheet squeezes through the narrow neck; one finished report lies at the bottom.">
+    </figure>
+    </div>
+    <div class="factors">
+      <div class="factor">
+        <div class="fig">20,000</div>
+        <h3>Homes that may be affected.</h3>
+        <p>Research presented to TDs and senators in June 2026 suggests the 9,500 figure could rise this far.</p>
+        <cite>RTÉ News, June 2026</cite>
       </div>
-      <div class="scrub-track">
-        <div class="scrub-ticks" aria-hidden="true"></div>
-        <input class="scrub-range" id="scrub" type="range" min="0" max="1000" value="83" step="1" aria-label="Walk through the six steps" aria-valuetext="Step 1 of 6: Open the case.">
-        <ol class="scrub-marks" aria-label="Steps">
-          <li><button type="button" data-stage="0" aria-current="step">01<small>08:40</small></button></li>
-          <li><button type="button" data-stage="1">02<small>08:55</small></button></li>
-          <li><button type="button" data-stage="2">03<small>10:30</small></button></li>
-          <li><button type="button" data-stage="3">04<small>12:10</small></button></li>
-          <li><button type="button" data-stage="4">05<small>12:40</small></button></li>
-          <li><button type="button" data-stage="5">06<small>12:55</small></button></li>
-        </ol>
-        <p class="scrub-hint"><span>One typical visit.</span><span><b>19:00</b> · home. Nothing left to write.</span></p>
+      <div class="factor">
+        <div class="fig">Scattered</div>
+        <h3>Evidence arrives in pieces.</h3>
+        <p>Phone photos, voice memos, handwritten notes, planning files and old reports, retyped at a desk days later.</p>
+        <cite>Architecture practice preparing BCAs, Sept 2026</cite>
+      </div>
+      <div class="factor hl">
+        <div class="fig">11<small>of 19</small></div>
+        <h3>Gaps restart the loop.</h3>
+        <p>In one council's audit, 11 of the 19 slowest applications were incomplete.</p>
+        <cite>Donegal County Council audit, Sept 2025</cite>
       </div>
     </div>
+    <p class="source-note">What software can't fix: lab testing capacity, funding and contractors. Releve focuses on the report every application needs.</p>
   </div>
 </section>
 
@@ -675,58 +434,102 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">How it works</div>
-      <h2>Prepare. Capture. Correct. Freeze.</h2>
+      <h2 class="scrub-title"><span class="on">Prepare.</span> <span>Capture.</span> <span>Correct.</span> <span>Freeze.</span></h2>
+      <p>Drag the pin through one visit.</p>
     </div>
-    <div class="steps four">
-      <div class="step-card">
-        <div class="num">01</div>
-        <h3>Prepare from what exists.</h3>
-        <p>Upload the planning file and any old report. The blank fields fill in, each one showing which document it came from.</p>
+    <div class="scrub">
+      <div class="scrub-copy" aria-live="polite">
+        <div class="num"><span id="scrub-num">01</span> · <span id="scrub-where">At the practice</span></div>
+        <h3 id="scrub-label">Start from what exists.</h3>
+        <p id="scrub-caption">Upload the planning file and old reports. Blank fields fill in, each showing the document it came from.</p>
       </div>
-      <div class="step-card">
-        <div class="num">02</div>
-        <h3>Capture at the house.</h3>
-        <p>Walk the walls and rooms. Photos and voice notes save on the tablet first and upload when there is signal.</p>
+      <div class="scrub-scene">
+        <img class="on" src="img/app-evidence-documents.jpg" width="1440" height="1000" alt="Documents: a synthetic homeowner PDF uploaded and processed, with the original kept.">
+        <img src="img/app-evidence-site.jpg" width="1440" height="1000" loading="lazy" alt="Site observation: a front-wall photo, the voice note written out, and a labelled AI suggestion.">
+        <img src="img/app-review-narrative.jpg" width="1440" height="1000" loading="lazy" alt="The draft editor beside the report preview, marked local draft, not submitted.">
+        <img src="img/app-report-versions.jpg" width="1440" height="1000" loading="lazy" alt="Saved versions: version 1 frozen and ready, with its PDF download.">
       </div>
-      <div class="step-card">
-        <div class="num">03</div>
-        <h3>Correct the draft.</h3>
-        <p>The report is already written. Fix what is wrong. Anything you type is never overwritten by the machine.</p>
-      </div>
-      <div class="step-card">
-        <div class="num">04</div>
-        <h3>Freeze and share.</h3>
-        <p>Version 1 becomes a PDF that never changes. Send it to the council, the lab or the homeowner. Edit again and you get version 2.</p>
+      <div class="scrub-track">
+        <div class="scrub-ticks" aria-hidden="true"></div>
+        <input class="scrub-range" id="scrub" type="range" min="0" max="1000" value="125" step="1" aria-label="Walk through the four steps" aria-valuetext="Step 1 of 4: Start from what exists.">
+        <ol class="scrub-marks" aria-label="Steps">
+          <li><button type="button" data-stage="0" aria-current="step">01 · PREPARE</button></li>
+          <li><button type="button" data-stage="1">02 · CAPTURE</button></li>
+          <li><button type="button" data-stage="2">03 · CORRECT</button></li>
+          <li><button type="button" data-stage="3">04 · FREEZE</button></li>
+        </ol>
+        <p class="scrub-hint"><span>One illustrative visit, on a made-up house.</span><span>Drag the pin, click a step, or use the arrow keys.</span></p>
       </div>
     </div>
   </div>
 </section>
 
-<section id="ai">
+<section id="trace" class="dark">
   <div class="wrap">
     <div class="head">
-      <div class="label">The AI</div>
-      <h2>The model proposes. The assessor signs.</h2>
+      <div class="label">The difference</div>
+      <h2>Not a black box. Every line traces back.</h2>
+      <p>Paste documents into a chatbot and you still have to check every answer. Releve breaks each source into small facts, and every line of the report points to the fact it came from.</p>
     </div>
-    <div class="steps">
-      <div class="step-card">
-        <div class="num">IT PROPOSES</div>
-        <h3>Every suggestion shows its source.</h3>
-        <p>"Year built: 2006, from planning.pdf." "Vertical crack near the corner, from your voice note." Nothing appears without a where-from.</p>
+    <div class="trace" id="trace-demo">
+      <svg class="trace-links" aria-hidden="true"><path id="tl-a"/><path id="tl-b"/><circle id="tl-c1" r="3"/><circle id="tl-c2" r="3"/><circle id="tl-c3" r="3"/><circle id="tl-c4" r="3"/></svg>
+      <div class="trace-col">
+        <div class="k"><b>01</b>SOURCES</div>
+        <div class="doc">
+          <div class="fn"><span>planning.pdf</span><span>page 3</span></div>
+          <span class="ln">Planning ref. 06/41287</span>
+          <span class="ln t" data-t="0">Date of completion: 2006</span>
+          <span class="ln t" data-t="1">Floor area: 142 m²</span>
+          <span class="ln">Walls: cavity, rendered</span>
+        </div>
+        <div class="voice">
+          <div class="fn"><span>voice note · front gable</span><span>0:42</span></div>
+          <svg class="wave" viewBox="0 0 200 28" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <span class="quote" data-t="2">“…a vertical crack on the left gable, running down from the eaves.”</span>
+        </div>
       </div>
-      <div class="step-card">
-        <div class="num">YOU DECIDE</div>
-        <h3>It never overwrites a person.</h3>
-        <p>A blank field takes the suggestion. A field you typed keeps your value. Run it again as often as you like.</p>
+      <div class="gutter" aria-hidden="true">extract</div>
+      <div class="trace-col">
+        <div class="k"><b>02</b>FACTS</div>
+        <button type="button" class="fact" data-t="0" aria-pressed="false">Year built: 2006<small>planning.pdf · p.3</small></button>
+        <button type="button" class="fact" data-t="1" aria-pressed="false">Floor area: 142 m²<small>planning.pdf · p.3</small></button>
+        <button type="button" class="fact" data-t="2" aria-pressed="false">Vertical crack, left gable<small>voice note · 0:42</small></button>
       </div>
-      <div class="step-card">
-        <div class="num">YOU SIGN</div>
-        <h3>Nothing is signed by a machine.</h3>
-        <p>The declaration is empty until the assessor fills it. The PDF says "draft" until they say otherwise.</p>
+      <div class="gutter" aria-hidden="true">draft</div>
+      <div class="trace-col">
+        <div class="k"><b>03</b>REPORT</div>
+        <div class="rep">
+          <div class="fn"><span>Section B · Building information</span></div>
+          <button type="button" class="row" data-t="0" aria-pressed="false"><span>Year built: 2006</span><span class="src">planning.pdf ↗</span></button>
+          <button type="button" class="row" data-t="1" aria-pressed="false"><span>Floor area: 142 m²</span><span class="src">planning.pdf ↗</span></button>
+          <button type="button" class="row" data-t="2" aria-pressed="false"><span>Crack, left gable</span><span class="src">voice note ↗</span></button>
+        </div>
+      </div>
+      <div class="traceback">Hover or click any line to trace it back to its source</div>
+    </div>
+    <div class="versus">
+      <div class="vs bot">
+        <div class="k">A CHATBOT</div>
+        <div class="ask">When was the house built?</div>
+        <div class="bubble">The house was built in 2006.</div>
+        <div class="verdict"><i aria-hidden="true">?</i>No source. You check it by hand.</div>
+        <ul>
+          <li>Answers can change each time you ask</li>
+          <li>No record of what it changed</li>
+        </ul>
+      </div>
+      <div class="vs us">
+        <div class="k">RELEVE</div>
+        <div class="fn">Section B · Building information</div>
+        <div class="line"><span>Year built: 2006</span><span class="chip">planning.pdf · p.3 ↗</span></div>
+        <div class="verdict"><i aria-hidden="true">✓</i>Source attached. Check it in one click.</div>
+        <ul>
+          <li>Your edits are never overwritten</li>
+          <li>A frozen version, and only the professional signs</li>
+        </ul>
       </div>
     </div>
-    <p class="pipe-note">The hard part was never the model. It is holding a legal report structure, a source for every value, and a version that cannot change after it is sent. Swap the model out and that scaffolding is what remains.</p>
-    <p class="pipe-note">In this prototype every suggestion comes from a labelled stand-in, not a live model. The live connection exists and has not been tested on real documents. A case is visible to the people put on it and nobody else: a practice that is not on the case gets a 404, a share is one named version, and revoking it closes the file.</p>
+    <p class="stand-in"><span class="tag">Prototype</span>The AI here is a labelled stand-in; a live model is connected but not yet tested on real documents. Swap the model and the traceable structure stays.</p>
   </div>
 </section>
 
@@ -734,121 +537,124 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">Who pays</div>
-      <h2>The assessment is already paid work. We sell to the people doing it.</h2>
-      <p>Every one of these reports is written today by a competent person under I.S. 465, and somebody already pays them to write it. We are not asking a new budget to appear. We are selling a shorter week to the practice that carries the cost of the long one.</p>
+      <h2>The practice that writes the report.</h2>
+      <p>Every assessment is already paid professional work. Releve sells time back to the practice that carries the write-up.</p>
     </div>
-    <div class="steps">
-      <div class="step-card">
-        <div class="num">BUYS IT</div>
-        <h3>The engineering practice.</h3>
-        <p>They carry the write-up. A morning at the house currently costs them the rest of the week at a desk. Priced per assessor, not per house, so a busy week costs them nothing extra.</p>
-      </div>
-      <div class="step-card">
-        <div class="num">WANTS IT</div>
-        <h3>The lender and the insurer.</h3>
-        <p>A frozen, dated, sourced report is the artefact they need to price a house they currently cannot price. They do not buy the tool. They benefit from the output, which is why practices will be asked for it.</p>
-      </div>
-      <div class="step-card">
-        <div class="num">OUTLASTS IT</div>
-        <h3>The standard, not the scheme.</h3>
-        <p>Grant schemes end. Building condition assessment does not, and defective concrete block is not the only defect that gets a standard and a report. The report structure is configurable for that reason.</p>
-      </div>
+    <div class="flow">
+      <div class="node"><div class="num">ADDS TO IT</div><h3>The homeowner</h3><p>Uploads what is missing through a one-time link. No account.</p></div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 44 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M0 7h42M35 1l7 6-7 6"/></svg>documents</div>
+      <div class="node buyer"><div class="num">BUYS IT</div><h3>The engineering or architecture practice</h3><p>A subscription per assessor, so a busy week costs nothing extra.</p></div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 44 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M0 7h42M35 1l7 6-7 6"/></svg>frozen PDF</div>
+      <div class="node"><div class="num">RECEIVES IT</div><h3>The council</h3><p>Gets the same PDF it gets today. No new portal to learn.</p></div>
     </div>
-    <p class="pipe-note">Not yet true: no practice has paid for this, and no price is set. The next real test is one practice running one live case, not another feature.</p>
+    <p class="pipe-note">Pricing is a hypothesis. No practice has paid for Releve yet.</p>
+  </div>
+</section>
+
+<section id="scale">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">How it scales</div>
+      <h2>One engine. Any report a professional signs.</h2>
+      <p>Evidence in, a source for every value, a professional signs, the version is frozen. A new report type is a new template, not a new product.</p>
+    </div>
+    <div class="ladder">
+      <div class="rung now" style="--k:0"><div class="num">NOW</div><h3>DCB assessments</h3><p>The Building Condition Assessment every grant needs.</p></div>
+      <div class="rung" style="--k:1"><div class="num">NEXT</div><h3>The rest of the scheme</h3><p>Works plans, payment claims and completion packs, plus the new social homes scheme.</p></div>
+      <div class="rung" style="--k:2"><div class="num">THEN</div><h3>Other site reports</h3><p>Condition surveys, snagging, installation, building control and fire safety.</p></div>
+      <div class="rung star" style="--k:3"><div class="num">NORTH STAR</div><h3>Traceable AI extraction</h3><p>Any evidence-heavy report, compliance included, where every fact has to be checkable.</p></div>
+    </div>
+    <p class="source-note">Each new report type still needs testing with real users. Success in DCB doesn't prove demand elsewhere.</p>
   </div>
 </section>
 
 <section id="status">
   <div class="wrap">
     <div class="head">
-      <div class="label">Status on 10 September 2026</div>
+      <div class="label">Where we are · built in two weeks</div>
       <h2>What is built, and what is next.</h2>
     </div>
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>Part</th><th>State</th></tr></thead>
-        <tbody>
-          <tr><td>Cases, work list, who has what</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Old documents fill the blank fields, with sources</td><td class="s built"><i></i>Built, stand-in AI</td></tr>
-          <tr><td>Photos and voice notes at the house, offline</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Report editor with live preview</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Frozen PDF versions</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Homeowner links, document requests, shares</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Hand the case to the next engineer, with lab results</td><td class="s built"><i></i>Built, synthetic lab</td></tr>
-          <tr><td>Live AI model</td><td class="s part"><i></i>Wired, untested</td></tr>
-          <tr><td>Real tablet in a real field</td><td class="s part"><i></i>Not yet run</td></tr>
-          <tr><td>Read by a practising I.S. 465 assessor</td><td class="s part"><i></i>Not yet</td></tr>
-          <tr><td>Irish-language report and interface</td><td class="s next"><i></i>Next</td></tr>
-          <tr><td>Council channel</td><td class="s next"><i></i>Next</td></tr>
-          <tr><td>Lab channel</td><td class="s next"><i></i>Next</td></tr>
-        </tbody>
-      </table>
+    <div class="status-grid">
+      <div class="status-col">
+        <h3>Built</h3>
+        <ul>
+          <li><div>Cases, work list and case assignment</div></li>
+          <li><div>Old documents fill blank fields, with sources <span>· stand-in AI</span></div></li>
+          <li><div>Photos and voice notes at the house, offline</div></li>
+          <li><div>Report editor with live preview</div></li>
+          <li><div>Frozen PDF versions</div></li>
+          <li><div>Homeowner links, document requests and shares</div></li>
+          <li><div>Hand the case to the next engineer, with lab results <span>· synthetic lab</span></div></li>
+        </ul>
+      </div>
+      <div class="status-col next">
+        <h3>Not yet</h3>
+        <ul>
+          <li><div>Live AI model <span>· connected, not tested on real documents</span></div></li>
+          <li><div>A real tablet at a real site</div></li>
+          <li><div>Review by a practising assessor</div></li>
+          <li><div>Irish-language report and interface <span>· next</span></div></li>
+          <li><div>Council and lab channels <span>· next</span></div></li>
+        </ul>
+      </div>
     </div>
+    <p class="pipe-note">The next real test is one practice running one live case. Before any real case material, data-protection controls and a documented data-flow assessment come first.</p>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
     <div class="cta">
-      <h2>Written at the house. Seen by everyone.</h2>
-      <a class="btn primary" href="#walkthrough">Drag through it
+      <h2>Drafted at the house. Traced to the source.</h2>
+      <a class="btn primary" href="#how">See how it works
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
     </div>
     <div class="meta">
-      <span>Releve · Crintus &amp; Co</span>
-      <span>Prototype for the TechIreland National AI Challenge 2026</span>
-      <span>Follows the I.S. 465:2026 report structure. The competent person signs it. Not a formal assessment.</span>
-      <span>Every house on this page is synthetic.</span>
+      <span>Releve (rel-uh-VAY): French for a survey reading · Crintus &amp; Co</span>
+      <span>TechIreland National AI Challenge 2026</span>
+      <span>Every house on this page is synthetic. Not a formal assessment.</span>
     </div>
   </div>
 </footer>
-
 <script>
 (function () {
-  // [number, clock, place, title, caption]. The clock is one plausible visit.
+  // [number, place, title, caption]
   var stages = [
-    ['01', '08:40', 'At the practice', 'Open the case.', 'The practice creates the case and hands it to an assessor.'],
-    ['02', '08:55', 'At the practice', 'Prepare from what exists.', 'Upload the planning file and the old report. The blank fields fill in, each showing where it came from.'],
-    ['03', '10:30', 'At the house, no signal', 'Capture at the house.', 'Photos and voice notes save on the tablet first, and upload when there is signal.'],
-    ['04', '12:10', 'At the house, in the van', 'Correct the draft.', 'The report is already written. Fix what is wrong. Your edits are never overwritten.'],
-    ['05', '12:40', 'At the house, in the van', 'Freeze a version.', 'Version 1 becomes a PDF that never changes. Edit again and you get version 2.'],
-    ['06', '12:55', 'Before the drive home', 'Share and hand over.', 'Send the homeowner a link for what is missing. Send the council the PDF. Hand the case to the next engineer.']
+    ['01', 'At the practice', 'Start from what exists.', 'Upload the planning file and old reports. Blank fields fill in, each showing the document it came from.'],
+    ['02', 'At the house', 'Capture at the house.', 'Photos and voice notes on a tablet. Saved on the device, uploaded when there is signal.'],
+    ['03', 'In the van', 'Correct the draft.', 'The report is drafted before you sit down. Anything you type is never overwritten.'],
+    ['04', 'Before the drive home', 'Freeze and share.', 'Version 1 becomes a fingerprinted PDF that never changes. Edit again and you get version 2.']
   ];
   var range = document.getElementById('scrub');
-  var scene = document.getElementById('scene');
-  if (!range || !scene) return;
+  if (!range) return;
   var num = document.getElementById('scrub-num');
-  var label = document.getElementById('scrub-label');
-  var clock = document.getElementById('scrub-time');
+  var words = Array.prototype.slice.call(document.querySelectorAll('.scrub-title span'));
   var where = document.getElementById('scrub-where');
+  var label = document.getElementById('scrub-label');
   var caption = document.getElementById('scrub-caption');
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.scrub-scene img'));
   var marks = Array.prototype.slice.call(document.querySelectorAll('.scrub-marks button'));
-  var N = stages.length, MAX = 1000, DURATION = 6000;
-  var anims = scene.getAnimations ? scene.getAnimations({ subtree: true }) : [];
-  var current = -1, settling = null;
+  var N = stages.length, MAX = 1000, current = -1, settling = null;
 
   function stageAt(t) { return Math.min(N - 1, Math.floor(t * N)); }
   function midpoint(k) { return (k + 0.5) / N; }
 
   function render(t) {
-    var time = t * DURATION;
-    for (var i = 0; i < anims.length; i++) { anims[i].pause(); anims[i].currentTime = time; }
     var k = stageAt(t);
-    scene.setAttribute('data-stage', k);
-    if (k !== current) {
-      current = k;
-      num.textContent = stages[k][0];
-      clock.textContent = stages[k][1];
-      where.textContent = stages[k][2];
-      label.textContent = stages[k][3];
-      caption.textContent = stages[k][4];
-      range.setAttribute('aria-valuetext', 'Step ' + (k + 1) + ' of ' + N + ', ' + stages[k][1] + ': ' + stages[k][3]);
-      marks.forEach(function (b, i) { if (i === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
-    }
+    if (k === current) return;
+    current = k;
+    num.textContent = stages[k][0];
+    where.textContent = stages[k][1];
+    label.textContent = stages[k][2];
+    caption.textContent = stages[k][3];
+    range.setAttribute('aria-valuetext', 'Step ' + (k + 1) + ' of ' + N + ': ' + stages[k][2]);
+    shots.forEach(function (img, i) { img.classList.toggle('on', i === k); });
+    words.forEach(function (w, i) { w.classList.toggle('done', i < k); w.classList.toggle('on', i === k); });
+    marks.forEach(function (b, i) { if (i === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
   }
 
-  // Ease the pin to a stage midpoint so it never rests mid-crossfade.
+  // Ease the pin to the middle of a step so it never rests on a boundary.
   function settle(target) {
     if (settling) cancelAnimationFrame(settling);
     var from = range.value / MAX, start = null, ms = 260;
@@ -858,7 +664,7 @@ border-bottom:1px solid var(--line);
       var t = from + (target - from) * e;
       range.value = Math.round(t * MAX);
       render(t);
-      if (p < 1) settling = requestAnimationFrame(step); else settling = null;
+      settling = p < 1 ? requestAnimationFrame(step) : null;
     }
     settling = requestAnimationFrame(step);
   }
@@ -867,7 +673,7 @@ border-bottom:1px solid var(--line);
     if (settling) { cancelAnimationFrame(settling); settling = null; }
     render(range.value / MAX);
   });
-  // Release with mouse or finger snaps; keyboard steps whole stages instead.
+  // Releasing a drag snaps to the step; the keyboard moves a whole step at a time.
   range.addEventListener('pointerup', function () { settle(midpoint(stageAt(range.value / MAX))); });
   range.addEventListener('keydown', function (e) {
     var k = stageAt(range.value / MAX), to = null;
@@ -883,46 +689,92 @@ border-bottom:1px solid var(--line);
     b.addEventListener('click', function () { settle(midpoint(+b.getAttribute('data-stage'))); range.focus({ preventScroll: true }); });
   });
 
+  // The words in the heading jump to their step too.
+  words.forEach(function (w, i) {
+    w.addEventListener('click', function () { settle(midpoint(i)); });
+  });
+
   render(range.value / MAX);
 })();
-
-// The correction in the problem headline. Runs once, when the line is well
-// inside the viewport, and is never replayed: a judge should see it happen,
-// not see it flicker every time the page is scrolled back. The class lands on
-// the headline itself, because the headline is what the new word shakes.
+</script>
+<script>
+// The trace demo: hover, click or tab to any line and its fact and source light up, joined by
+// connector lines. Left alone and on screen, it steps through the three lines by itself.
 (function () {
-  var fix = document.querySelector('#problem h2.fix');
-  if (!fix) return;
-  // Measure both words so the line does not sit open waiting for the new one.
-  // The old word is out of flow, so the slot would otherwise always be as wide
-  // as the word that has not arrived yet. offsetWidth, not the bounding box:
-  // the new word is set a degree or two off square and its box is wider than
-  // it is. Measured again once the webfont has loaded, because the first
-  // measurement happens in the fallback face and is wrong by a good 20px.
-  var swap = fix.querySelector('.swap');
-  var was = fix.querySelector('.was');
-  var now = fix.querySelector('.now');
-  function measure() {
-    if (!swap || !was || !now) return;
-    swap.style.setProperty('--w0', was.offsetWidth + 'px');
-    swap.style.setProperty('--w1', now.offsetWidth + 'px');
+  var root = document.getElementById('trace-demo');
+  if (!root) return;
+  var svg = root.querySelector('.trace-links');
+  var pathA = svg.querySelector('#tl-a'), pathB = svg.querySelector('#tl-b');
+  var dots = ['#tl-c1', '#tl-c2', '#tl-c3', '#tl-c4'].map(function (id) { return svg.querySelector(id); });
+  var items = Array.prototype.slice.call(root.querySelectorAll('[data-t]'));
+  var N = 3, current = 0, paused = false, visible = false;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // A small, fixed waveform for the voice-note card.
+  var wave = root.querySelector('.wave');
+  if (wave) {
+    var bars = '';
+    for (var i = 0; i < 48; i++) {
+      var h = 4 + Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.37)) * 20;
+      bars += '<rect x="' + (i * 4.2).toFixed(1) + '" y="' + (14 - h / 2).toFixed(1) + '" width="2.2" height="' + h.toFixed(1) + '" rx="1"/>';
+    }
+    wave.innerHTML = bars;
   }
-  measure();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
-  window.addEventListener('resize', measure);
-  if (swap) swap.addEventListener('animationend', function (e) {
-    // Once the slot has opened, hand the width back to the text.
-    if (e.animationName === 'slot') swap.style.width = 'auto';
-  });
-  if (!('IntersectionObserver' in window)) { fix.classList.add('on'); return; }
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (!e.isIntersecting) return;
-      fix.classList.add('on');
-      io.disconnect();
+
+  function curve(x1, y1, x2, y2) {
+    var m = (x1 + x2) / 2;
+    return 'M' + x1 + ' ' + y1 + ' C' + m + ' ' + y1 + ' ' + m + ' ' + y2 + ' ' + x2 + ' ' + y2;
+  }
+  function place(dot, x, y) { dot.setAttribute('cx', x); dot.setAttribute('cy', y); }
+
+  function draw() {
+    if (getComputedStyle(svg).display === 'none') return;
+    var box = root.getBoundingClientRect();
+    var src = root.querySelector('.doc [data-t="' + current + '"], .voice [data-t="' + current + '"]');
+    var fact = root.querySelector('.fact[data-t="' + current + '"]');
+    var row = root.querySelector('.row[data-t="' + current + '"]');
+    var card = src.closest('.doc, .voice').getBoundingClientRect();
+    var s = src.getBoundingClientRect(), f = fact.getBoundingClientRect();
+    var r = row.getBoundingClientRect(), rep = row.closest('.rep').getBoundingClientRect();
+    var x1 = card.right - box.left, y1 = s.top + s.height / 2 - box.top;
+    var x2 = f.left - box.left, x3 = f.right - box.left, y2 = f.top + f.height / 2 - box.top;
+    var x4 = rep.left - box.left, y4 = r.top + r.height / 2 - box.top;
+    pathA.setAttribute('d', curve(x1, y1, x2, y2));
+    pathB.setAttribute('d', curve(x3, y2, x4, y4));
+    place(dots[0], x1, y1); place(dots[1], x2, y2); place(dots[2], x3, y2); place(dots[3], x4, y4);
+  }
+
+  function show(t) {
+    current = t;
+    items.forEach(function (el) {
+      var on = +el.getAttribute('data-t') === t;
+      el.classList.toggle('on', on);
+      if (el.tagName === 'BUTTON') el.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
-  }, { threshold: 0.9 });
-  io.observe(fix);
+    draw();
+  }
+
+  items.forEach(function (el) {
+    var t = +el.getAttribute('data-t');
+    function take() { paused = true; show(t); }
+    el.addEventListener('mouseenter', take);
+    el.addEventListener('focus', take);
+    el.addEventListener('click', take);
+  });
+  root.addEventListener('mouseleave', function () { paused = false; });
+  root.addEventListener('focusout', function (e) { if (!root.contains(e.relatedTarget)) paused = false; });
+
+  if (!reduce) {
+    setInterval(function () { if (!paused && visible) show((current + 1) % N); }, 3200);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; }, { threshold: 0.4 }).observe(root);
+    } else {
+      visible = true;
+    }
+  }
+  window.addEventListener('resize', draw);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  show(0);
 })();
 </script>
 </body>
