@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Releve — the mark assembles itself</title>
+<style>
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 700;font-display:swap;src:url('../fonts/inter.woff2') format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url('../fonts/jetbrains-mono.woff2') format('woff2')}
+:root{
+  --ground:#fffef2; --surface:#f3f2e7; --line:#d1d0c6; --line-2:#bab9b0;
+  --text:#191918; --muted:rgba(25,25,24,.6);
+  --accent:#fcaa2d; --accent-deep:#a36404;
+  --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --T:2800ms;                 /* one full assembly */
+  --bar-end:var(--accent);    /* colour the stolen line settles to */
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans);line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header{padding:56px 0 32px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-weight:400;letter-spacing:-.045em;font-size:clamp(28px,4vw,44px);line-height:1.1}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.lede{margin:18px 0 0;color:var(--muted);max-width:62ch}
+.bar{display:flex;gap:10px;align-items:center;margin-top:20px;flex-wrap:wrap}
+button{all:unset;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line-2);padding:8px 14px;cursor:pointer;color:var(--text);
+  transition:background .15s,border-color .15s}
+button:hover{background:var(--surface);border-color:var(--text)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{width:260px;accent-color:var(--accent)}
+.hint{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted)}
+
+.card{border-top:1px solid var(--line);padding:40px 0}
+.num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px}
+.card h2{margin:0;font-weight:400;font-size:24px;letter-spacing:-.02em}
+.card p{margin:10px 0 0;max-width:60ch}
+.card p.q{color:var(--muted);font-size:14px}
+.stage{margin-top:26px}
+.stage svg{display:block;width:100%;height:auto;max-width:940px;overflow:visible}
+.beats{display:grid;grid-template-columns:repeat(6,1fr);margin:16px 0 0;padding:0;list-style:none;
+  border-top:1px solid var(--line);max-width:940px}
+.beats li{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--muted);
+  padding:10px 8px 0;border-right:1px solid var(--line)}
+.beats li:last-child{border-right:0}
+.beats b{display:block;color:var(--text);font-weight:500;font-size:11px;letter-spacing:.02em;margin-bottom:2px}
+.beats small{display:block;color:var(--accent-deep);font-variant-numeric:tabular-nums}
+.sizes{display:flex;align-items:flex-end;gap:26px;margin-top:22px;border:1px solid var(--line-2);padding:22px;flex-wrap:wrap}
+.lockups{display:flex;align-items:flex-end;gap:48px;margin-top:24px;border:1px solid var(--line-2);padding:26px;flex-wrap:wrap}
+.lu{display:flex;flex-direction:column;gap:10px}
+.lu svg{overflow:visible}
+.lu small{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted)}
+.brandbar{margin-top:14px;border:1px solid var(--line-2);border-top:0;padding:0 26px;
+  display:flex;align-items:center;height:60px;background:var(--ground)}
+.brand{display:flex;align-items:baseline;gap:12px}
+.brand .brandmark{width:26px;height:26px;flex:0 0 auto;align-self:center;color:var(--accent)}
+.brand b{font-family:var(--sans);font-size:19px;font-weight:600;letter-spacing:-.03em}
+.brand span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sz{display:flex;flex-direction:column;align-items:center;gap:8px}
+.sz small{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted)}
+.sz svg{overflow:visible}
+footer{padding:40px 0 80px;color:var(--muted);font-size:14px}
+footer p{max-width:62ch;margin:0 0 12px}
+
+/* ---- the rig ------------------------------------------------------------
+   Every piece is one straight line drawn from its own origin along +x, placed
+   by translate(anchor) rotate(angle). A pinned-end pivot is then just an angle
+   change with the translate held, which is what keeps the fold rigid, and the
+   three pieces are authored once, in the finished mark's own coordinates.
+   What differs between E and F is only what the rig does around them:
+     E  rotate(90deg) throughout, so the mark's upright geometry lies on its
+        side on screen, and the last beat unwinds the rig to 0.
+        Local (x,y) shows at (32-(y-48), 48+(x-32)).
+     F  no rotation, but scaled up and parked under the wordmark, so the same
+        pieces start as the word's underline and shrink into place at the end.
+        Local (x,y) shows at ((x-32)*s+32+tx, (y-48)*s+48+ty).              */
+.mark *{transform-box:view-box;transform-origin:0 0}
+.rig{transform-origin:32px 48px;transform:rotate(0deg)}
+.legL{transform:translate(32px,44px) rotate(122deg)}
+.legR{transform:translate(32px,44px) rotate(58deg)}
+.stem{transform:translate(32px,68px) rotate(-90deg)}
+.barline{transform:translate(10px,36px) rotate(0deg)}
+.legL,.legR,.stem,.barline{stroke:currentColor;stroke-width:var(--sw,5)}
+.donor{opacity:0}
+/* E steals the benchmark line, so that is the amber one. F steals the centre
+   line off the l, so the amber moves there and the benchmark line goes ink.
+   F also hangs its centre line from the point rather than standing it on the
+   base, because the l descends into place and must not rotate on the way. */
+.v-e .barline{stroke:var(--accent)}
+.v-f .stem{stroke:var(--accent);transform:translate(32px,44px) rotate(90deg)}
+
+.run.v-e .legL{animation:p-legL var(--T) linear both}
+.run.v-e .legR{animation:p-legR var(--T) linear both}
+.run.v-e .stem{animation:p-stem var(--T) linear both}
+.run.v-e .rig{animation:e-rig var(--T) cubic-bezier(.5,0,.3,1) both}
+/* the line's easing has to be the rig's own: while the arrow reaches for the R
+   the line is counter-moving inside the rig to stay put on the letter, and two
+   different curves would slide it off the stem it is standing on */
+.run.v-e .barline{animation:e-bar var(--T) cubic-bezier(.5,0,.3,1) both, settle var(--T) linear both}
+.run.v-f .legL{animation:f-legL var(--T) cubic-bezier(.45,0,.3,1) both}
+.run.v-f .legR{animation:f-legR var(--T) cubic-bezier(.45,0,.3,1) both}
+.run.v-f .rig{animation:f-rig var(--T) cubic-bezier(.5,0,.3,1) both}
+.run.v-f .barline{animation:f-bar var(--T) cubic-bezier(.45,0,.3,1) both}
+.run.v-f .stem{animation:f-stem var(--T) cubic-bezier(.4,0,.25,1) both, settle var(--T) linear both}
+.run.v-f .donor{animation:f-donor var(--T) steps(1,end) both}
+
+/* E, in its own order. Three pieces in a line have to end up meeting at one
+   point. Only the two either side of that point already touch it; the third has
+   to get there. A piece that hinges at its joint and goes over lands its far end
+   exactly on the point only when the piece it falls across is its own length, so
+   the line has to be ordered with the two legs together: leg, leg, stem, with
+   the meeting point at the leg/stem joint. Then the top leg tips over onto its
+   twin and lands home, with nothing to slide, and the other two are already
+   touching the point and simply swing off it.
+   The faller never comes back down INTO the line: past halfway it drifts 5.5
+   clear, a little over one stroke, and lands ACROSS its twin in relief. The
+   drift is gone by the time the three have opened, because by then it is one
+   object rather than loose pieces.
+     0-5   hold
+     5-20  the top 28.3 part at the joint with no gap and tip over on it, slowly
+           at first and then faster, going clear of the line as they come down
+     20-26 they land flat along their twin, lying over it, far end on the point
+     26-44 all three swing off that point and it settles into the mark
+   The faller and the near leg pivot on their own anchor, so those are just the
+   translate. The stem turns about its far end, pinned at the point, so its
+   anchor is stepped round the arc by hand: anchor = tip - 24*(cos,sin).
+   All three are timed linear and share it: they hold one point between them for
+   the whole fold, and different curves would pull that point apart.
+   Local (x,y) shows on screen at (32-(y-48), 48+(x-32)), so local +x runs down
+   the screen, a falling local angle turns anticlockwise, which is the fall to
+   the left, and local +y lifts a piece to the left, clear of the line. */
+@keyframes p-legR{
+  0%,5%{transform:translate(-8.3px,48px) rotate(0deg)}
+  9%{transform:translate(-7.87px,52.91px) rotate(-10deg)}
+  13%{transform:translate(-1.68px,66.19px) rotate(-40deg)}
+  16%{transform:translate(22.47px,76.5px) rotate(-95deg)}
+  18%{transform:translate(43.18px,67.59px) rotate(-145deg)}
+  20%,26%{transform:translate(48.3px,53.5px) rotate(-180deg)}
+  44%,100%{transform:translate(32px,44px) rotate(-302deg)}
+}
+@keyframes p-legL{
+  0%,26%{transform:translate(48.3px,48px) rotate(180deg)}
+  44%,100%{transform:translate(32px,44px) rotate(122deg)}
+}
+@keyframes p-stem{
+  0%,26%{transform:translate(72.3px,48px) rotate(180deg)}
+  30.5%{transform:translate(66.4px,56.19px) rotate(202.5deg)}
+  35%{transform:translate(57.12px,62.97px) rotate(225deg)}
+  39.5%{transform:translate(45.27px,67.17px) rotate(247.5deg)}
+  44%,100%{transform:translate(32px,68px) rotate(270deg)}
+}
+@keyframes settle{
+  0%,92%{stroke:var(--accent)}
+  100%{stroke:var(--bar-end)}
+}
+
+/* E: 52-64 the arrow reaches across for the R, while the line counter-moves to
+   stay on the letter | 64-80 it lets go and rides back with the arrow | 80-92
+   the finished mark turns upright. The line needs no growing and no thinning on
+   the way: the wordmark is sized so the R's stem is already 44 units long and
+   the mark's stroke is the R's own stem width, so what leaves the letter is the
+   benchmark line, not a copy of it. */
+@keyframes e-rig{
+  0%,54%{transform:translate(0px,0px) rotate(90deg)}
+  64%,68%{transform:translate(var(--lunge,40px),0px) rotate(90deg)}
+  80%{transform:translate(0px,0px) rotate(90deg)}
+  92%,100%{transform:translate(0px,0px) rotate(0deg)}
+}
+@keyframes e-bar{
+  0%,54%{transform:translate(var(--bx,120px),var(--by0,30px)) rotate(0deg)}
+  64%,68%{transform:translate(var(--bx,120px),var(--by,30px)) rotate(0deg)}
+  80%,100%{transform:translate(10px,36px) rotate(0deg)}
+}
+
+/* F: the underline now carries the two legs and the benchmark line, 100.6 in
+   all, because the centre line comes off the l instead.
+   8-20 the benchmark line breaks off the end, falls, and catches the middle of
+   what is left by its own middle | 20-26 it holds there, balanced across the
+   line | 26-40 the rest folds down under it while it levels, so it is never
+   lying flat along the line it came from | 40-52 it lifts to its height |
+   30-48 the whole assembly sinks clear of the word | 58 the l's stroke changes
+   hands | 58-70 it drops straight down into the centre, no rotation, because
+   the l is already the line it becomes | 78-92 all four travel home together.
+   The level is a rotation about the line's own middle, so the anchor is stepped
+   round by hand: anchor = apex - 22*(cos,sin), with the apex moving as it folds. */
+@keyframes f-rig{
+  0%,30%{transform:translate(var(--ftx,300px),var(--fty,32px)) scale(var(--fs,1.6))}
+  48%,78%{transform:translate(var(--ftx,300px),var(--fdy,50px)) scale(var(--fs,1.6))}
+  92%,100%{transform:translate(0px,0px) scale(1)}
+}
+@keyframes f-legL{
+  0%,26%{transform:translate(20px,48px) rotate(180deg)}
+  40%,100%{transform:translate(32px,44px) rotate(122deg)}
+}
+@keyframes f-legR{
+  0%,26%{transform:translate(20px,48px) rotate(0deg)}
+  40%,100%{transform:translate(32px,44px) rotate(58deg)}
+}
+@keyframes f-bar{
+  0%,8%{transform:translate(48.3px,48px) rotate(0deg)}
+  20%,26%{transform:translate(7.38px,29.98px) rotate(55deg)}
+  29.5%{transform:translate(6.46px,32.49px) rotate(41.25deg)}
+  33%{transform:translate(6.49px,35.84px) rotate(27.5deg)}
+  36.5%{transform:translate(7.63px,39.77px) rotate(13.75deg)}
+  40%{transform:translate(10px,44px) rotate(0deg)}
+  52%,100%{transform:translate(10px,36px) rotate(0deg)}
+}
+@keyframes f-stem{
+  0%,58%{transform:translate(var(--fsx,40px),var(--fsy,10px)) rotate(90deg) scaleX(var(--fss,1));opacity:0;stroke-width:var(--bold,7)}
+  58.01%{transform:translate(var(--fsx,40px),var(--fsy,10px)) rotate(90deg) scaleX(var(--fss,1));opacity:1;stroke-width:var(--bold,7)}
+  70%,100%{transform:translate(32px,44px) rotate(90deg) scaleX(1);opacity:1;stroke-width:5}
+}
+@keyframes f-donor{
+  0%,58%{opacity:1}
+  58.01%,100%{opacity:0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .run .rig,.run .legL,.run .legR,.run .stem,.run .barline,.run .donor{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="label">Releve &middot; cut benchmark &middot; assembly</div>
+    <h1>The mark builds itself out of the wordmark.</h1>
+    <p class="lede">One length of line, the same total length as the finished arrow. It breaks in two places and folds into the arrow. The arrow has no benchmark line yet, so it takes an amber stroke out of the wordmark, carries it back and sets it on top. Nothing is added and nothing is thrown away. Two versions below, differing in where the line starts and which letter it robs.</p>
+    <div class="bar">
+      <button id="replay">Replay both</button>
+      <button id="loop">Loop: on</button>
+      <button id="speed">Speed: 1&times;</button>
+      <button id="tone">Line ends: amber</button>
+    </div>
+    <div class="bar">
+      <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Scrub both assemblies">
+      <span class="hint" id="clock">drag to scrub &middot; scrubbing pauses the loop</span>
+      <span class="hint" id="fit"></span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ F ============ -->
+<section class="card" data-stage><div class="wrap">
+  <div class="num">F</div>
+  <h2>Underline start, the l becomes the centre line</h2>
+  <p>The underline carries the two legs and the benchmark line, because the centre line is the <b>l</b>. The benchmark line breaks off the end, falls, and catches the middle of what is left by its own middle; it holds there balanced, then levels as the rest folds down under it, and lifts to its height. The assembly sinks clear of the word, and the l drops straight down into the centre without turning, because it is already the line it becomes.</p>
+  <p class="q">This is the version where the amber is the centre line and everything else is ink, so the finished mark is not the one in <span class="hint">docs/01-decisions.md</span>. Both marks are in the strip at the bottom at 72&nbsp;px and 26&nbsp;px. Cost, unchanged: an underline has to span the word, so the line is drawn at about 1.6&times; and shrinks as it travels.</p>
+  <div class="stage">
+    <svg id="stage-f" class="mark v-f" viewBox="0 0 940 150" fill="none" role="img" aria-label="The Releve mark assembling itself from the wordmark's underline and the stem of the l">
+      <text id="word-f" x="150" y="66" font-family="Inter, sans-serif" font-weight="600"
+            fill="currentColor">Releve</text>
+      <rect class="donor" id="donor-f" x="150" y="30" width="7" height="38" fill="var(--accent)"/>
+      <g class="rig">
+        <g class="legL"><path d="M0 0H28.3" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="legR"><path d="M0 0H28.3" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="stem"><path d="M0 0H24" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="barline"><path d="M0 0H44" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+      </g>
+    </svg>
+  </div>
+  <ol class="beats">
+    <li><b>Underline</b><small>0.00s</small>the word sits on a rule the width of itself</li>
+    <li><b>Break</b><small>0.22s</small>the benchmark line drops off the end and falls</li>
+    <li><b>Balance</b><small>0.56s</small>it catches the middle of what is left, across it, at an angle</li>
+    <li><b>Level</b><small>0.73s</small>the rest folds down under it while it comes level</li>
+    <li><b>Lift</b><small>1.12s</small>it rises to its height and the whole thing sinks clear</li>
+    <li><b>Drop</b><small>1.62s</small>the l falls into the centre, then all four go home</li>
+  </ol>
+</div></section>
+
+<!-- ============ E ============ -->
+<section class="card" data-stage><div class="wrap">
+  <div class="num">E</div>
+  <h2>Standing start, robs the R</h2>
+  <p>The line begins standing upright where the mark will end up, in the order leg, leg, stem, so that the top piece tips over onto its own twin and lands exactly on the point all three have to meet at. It folds into an arrow pointing at the wordmark, reaches across and takes the amber stem out of the <b>R</b>, then turns upright carrying it. There is no moment where one thing is swapped for another: the wordmark is sized so the R's stem is already 44 units long, and the mark's stroke is that stem's own width, so the amber line on the letter <b>is</b> the benchmark line from the first frame. It does not appear. It leaves.</p>
+  <p class="q">Cost of the exact match: it sets three things you would otherwise choose. The wordmark's <b>size</b>, because its cap height has to equal what the line covers. Its <b>weight</b>, because its stem has to equal the mark's stroke. And the <b>lock-up</b>, because the benchmark line is longer than the mark is tall: if the line equals the cap height, the mark can only be about 0.7 of it, where <span class="hint">logo-sheet.html</span> draws it at about 1.09. The fitted numbers are in the header. Second cost, unchanged: a bare vertical line beside a wordmark is not a thing a page would have anyway, so the opening half second reads as something loading rather than resting.</p>
+  <div class="stage">
+    <svg id="stage-e" class="mark v-e" viewBox="0 0 940 96" fill="none" role="img" aria-label="The Releve mark assembling itself from a standing line and the stem of the R">
+      <text id="word-e" x="78" y="66" font-family="Inter, sans-serif" font-weight="600"
+            fill="currentColor">Releve</text>
+      <g class="rig">
+        <g class="legL"><path d="M0 0H28.3" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="legR"><path d="M0 0H28.3" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="stem"><path d="M0 0H24" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="barline"><path d="M0 0H44" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+      </g>
+    </svg>
+  </div>
+  <ol class="beats">
+    <li><b>One line</b><small>0.00s</small>standing upright, 80.6 units; the R's stem is already the mark's line</li>
+    <li><b>Break</b><small>0.14s</small>the top 28.3 part at the joint and tip over on it, no gap</li>
+    <li><b>Land</b><small>0.56s</small>they come down flat along their twin, lying over it, not in it</li>
+    <li><b>Home</b><small>0.73s</small>the far end is on the point already: nothing slides to get there</li>
+    <li><b>Open</b><small>0.73s</small>all three swing off that one point into the arrow</li>
+    <li><b>Take</b><small>1.79s</small>the arrow reaches, the line lets go of the R, and both turn upright</li>
+  </ol>
+</div></section>
+
+<section class="card" data-stage><div class="wrap">
+  <h2>On the logo</h2>
+  <p>The same animation at the sizes the page actually uses, with the wordmark set close to the mark the way the nav bar sets it. Nothing here is redrawn: it is the identical rig, scaled, and each lock-up measures its own wordmark so the arrow reaches exactly as far as its own R.</p>
+  <div class="lockups">
+    <div class="lu">
+      <svg class="mark v-e" viewBox="0 0 300 96" style="width:122px" fill="none" role="img" aria-label="The Releve lock-up assembling at nav bar size">
+      <text x="78" y="66" font-family="Inter, sans-serif" fill="currentColor">Releve</text>
+      <g class="rig">
+        <g class="legL"><path d="M0 0H28.3" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="legR"><path d="M0 0H28.3" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="stem"><path d="M0 0H24" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="barline"><path d="M0 0H44" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+      </g>
+      </svg>
+      <small>nav bar &mdash; 26 px mark</small>
+    </div>
+    <div class="lu">
+      <svg class="mark v-e" viewBox="0 0 300 96" style="width:338px" fill="none" role="img" aria-label="The Releve lock-up assembling at hero size">
+      <text x="78" y="66" font-family="Inter, sans-serif" fill="currentColor">Releve</text>
+      <g class="rig">
+        <g class="legL"><path d="M0 0H28.3" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="legR"><path d="M0 0H28.3" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="stem"><path d="M0 0H24" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+        <g class="barline"><path d="M0 0H44" stroke-linecap="square" vector-effect="non-scaling-stroke"/></g>
+      </g>
+      </svg>
+      <small>hero &mdash; 72 px mark</small>
+    </div>
+  </div>
+  <p class="q">And the nav bar as it stands today, at its own type sizes, for comparison:</p>
+  <div class="brandbar">
+    <span class="brand">
+      <svg class="brandmark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg>
+      <b>Releve</b><span>I.S. 465 reporting</span>
+    </span>
+  </div>
+</div></section>
+
+<section class="card"><div class="wrap">
+  <h2>The decision underneath both of them</h2>
+  <p>Either way the stolen line is amber, because it came out of the wordmark. Leaving it amber makes the finished mark two-tone &mdash; ink arrow, amber line &mdash; which is a different mark from the single-colour one in <span class="hint">docs/01-decisions.md</span>. Settling it to ink keeps that mark and costs the payoff. The <b>Line ends</b> button switches both stages.</p>
+  <p class="q">Both are landing-page openings, played once. The second half of each is a conversation between the mark and the wordmark, so neither can run where the mark appears alone: not the 26&nbsp;px header mark, not the app top bar.</p>
+  <div class="sizes">
+    <div class="sz"><svg width="72" height="72" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><small>the mark today, 72</small></div>
+    <div class="sz"><svg width="26" height="26" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><small>header, 26</small></div>
+    <div class="sz"><svg width="72" height="72" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"><path d="M10 20h44" stroke="var(--accent)"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><small>E: amber line, 72</small></div>
+    <div class="sz"><svg width="26" height="26" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square"><path d="M10 20h44" stroke="var(--accent)"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><small>E: amber line, 26</small></div>
+    <div class="sz"><svg width="72" height="72" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="square"><path d="M10 20h44"/><path d="M32 52V28" stroke="var(--accent)"/><path d="M17 52 32 28l15 24"/></svg><small>F: amber centre, 72</small></div>
+    <div class="sz"><svg width="26" height="26" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square"><path d="M10 20h44"/><path d="M32 52V28" stroke="var(--accent)"/><path d="M17 52 32 28l15 24"/></svg><small>F: amber centre, 26</small></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>Geometry is unchanged: the finished arrow is still <span class="hint">M32 52V28</span> and <span class="hint">M17 52 32 28l15 24</span> under a benchmark line 44 units long, so the favicon and the 16&nbsp;px case are untouched.</p>
+  <p>Under <span class="hint">prefers-reduced-motion: reduce</span> both stages draw the finished mark, the wordmark keeps its own strokes, and nothing moves at any point.</p>
+</div></footer>
+
+<script>
+(function () {
+  var GAP = 1000;                             // rest between runs
+  var stages = Array.prototype.slice.call(document.querySelectorAll('.mark'));
+  var looping = true, scrubbing = false, dur = 2800;
+
+  var BASE_Y = 66, BAR = 44, SIZE = 52;
+  var ARROW = 80.6;   // E's line: two legs and the centre, laid end to end
+  var LINE = 100.6;   // F's line: two legs and the benchmark, the centre comes off the l
+  var ctx = null;
+  function at(size, weight) {
+    if (!ctx) ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = (weight || 600) + ' ' + size + 'px Inter, sans-serif';
+    return ctx;
+  }
+  function ink(ch) {                          // getBBox on SVG text gives the layout box,
+    var m = at(SIZE, WEIGHT).measureText(ch); // not the ink, so the glyph is measured here
+    return { left: m.actualBoundingBoxLeft, cap: m.actualBoundingBoxAscent };
+  }
+
+  // The amber line has to be the R's stem exactly, which means the glyph has to
+  // match the line rather than the line matching the glyph. Two things have to
+  // agree: the stem's height against the line's drawn length, and the stem's
+  // width against the mark's stroke. Canvas has no API for a stem's width, so
+  // the letter is drawn big and a row is read across just above the baseline,
+  // where the leftmost run of ink is the stem and nothing else.
+  var REF = 200;
+  function ratios(weight) {
+    var c = document.createElement('canvas');
+    c.width = REF * 2; c.height = REF * 2;
+    var g = c.getContext('2d');
+    g.font = weight + ' ' + REF + 'px Inter, sans-serif';
+    g.textBaseline = 'alphabetic';
+    g.fillStyle = '#000';
+    g.fillText('R', 20, REF * 1.5);
+    var cap = g.measureText('R').actualBoundingBoxAscent;
+    if (!cap) return null;
+    var px = g.getImageData(0, Math.round(REF * 1.5 - cap * 0.15), c.width, 1).data;
+    var start = -1, i;
+    for (i = 0; i < c.width; i++) {
+      var on = px[i * 4 + 3] > 128;
+      if (on && start < 0) start = i;
+      else if (!on && start >= 0) return { cap: cap / REF, stem: (i - start) / REF };
+    }
+    return null;
+  }
+
+  var SW = 5;                                 // the mark keeps its own stroke weight
+  var WEIGHT = 600;
+  function measure() {
+    // The line is drawn 44 long and square-capped, so what it covers on screen is
+    // 44 + SW. Size the wordmark so the R's cap height is that, and pick the
+    // weight whose stem comes out at SW. Then the amber on the letter is the
+    // benchmark line itself: nothing grows, thins or fades when it leaves.
+    var base = ratios(600);
+    if (!base) return;                        // font not ready yet
+    SIZE = (BAR + SW) / base.cap;
+    var weight = 600, best = Infinity, w, r;
+    for (w = 400; w <= 700; w += 25) {       // the woff2 only carries 400-700; asking
+                                             // for less renders as 400 and would lie
+      r = ratios(w);
+      if (r && Math.abs(r.stem * SIZE - SW) < best) { best = Math.abs(r.stem * SIZE - SW); weight = w; }
+    }
+    WEIGHT = weight;
+    document.documentElement.style.setProperty('--sw', SW + 'px');
+    document.documentElement.style.setProperty('--bold', SW);
+    Array.prototype.forEach.call(document.querySelectorAll('.mark text'), function (t) {
+      t.setAttribute('font-size', SIZE.toFixed(2));
+      t.setAttribute('font-weight', weight);
+      t.setAttribute('letter-spacing', (-0.031 * SIZE).toFixed(2));
+    });
+    document.getElementById('fit').textContent =
+      'fitted: ' + SIZE.toFixed(1) + 'px, weight ' + weight + ', cap ' + (base.cap * SIZE).toFixed(1) +
+      ' against a line that covers ' + (BAR + SW);
+
+    // ---- E: the R, and how far each lock-up's arrow has to reach for it.
+    // Every E stage is measured off its own wordmark, because the lock-ups set
+    // the word closer to the mark than the big stage does.
+    var ri = ink('R');
+    Array.prototype.forEach.call(document.querySelectorAll('.v-e'), function (e) {
+      var we = e.querySelector('text');
+      var rx = we.getStartPositionOfChar(0).x - ri.left, ry = BASE_Y - ri.cap + SW / 2;
+      // screen -> rig-local through rotate(90deg) about (32,48), with and without
+      // the reach: the line holds its place on the letter while the arrow travels
+      var sx = rx + SW / 2, lunge = Math.round(sx - 44);
+      e.style.setProperty('--lunge', lunge + 'px');
+      e.style.setProperty('--bx', (ry - 16) + 'px');
+      e.style.setProperty('--by0', (80 - sx) + 'px');
+      e.style.setProperty('--by', (80 + lunge - sx) + 'px');
+    });
+    var e = document.getElementById('stage-e');
+
+    // ---- F: the underline's span, and the l it lifts onto
+    var f = document.getElementById('stage-f'), wf = document.getElementById('word-f');
+    var W = wf.getComputedTextLength(), X0 = wf.getStartPositionOfChar(0).x;
+    var s = W / LINE;                         // the line is drawn the width of the word
+    var l = ink('l');
+    var lx = wf.getStartPositionOfChar(2).x - l.left, ltop = BASE_Y - l.cap;
+    var df = document.getElementById('donor-f');
+    df.setAttribute('x', lx); df.setAttribute('y', ltop);
+    df.setAttribute('width', SW); df.setAttribute('height', l.cap);
+    var ftx = X0 + 40.3 * s - 32;             // underline's left end on the word's
+    var fdy = BASE_Y + 12 - 48 + 12 * s;      // sunk clear of the baseline
+    f.style.setProperty('--fs', s.toFixed(4));
+    f.style.setProperty('--ftx', ftx + 'px');
+    f.style.setProperty('--fty', (BASE_Y + 14 - 48) + 'px');  // sitting as its underline
+    f.style.setProperty('--fdy', fdy + 'px');
+    // the l's own place, read back into rig coordinates at the sunk position
+    f.style.setProperty('--fsx', ((lx + SW / 2 - 32 - ftx) / s + 32) + 'px');
+    f.style.setProperty('--fsy', ((ltop - 48 - fdy) / s + 48) + 'px');
+    f.style.setProperty('--fss', (l.cap / (24 * s)).toFixed(4));
+  }
+
+  // Restarting a CSS animation needs a style flush between dropping the class
+  // and putting it back. `void el.offsetWidth` cannot do it here: offsetWidth is
+  // undefined on SVG elements, so it forces nothing. Read it off the document.
+  function play(el, then) {
+    el.classList.remove('run');
+    void document.body.offsetHeight;
+    el.classList.add('run');
+    requestAnimationFrame(function () { then(el.getAnimations({ subtree: true })); });
+  }
+
+  // Each stage keeps its own clock, so restarting one never waits on the other.
+  function cycle(el) {
+    play(el, function (running) {
+      if (!running.length) return;            // reduced motion: nothing to loop
+      Promise.all(running.map(function (a) { return a.finished.catch(function () {}); }))
+        .then(function () {
+          if (!looping || scrubbing) return;
+          el.timer = setTimeout(function () { if (looping && !scrubbing) cycle(el); }, GAP);
+        });
+    });
+  }
+
+  function restartAll() { scrubbing = false; stages.forEach(function (el) { clearTimeout(el.timer); cycle(el); }); }
+  function stopAll() { stages.forEach(function (el) { clearTimeout(el.timer); }); }
+
+  document.getElementById('replay').addEventListener('click', function (ev) { ev.stopPropagation(); restartAll(); });
+
+  // Click a stage to replay only that one.
+  Array.prototype.forEach.call(document.querySelectorAll('[data-stage]'), function (card) {
+    card.addEventListener('click', function () {
+      scrubbing = false;
+      Array.prototype.forEach.call(card.querySelectorAll('.mark'), function (el) {
+        clearTimeout(el.timer);
+        cycle(el);
+      });
+    });
+  });
+
+  var loopBtn = document.getElementById('loop');
+  loopBtn.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    looping = !looping;
+    loopBtn.textContent = looping ? 'Loop: on' : 'Loop: off';
+    if (looping) restartAll(); else stopAll();
+  });
+
+  var speedBtn = document.getElementById('speed');
+  speedBtn.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    dur = dur === 2800 ? 7000 : 2800;
+    document.documentElement.style.setProperty('--T', dur + 'ms');
+    speedBtn.textContent = dur === 2800 ? 'Speed: 1×' : 'Speed: 0.4×';
+    restartAll();
+  });
+
+  var toneBtn = document.getElementById('tone');
+  toneBtn.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    var amber = document.documentElement.style.getPropertyValue('--bar-end') !== 'var(--text)';
+    document.documentElement.style.setProperty('--bar-end', amber ? 'var(--text)' : 'var(--accent)');
+    toneBtn.textContent = amber ? 'Line ends: ink' : 'Line ends: amber';
+    restartAll();
+  });
+
+  var scrub = document.getElementById('scrub'), clock = document.getElementById('clock');
+  scrub.addEventListener('input', function (ev) {
+    ev.stopPropagation();
+    scrubbing = true;
+    stopAll();
+    var t = dur * scrub.value / 1000;
+    stages.forEach(function (el) {
+      el.getAnimations({ subtree: true }).forEach(function (a) { a.pause(); a.currentTime = t; });
+    });
+    clock.textContent = (t / 1000).toFixed(2) + ' s of ' + (dur / 1000).toFixed(2) + ' s';
+  });
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { measure(); restartAll(); });
+  } else {
+    measure(); restartAll();
+  }
+  window.addEventListener('resize', measure);
+})();
+</script>
+</body>
+</html>

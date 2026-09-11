@@ -1,0 +1,1081 @@
+<!doctype html>
+<html lang="en-IE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spike — one case, many hands, with the case moving</title>
+<style>
+  /* Same tokens as index.html so this can be lifted straight across. */
+  @font-face{font-family:'Inter';font-style:normal;font-weight:400 700;font-display:swap;src:url('../fonts/inter.woff2') format('woff2')}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url('../fonts/jetbrains-mono.woff2') format('woff2')}
+  :root{
+    --ground:#fffef2; --surface:#f3f2e7; --surface-2:#e9e8dc;
+    --line:#d1d0c6; --line-2:#bab9b0;
+    --text:#191918; --muted:rgba(25,25,24,.6);
+    --accent:#fcaa2d; --accent-ink:#191918; --accent-soft:#fdeac4; --accent-deep:#a36404;
+    --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',SFMono-Regular,Menlo,monospace;
+    --wrap:1080px;
+    --cycle:9s;           /* one full pass of the case through every hand */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px}
+  section{padding:clamp(48px,6vw,84px) 0;border-bottom:1px solid var(--line)}
+  .head{display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(24px,3vw,40px)}
+  .label{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  h1,h2,h3{margin:0;font-weight:400;letter-spacing:-.045em;line-height:1.1}
+  h2{font-size:clamp(28px,4vw,44px);max-width:22ch}
+  h3{font-size:19px;line-height:1.3;letter-spacing:-.02em}
+  .head p{color:var(--muted);max-width:60ch;font-size:clamp(16px,1.5vw,18px)}
+  .pipe-note{margin:28px 0 0;color:var(--muted);max-width:66ch;font-size:16px}
+  .pipe-note b{color:var(--text);font-weight:500}
+
+  /* ================= OPTION A — the hub scene =================
+     Specgauge draws a chain because their signal really is a chain:
+     the probe cannot reach the cloud without the comms box. Ours is not
+     a chain. The case sits still and four hands reach it, so the case is
+     in the middle and the dots run in and out, not left to right.
+     Two hands write into it (amber, inbound), two read from it (ink,
+     outbound) — that difference is the whole argument of the section. */
+  .scene-frame{background:var(--surface);border:1px solid var(--line-2);padding:8px}
+  .scene{display:block;width:100%;height:auto}
+
+  .scene .wire{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:2 6;opacity:.7}
+  /* The moving dots are one stroke: a dash pattern of near-zero length with
+     round caps is a row of dots, and sliding the dashoffset marches them. */
+  .scene .flow{fill:none;stroke-width:4.5;stroke-linecap:round;stroke-dasharray:.01 16;
+    animation:march 1.6s linear infinite}
+  .scene .flow.in{stroke:var(--accent)}
+  .scene .flow.out{stroke:var(--line-2)}
+  @keyframes march{to{stroke-dashoffset:-32}}
+
+  .scene .glyph{fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:square;stroke-linejoin:miter}
+  .scene .glyph.thin{stroke-width:1.5;stroke:var(--line-2)}
+  .scene .fill{fill:var(--accent)}
+  .scene .fill.soft{fill:var(--accent-soft)}
+  .scene .plate{fill:var(--ground);stroke:var(--text);stroke-width:2}
+  .scene .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;fill:var(--muted);text-transform:uppercase}
+  .scene .cap b{fill:var(--text);font-weight:500}
+  .scene .hubcap{font-family:var(--mono);font-size:11px;letter-spacing:.1em;fill:var(--text)}
+  .scene .hubnum{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.02em;fill:var(--text)}
+
+  /* Each hand lifts for its slice of the cycle, in the order the case
+     actually moves: assessor, lab, council, homeowner. */
+  .scene .node{animation:hand var(--cycle) linear infinite;animation-delay:calc(var(--i) * (var(--cycle) / 4));transform-box:fill-box;transform-origin:center}
+  @keyframes hand{
+    0%{opacity:.45}
+    4%{opacity:.45}
+    10%{opacity:1}
+    26%{opacity:1}
+    34%{opacity:.45}
+    100%{opacity:.45}
+  }
+  .scene .node .ring{opacity:0;animation:ring var(--cycle) linear infinite;animation-delay:calc(var(--i) * (var(--cycle) / 4))}
+  @keyframes ring{0%,8%{opacity:0;transform:scale(.9)}14%{opacity:1}30%{opacity:0}100%{opacity:0}}
+  .scene .blink{animation:blink 1.4s steps(2,jump-none) infinite}
+  @keyframes blink{50%{opacity:.2}}
+
+  .legend{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:16px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:8px}
+  .legend i{width:26px;height:0;border-top:4px dotted currentColor}
+  .legend .w{color:var(--accent-deep)}
+  .legend .r{color:var(--text)}
+
+  /* ================= OPTION B — the cards, wired =================
+     The four cards you already have, with the case handed along the row.
+     Cheaper to land, keeps every word that is on the page today. */
+  .hands{padding-top:40px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;position:relative}
+  @media (max-width:980px){.hands{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.hands{grid-template-columns:1fr}}
+  .step-card{position:relative;background:var(--surface);border:1px solid var(--line);padding:22px 22px 24px;display:flex;flex-direction:column;gap:10px;
+    animation:card var(--cycle) linear infinite;animation-delay:calc(var(--i) * (var(--cycle) / 4))}
+  /* Lit while the chip is actually sitting on this card: the chip holds on
+     card i for the first 20% of that card's slice, so the light comes up at
+     3% and is gone by 22%, before the chip has left. */
+  @keyframes card{
+    0%,1%{border-color:var(--line);background:var(--surface)}
+    3%,19%{border-color:var(--accent);background:var(--ground)}
+    22%,100%{border-color:var(--line);background:var(--surface)}
+  }
+  .step-card .num{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--accent-deep)}
+  .step-card p{margin:0;color:var(--muted);font-size:15.5px}
+  /* The wire between two cards sits in the 16px gutter: a row of dots laid
+     down as a repeating gradient, so they can be slid sideways. ::after is
+     the resting wire, ::before the amber one that marches for the hop
+     (20% to 25% of the slice, which is exactly when the chip is in flight). */
+  .step-card::after,.step-card::before{
+    content:"";position:absolute;top:34px;left:100%;width:16px;height:4px;
+    background-image:radial-gradient(circle at 2px 2px, var(--line-2) 1.5px, transparent 1.8px);
+    background-size:6px 4px;background-repeat:repeat-x;
+  }
+  .step-card::before{
+    background-image:radial-gradient(circle at 2px 2px, var(--accent) 1.8px, transparent 2.1px);
+    opacity:0;animation:hop var(--cycle) linear infinite;animation-delay:calc(var(--i) * (var(--cycle) / 4));
+  }
+  .step-card:last-child::after,.step-card:last-child::before{display:none}
+  @keyframes hop{
+    0%,19%{opacity:0;background-position-x:0}
+    20%{opacity:1}
+    25%{opacity:1;background-position-x:18px}
+    26%,100%{opacity:0;background-position-x:18px}
+  }
+  @media (max-width:980px){.step-card::after,.step-card::before{display:none}}
+  /* The case itself: a small amber chip that rides the row. */
+  .chip{position:absolute;z-index:2;top:2px;left:0;width:18px;height:22px;background:var(--accent);border:1px solid var(--accent-deep);
+    animation:ride var(--cycle) cubic-bezier(.6,0,.35,1) infinite;pointer-events:none}
+  .chip::before{content:"";position:absolute;left:3px;right:3px;top:5px;height:1.5px;background:var(--accent-ink);opacity:.5;box-shadow:0 4px 0 rgba(25,25,24,.5),0 8px 0 rgba(25,25,24,.5)}
+  @keyframes ride{
+    0%,20%{left:calc(12.5% - 9px)}
+    25%,45%{left:calc(37.5% - 9px)}
+    50%,70%{left:calc(62.5% - 9px)}
+    75%,95%{left:calc(87.5% - 9px)}
+    100%{left:calc(12.5% - 9px)}
+  }
+  @media (max-width:980px){.chip{display:none}}
+
+  .opt{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:6px}
+
+  /* ================= OPTION C - the report evolves =================
+     The beat from the X-Men pyramid scene: a thing sits in a fixed
+     chamber, power pours in from outside, and on every hit it does not
+     just fill up - it gains a part it did not have and comes back bigger.
+     Translated here: the chamber is the case, and the report inside it
+     grows a layer per contribution until it seals as v1.
+
+     Relace's look has no glow to lean on, so the surge is carried by the
+     things a flat style can do: a hard cut (new parts snap on, they never
+     fade in), a scale step that overshoots before it settles, and a single
+     frame of amber wash. The fourth hit is the biggest because it is the
+     one that cannot be taken back - signing and freezing. */
+  .evo-frame{background:var(--surface);border:1px solid var(--line-2);padding:8px;--evo:12s}
+  .evo{display:block;width:100%;height:auto}
+
+  .evo .wire{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:2 6;opacity:.55}
+  .evo .beam{fill:none;stroke:var(--accent);stroke-width:4.5;stroke-linecap:round;stroke-dasharray:.01 15;
+    opacity:0;animation:march 1.1s linear infinite, beamA var(--evo) linear infinite}
+  .evo .beam.b2{animation:march 1.1s linear infinite, beamB var(--evo) linear infinite}
+  .evo .beam.b3{animation:march 1.1s linear infinite, beamC var(--evo) linear infinite}
+  .evo .out{fill:none;stroke:var(--line-2);stroke-width:4.5;stroke-linecap:round;stroke-dasharray:.01 16;
+    opacity:0;animation:march 1.7s linear infinite, outwin var(--evo) linear infinite}
+  /* each beam runs in the seconds before its hit, at 10%, 30% and 50% */
+  @keyframes beamA{0%,1%{opacity:0}3%,9.6%{opacity:1}10.4%,100%{opacity:0}}
+  @keyframes beamB{0%,21%{opacity:0}23%,29.6%{opacity:1}30.4%,100%{opacity:0}}
+  @keyframes beamC{0%,41%{opacity:0}43%,49.6%{opacity:1}50.4%,100%{opacity:0}}
+  @keyframes outwin{0%,73%{opacity:0}76%,100%{opacity:1}}
+
+  .evo .glyph{fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:square}
+  .evo .glyph.thin{stroke-width:1.5;stroke:var(--line-2)}
+  .evo .plate{fill:var(--ground);stroke:var(--text);stroke-width:2}
+  .evo .fill{fill:var(--accent)}
+  .evo .fill.soft{fill:var(--accent-soft)}
+  .evo .cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;fill:var(--muted);text-transform:uppercase}
+  .evo .stage{font-family:var(--mono);font-size:12px;letter-spacing:.1em;fill:var(--text);text-transform:uppercase}
+  .evo .tiny{font-family:var(--mono);font-size:8px;letter-spacing:.08em;fill:var(--muted)}
+
+  /* the chamber never moves or resizes: it is what the growth is read against */
+  .evo .chamber{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:3 7}
+  .evo .bracket{fill:none;stroke:var(--text);stroke-width:2;
+    animation:bracket var(--evo) linear infinite}
+  @keyframes bracket{
+    0%,9.6%{stroke:#191918}  10%{stroke:#fcaa2d}  13%{stroke:#191918}
+    29.6%{stroke:#191918}    30%{stroke:#fcaa2d}  33%{stroke:#191918}
+    49.6%{stroke:#191918}    50%{stroke:#fcaa2d}  53%{stroke:#191918}
+    69.6%{stroke:#191918}    70%{stroke:#fcaa2d}  75%{stroke:#fcaa2d}
+    79%,100%{stroke:#191918}
+  }
+
+  /* the report itself: one group, grown in steps, overshooting each time
+     and dropping back - a thing bracing under what just hit it */
+  .evo .doc{transform-box:view-box;transform-origin:440px 256px;
+    animation:grow var(--evo) linear infinite}
+  @keyframes grow{
+    0%,9.6%{transform:scale(.60)}
+    10.8%{transform:scale(.78)}
+    12.6%,29.6%{transform:scale(.71)}
+    30.8%{transform:scale(.92)}
+    32.6%,49.6%{transform:scale(.82)}
+    50.8%{transform:scale(1.02)}
+    52.6%,69.6%{transform:scale(.91)}
+    71%{transform:scale(1.11)}
+    72.6%{transform:scale(.98)}
+    74%,100%{transform:scale(1)}
+  }
+  /* hard cuts: a part appears whole, it never fades in */
+  .evo .L1,.evo .L2,.evo .L3,.evo .L4{opacity:0}
+  .evo .L1{animation:s1 var(--evo) steps(1,end) infinite}
+  .evo .L2{animation:s2 var(--evo) steps(1,end) infinite}
+  .evo .L3{animation:s3 var(--evo) steps(1,end) infinite}
+  .evo .L4{animation:s4 var(--evo) steps(1,end) infinite}
+  @keyframes s1{0%{opacity:0}10%,100%{opacity:1}}
+  @keyframes s2{0%{opacity:0}30%,100%{opacity:1}}
+  @keyframes s3{0%{opacity:0}50%,100%{opacity:1}}
+  @keyframes s4{0%{opacity:0}70%,100%{opacity:1}}
+
+  .evo .flash{fill:var(--accent-soft);opacity:0;animation:flash var(--evo) linear infinite}
+  @keyframes flash{
+    0%,9.7%{opacity:0}  10%{opacity:.85} 12.8%{opacity:0}
+    29.7%{opacity:0}    30%{opacity:.85} 32.8%{opacity:0}
+    49.7%{opacity:0}    50%{opacity:.85} 52.8%{opacity:0}
+    69.7%{opacity:0}    70%{opacity:.95} 75%{opacity:0}
+    100%{opacity:0}
+  }
+
+  /* each source lifts for its own hit, then all of them come up together
+     under the finished report - the point being that all of them made it */
+  .evo .src{opacity:.35;animation:srcA var(--evo) linear infinite}
+  .evo .src.s-lab{animation-name:srcB}
+  .evo .src.s-str{animation-name:srcC}
+  .evo .dst{opacity:.35;animation:dst var(--evo) linear infinite}
+  @keyframes srcA{0%,1%{opacity:.35}3%,13%{opacity:1}17%,73%{opacity:.35}77%,100%{opacity:1}}
+  @keyframes srcB{0%,21%{opacity:.35}23%,33%{opacity:1}37%,73%{opacity:.35}77%,100%{opacity:1}}
+  @keyframes srcC{0%,41%{opacity:.35}43%,53%{opacity:1}57%,73%{opacity:.35}77%,100%{opacity:1}}
+  @keyframes dst{0%,73%{opacity:.35}77%,100%{opacity:1}}
+
+  /* the caption names the part that just landed, not the actor */
+  .evo .c0,.evo .c1,.evo .c2,.evo .c3,.evo .c4{opacity:0}
+  .evo .c0{animation:k0 var(--evo) steps(1,end) infinite}
+  .evo .c1{animation:k1 var(--evo) steps(1,end) infinite}
+  .evo .c2{animation:k2 var(--evo) steps(1,end) infinite}
+  .evo .c3{animation:k3 var(--evo) steps(1,end) infinite}
+  .evo .c4{animation:k4 var(--evo) steps(1,end) infinite}
+  @keyframes k0{0%{opacity:1}10%,100%{opacity:0}}
+  @keyframes k1{0%{opacity:0}10%{opacity:1}30%,100%{opacity:0}}
+  @keyframes k2{0%{opacity:0}30%{opacity:1}50%,100%{opacity:0}}
+  @keyframes k3{0%{opacity:0}50%{opacity:1}70%,100%{opacity:0}}
+  @keyframes k4{0%{opacity:0}70%,100%{opacity:1}}
+
+  .evo .seg{fill:var(--surface-2)}
+  .evo .segf{fill:var(--accent);opacity:0}
+  .evo .segf.g1{animation:s1 var(--evo) steps(1,end) infinite}
+  .evo .segf.g2{animation:s2 var(--evo) steps(1,end) infinite}
+  .evo .segf.g3{animation:s3 var(--evo) steps(1,end) infinite}
+  .evo .segf.g4{animation:s4 var(--evo) steps(1,end) infinite}
+
+  /* ================= OPTION D - the right actors =================
+     Option C drew the lab and the council as peers of the assessor, which
+     claims two integrations that do not exist. In the app a lab is a text
+     field on a sample and its result arrives as a recorded document; the
+     council has no account at all and gets a package by hand. So the
+     drawing is now mostly about a boundary: inside it are the four people
+     with logins, outside it are the two parties reached on paper.
+
+     The I.S. 465 structure is not a party either. It lands on the first
+     hit as four empty numbered sections, and every later hit fills one.
+     That is the claim worth making - the sections are there before the
+     content is, which is why nobody has to re-type anything into them.
+
+     Cycle 12s: hits at 10, 25, 40, 55 and 70 per cent, then a 3.6s hold
+     on the frozen version while the package leaves. */
+  .bnd-frame{background:var(--surface);border:1px solid var(--line-2);padding:8px;--evo:12s}
+  .bnd{display:block;width:100%;height:auto}
+
+  .bnd .wire{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:2 6;opacity:.5}
+  .bnd .beam{fill:none;stroke:var(--accent);stroke-width:4.5;stroke-linecap:round;stroke-dasharray:.01 15;
+    opacity:0;animation:march 1.1s linear infinite, bm1 var(--evo) linear infinite}
+  .bnd .beam.m2{animation:march 1.1s linear infinite, bm2 var(--evo) linear infinite}
+  .bnd .beam.m3{animation:march 1.1s linear infinite, bm3 var(--evo) linear infinite}
+  .bnd .beam.m5{animation:march 1.1s linear infinite, bm5 var(--evo) linear infinite}
+  @keyframes bm1{0%,1%{opacity:0}3%,9.6%{opacity:1}10.4%,100%{opacity:0}}
+  @keyframes bm2{0%,16%{opacity:0}18%,24.6%{opacity:1}25.4%,100%{opacity:0}}
+  @keyframes bm3{0%,31%{opacity:0}33%,39.6%{opacity:1}40.4%,100%{opacity:0}}
+  @keyframes bm5{0%,61%{opacity:0}63%,69.6%{opacity:1}70.4%,100%{opacity:0}}
+
+  /* Paper lanes read differently on purpose: a long dash that does not
+     march, with a document sliding along it. Nothing streams, because
+     nothing streams in real life either. */
+  .bnd .lane{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:9 7}
+  .bnd .doc-out,.bnd .doc-in,.bnd .doc-pkg{opacity:0}
+  .bnd .doc-out{animation:paperOut var(--evo) linear infinite}
+  .bnd .doc-in{animation:paperIn var(--evo) linear infinite}
+  .bnd .doc-pkg{animation:paperPkg var(--evo) linear infinite}
+  @keyframes paperOut{
+    0%,26%{opacity:0;transform:translateX(0)}
+    28%{opacity:1;transform:translateX(4px)}
+    35%{opacity:1;transform:translateX(104px)}
+    37%,100%{opacity:0;transform:translateX(112px)}}
+  @keyframes paperIn{
+    0%,46%{opacity:0;transform:translateX(0)}
+    48%{opacity:1;transform:translateX(-4px)}
+    54.5%{opacity:1;transform:translateX(-104px)}
+    56%,100%{opacity:0;transform:translateX(-112px)}}
+  @keyframes paperPkg{
+    0%,85%{opacity:0;transform:translateX(0)}
+    87%{opacity:1;transform:translateX(6px)}
+    97%,100%{opacity:1;transform:translateX(108px)}}
+
+  .bnd .glyph{fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:square}
+  .bnd .glyph.thin{stroke-width:1.5;stroke:var(--line-2)}
+  .bnd .plate{fill:var(--ground);stroke:var(--text);stroke-width:2}
+  .bnd .fill{fill:var(--accent)}
+  .bnd .fill.soft{fill:var(--accent-soft)}
+  .bnd .cap{font-family:var(--mono);font-size:10px;letter-spacing:.11em;fill:var(--muted);text-transform:uppercase}
+  .bnd .edge{font-family:var(--mono);font-size:10px;letter-spacing:.16em;fill:var(--line-2);text-transform:uppercase}
+  .bnd .stage{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;fill:var(--text);text-transform:uppercase}
+  .bnd .tiny{font-family:var(--mono);font-size:7.5px;letter-spacing:.06em;fill:var(--muted)}
+
+  /* the app boundary, and the chamber inside it */
+  .bnd .boundary{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:5 5}
+  .bnd .chamber{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 7}
+  .bnd .bracket{fill:none;stroke:var(--text);stroke-width:2;animation:bracket5 var(--evo) linear infinite}
+  @keyframes bracket5{
+    0%,9.6%{stroke:#191918}  10%{stroke:#fcaa2d}  13%{stroke:#191918}
+    24.6%{stroke:#191918}    25%{stroke:#fcaa2d}  28%{stroke:#191918}
+    39.6%{stroke:#191918}    40%{stroke:#fcaa2d}  43%{stroke:#191918}
+    54.6%{stroke:#191918}    55%{stroke:#fcaa2d}  58%{stroke:#191918}
+    69.6%{stroke:#191918}    70%{stroke:#fcaa2d}  75%{stroke:#fcaa2d}
+    79%,100%{stroke:#191918}}
+
+  .bnd .doc{transform-box:view-box;transform-origin:450px 280px;
+    animation:grow5 var(--evo) linear infinite}
+  @keyframes grow5{
+    0%,9.6%{transform:scale(.50)}
+    10.9%{transform:scale(.66)}
+    12.4%,24.6%{transform:scale(.58)}
+    25.9%{transform:scale(.79)}
+    27.4%,39.6%{transform:scale(.70)}
+    40.9%{transform:scale(.89)}
+    42.4%,54.6%{transform:scale(.80)}
+    55.9%{transform:scale(.98)}
+    57.4%,69.6%{transform:scale(.89)}
+    71%{transform:scale(1.12)}
+    72.6%{transform:scale(.98)}
+    74%,100%{transform:scale(1)}}
+
+  .bnd .P1,.bnd .P2,.bnd .P3,.bnd .P4,.bnd .P5{opacity:0}
+  .bnd .P1{animation:v1 var(--evo) steps(1,end) infinite}
+  .bnd .P2{animation:v2 var(--evo) steps(1,end) infinite}
+  .bnd .P3{animation:v3 var(--evo) steps(1,end) infinite}
+  .bnd .P4{animation:v4 var(--evo) steps(1,end) infinite}
+  .bnd .P5{animation:v5 var(--evo) steps(1,end) infinite}
+  @keyframes v1{0%{opacity:0}10%,100%{opacity:1}}
+  @keyframes v2{0%{opacity:0}25%,100%{opacity:1}}
+  @keyframes v3{0%{opacity:0}40%,100%{opacity:1}}
+  @keyframes v4{0%{opacity:0}55%,100%{opacity:1}}
+  @keyframes v5{0%{opacity:0}70%,100%{opacity:1}}
+
+  .bnd .cover{transform-box:view-box;transform-origin:450px 170px;transform:scaleY(0);
+    animation:closeUp var(--evo) linear infinite}
+  @keyframes closeUp{
+    0%,76.8%{transform:scaleY(0)}
+    78.4%{transform:scaleY(1.04)}
+    79.4%,100%{transform:scaleY(1)}}
+  /* the stamp arrives the way a stamp does: from above, too big, hard, once */
+  .bnd .stamp{transform-box:view-box;transform-origin:452px 320px;opacity:0;
+    animation:stampDown var(--evo) linear infinite}
+  @keyframes stampDown{
+    0%,81%{opacity:0;transform:rotate(-9deg) scale(1.55)}
+    81.3%{opacity:1;transform:rotate(-9deg) scale(1.3)}
+    82.4%{opacity:1;transform:rotate(-9deg) scale(.93)}
+    83.4%,100%{opacity:1;transform:rotate(-9deg) scale(1)}}
+  .bnd .stampword{font-family:var(--mono);font-size:19px;font-weight:600;
+    letter-spacing:.12em;fill:#a36404}
+
+  .bnd .flash{fill:var(--accent-soft);opacity:0;animation:flash5 var(--evo) linear infinite}
+  @keyframes flash5{
+    0%,9.7%{opacity:0} 10%{opacity:.85} 12.6%{opacity:0}
+    24.7%{opacity:0}   25%{opacity:.85} 27.6%{opacity:0}
+    39.7%{opacity:0}   40%{opacity:.85} 42.6%{opacity:0}
+    54.7%{opacity:0}   55%{opacity:.85} 57.6%{opacity:0}
+    69.7%{opacity:0}   70%{opacity:.95} 75%{opacity:0}
+    81%{opacity:0}     81.4%{opacity:.7}  84%,100%{opacity:0}}
+
+  /* the assessor lights twice: once at the house, once to sign */
+  .bnd .a-adm{opacity:.35;animation:lAdm var(--evo) linear infinite}
+  .bnd .a-ass{opacity:.35;animation:lAss var(--evo) linear infinite}
+  .bnd .a-own{opacity:.35;animation:lOwn var(--evo) linear infinite}
+  .bnd .a-lab{opacity:.35;animation:lLab var(--evo) linear infinite}
+  .bnd .a-cnl{opacity:.35;animation:lCnl var(--evo) linear infinite}
+  @keyframes lAdm{0%,1%{opacity:.35}3%,13%{opacity:1}17%,73%{opacity:.35}77%,100%{opacity:1}}
+  @keyframes lAss{0%,16%{opacity:.35}18%,28%{opacity:1}32%,61%{opacity:.35}63%,73%{opacity:1}77%,100%{opacity:1}}
+  @keyframes lOwn{0%,31%{opacity:.35}33%,43%{opacity:1}47%,73%{opacity:.35}77%,100%{opacity:1}}
+  @keyframes lLab{0%,26%{opacity:.35}28%,36%{opacity:1}40%,46%{opacity:.35}48%,58%{opacity:1}62%,73%{opacity:.35}77%,100%{opacity:1}}
+  @keyframes lCnl{0%,87%{opacity:.35}93%,100%{opacity:1}}
+
+  .bnd .d0,.bnd .d1,.bnd .d2,.bnd .d3,.bnd .d4,.bnd .d5,.bnd .d6,.bnd .d7{opacity:0}
+  .bnd .d0{animation:q0 var(--evo) steps(1,end) infinite}
+  .bnd .d1{animation:q1 var(--evo) steps(1,end) infinite}
+  .bnd .d2{animation:q2 var(--evo) steps(1,end) infinite}
+  .bnd .d3{animation:q3 var(--evo) steps(1,end) infinite}
+  .bnd .d4{animation:q4 var(--evo) steps(1,end) infinite}
+  .bnd .d5{animation:q5 var(--evo) steps(1,end) infinite}
+  .bnd .d6{animation:q6 var(--evo) steps(1,end) infinite}
+  .bnd .d7{animation:q7 var(--evo) steps(1,end) infinite}
+  @keyframes q0{0%{opacity:1}10%,100%{opacity:0}}
+  @keyframes q1{0%{opacity:0}10%{opacity:1}25%,100%{opacity:0}}
+  @keyframes q2{0%{opacity:0}25%{opacity:1}40%,100%{opacity:0}}
+  @keyframes q3{0%{opacity:0}40%{opacity:1}55%,100%{opacity:0}}
+  @keyframes q4{0%{opacity:0}55%{opacity:1}70%,100%{opacity:0}}
+  @keyframes q5{0%{opacity:0}70%{opacity:1}77%,100%{opacity:0}}
+  @keyframes q6{0%{opacity:0}77%{opacity:1}86%,100%{opacity:0}}
+  @keyframes q7{0%{opacity:0}86%,100%{opacity:1}}
+
+  .bnd .seg{fill:var(--surface-2)}
+  .bnd .segf{fill:var(--accent);opacity:0}
+  .bnd .segf.n1{animation:v1 var(--evo) steps(1,end) infinite}
+  .bnd .segf.n2{animation:v2 var(--evo) steps(1,end) infinite}
+  .bnd .segf.n3{animation:v3 var(--evo) steps(1,end) infinite}
+  .bnd .segf.n4{animation:v4 var(--evo) steps(1,end) infinite}
+  .bnd .segf.n5{animation:v5 var(--evo) steps(1,end) infinite}
+
+  /* ---- the same scene stood up for a phone ----
+     Nothing about the beats changes: every animation is bound to a class
+     (.P1-.P5, .cover, .stamp, .segf, .d0-.d7) and none of them mentions a
+     coordinate, so the portrait scene inherits the lot. Only the three
+     transform origins are geometry, and they are overridden here.
+
+     What is dropped is the actor column. Three glyphs and their labels
+     cannot survive 380px, and they were never the argument - so the actor
+     becomes the first line of the caption instead, and the app boundary
+     stops being a box and becomes a rule, which reads better upright. */
+  .bnd-tall{display:none}
+  .bnd-tall .doc{transform-origin:190px 272.38px}
+  .bnd-tall .cover{transform-origin:190px 128px}
+  .bnd-tall .stamp{transform-origin:192.62px 324.88px}
+  .bnd-tall .tiny{font-size:10px}
+  .bnd-tall .stampword{font-size:25px}
+  .bnd-tall .cap,.bnd-tall .edge{font-size:11px}
+  .bnd-tall .who{font-family:var(--mono);font-size:13px;letter-spacing:.14em;
+    fill:var(--accent-deep);text-transform:uppercase}
+  .bnd-tall .what{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;
+    fill:var(--text);text-transform:uppercase}
+  /* the paper lanes are shorter and the order now travels left, to the lab */
+  .bnd-tall .doc-out{animation-name:tallOut}
+  .bnd-tall .doc-in{animation-name:tallIn}
+  .bnd-tall .doc-pkg{animation-name:tallPkg}
+  @keyframes tallOut{
+    0%,26%{opacity:0;transform:translateX(0)}
+    28%{opacity:1;transform:translateX(-4px)}
+    35%{opacity:1;transform:translateX(-62px)}
+    37%,100%{opacity:0;transform:translateX(-68px)}}
+  @keyframes tallIn{
+    0%,46%{opacity:0;transform:translateX(0)}
+    48%{opacity:1;transform:translateX(4px)}
+    54.5%{opacity:1;transform:translateX(62px)}
+    56%,100%{opacity:0;transform:translateX(68px)}}
+  @keyframes tallPkg{
+    0%,85%{opacity:0;transform:translateX(0)}
+    87%{opacity:1;transform:translateX(6px)}
+    97%,100%{opacity:1;transform:translateX(64px)}}
+  @media (max-width:720px){
+    .bnd:not(.bnd-tall){display:none}
+    .bnd-tall{display:block}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .scene .flow{animation:none;stroke-dasharray:2 8;opacity:.8}
+    .scene .node,.scene .node .ring,.scene .blink,.step-card,.step-card::after{animation:none}
+    .scene .node{opacity:1}
+    .scene .node .ring{opacity:0}
+    .chip{display:none}
+    /* Option C rests on the finished report: every layer on, nothing moving */
+    .evo .doc,.evo .flash,.evo .bracket,.evo .beam{animation:none}
+    .evo .doc{transform:none}
+    .evo .flash{opacity:0}
+    .evo .beam{display:none}
+    .evo .out{animation:none;opacity:1;stroke-dasharray:2 8}
+    .evo .L1,.evo .L2,.evo .L3,.evo .L4{animation:none;opacity:1}
+    .evo .src,.evo .dst{animation:none;opacity:1}
+    .evo .c0,.evo .c1,.evo .c2,.evo .c3{animation:none;opacity:0}
+    .evo .c4{animation:none;opacity:1}
+    .evo .segf{animation:none;opacity:1}
+    /* Option D rests on the frozen version, package already gone out */
+    .bnd .doc,.bnd .flash,.bnd .bracket,.bnd .beam{animation:none}
+    .bnd .doc{transform:none}
+    .bnd .flash{opacity:0}
+    .bnd .beam{display:none}
+    .bnd .doc-out,.bnd .doc-in{display:none}
+    .bnd .doc-pkg{animation:none;opacity:1;transform:translateX(108px)}
+    .bnd-tall .doc-pkg{transform:translateX(64px)}
+    .bnd .P1,.bnd .P2,.bnd .P3,.bnd .P4,.bnd .P5{animation:none;opacity:1}
+    .bnd .a-adm,.bnd .a-ass,.bnd .a-own,.bnd .a-lab,.bnd .a-cnl{animation:none;opacity:1}
+    .bnd .cover{animation:none;transform:scaleY(1)}
+    .bnd .stamp{animation:none;opacity:1;transform:rotate(-9deg)}
+    .bnd .doc-pkg{animation:none;opacity:1;transform:translateX(108px)}
+    .bnd .d0,.bnd .d1,.bnd .d2,.bnd .d3,.bnd .d4,.bnd .d5,.bnd .d6{animation:none;opacity:0}
+    .bnd .d7{animation:none;opacity:1}
+    .bnd .segf{animation:none;opacity:1}
+  }
+</style>
+</head>
+<body>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="opt">Option A</div>
+      <div class="label">One case, many hands</div>
+      <h2>Everyone sees the same case. Nobody re-types it.</h2>
+      <p>Two hands write into the case. Two read out of it. It is the same file for all four, and it never leaves the middle.</p>
+    </div>
+
+    <div class="scene-frame">
+      <svg class="scene" viewBox="0 46 880 424" role="img" aria-labelledby="scene-t scene-d">
+        <title id="scene-t">One case in the middle, four hands around it</title>
+        <desc id="scene-d">The assessor and the lab write into a single case file. The council and the homeowner read the same file out of it.</desc>
+
+        <!-- wires, drawn source to destination so the dots march the right way -->
+        <path id="wA" class="wire" d="M196 128 C 268 152, 300 174, 354 198"/>
+        <path id="wB" class="wire" d="M196 372 C 268 348, 300 326, 354 302"/>
+        <path id="wC" class="wire" d="M526 198 C 580 174, 612 152, 684 128"/>
+        <path id="wD" class="wire" d="M526 302 C 580 326, 612 348, 684 372"/>
+        <use class="flow in"  href="#wA"/>
+        <use class="flow in"  href="#wB" style="animation-delay:-.8s"/>
+        <use class="flow out" href="#wC" style="animation-delay:-.4s"/>
+        <use class="flow out" href="#wD" style="animation-delay:-1.2s"/>
+
+        <!-- the case, in the middle, never moving -->
+        <g>
+          <rect class="plate" x="354" y="150" width="172" height="200"/>
+          <rect class="fill soft" x="356" y="262" width="168" height="86"/>
+          <rect class="fill" x="356" y="262" width="168" height="4"/>
+          <line class="glyph thin" x1="374" y1="196" x2="486" y2="196"/>
+          <line class="glyph thin" x1="374" y1="214" x2="458" y2="214"/>
+          <line class="glyph thin" x1="374" y1="232" x2="472" y2="232"/>
+          <text class="hubcap" x="374" y="178">CASE 04</text>
+          <rect class="fill blink" x="494" y="168" width="8" height="8"/>
+          <text class="hubnum" x="374" y="302">4 of 4</text>
+          <text class="cap" x="374" y="324">SOURCES IN</text>
+        </g>
+        <text class="cap" x="440" y="372" text-anchor="middle"><tspan font-weight="500" fill="#191918">ONE CASE</tspan> · ONE VERSION</text>
+
+        <!-- ASSESSOR -->
+        <g class="node" style="--i:0">
+          <rect class="ring" x="92" y="66" width="104" height="86" fill="none" stroke="#fcaa2d" stroke-width="2"/>
+          <rect class="plate" x="104" y="78" width="80" height="62"/>
+          <line class="glyph thin" x1="116" y1="96" x2="156" y2="96"/>
+          <line class="glyph thin" x1="116" y1="110" x2="168" y2="110"/>
+          <rect class="fill" x="116" y="122" width="26" height="6"/>
+          <text class="cap" x="104" y="164">ASSESSOR</text>
+          <text class="cap" x="104" y="180">AT THE HOUSE</text>
+        </g>
+
+        <!-- LAB: a core sample, because that is literally what they send back -->
+        <g class="node" style="--i:1">
+          <rect class="ring" x="98" y="296" width="92" height="118" fill="none" stroke="#fcaa2d" stroke-width="2"/>
+          <path class="fill soft" d="M116 356h56v42a28 8 0 0 1-56 0z"/>
+          <path class="glyph" d="M116 316v82a28 8 0 0 0 56 0v-82"/>
+          <ellipse class="plate" cx="144" cy="316" rx="28" ry="8"/>
+          <line class="glyph thin" x1="116" y1="356" x2="172" y2="356"/>
+          <text class="cap" x="104" y="436">LAB</text>
+          <text class="cap" x="104" y="452">CORE RESULTS</text>
+        </g>
+
+        <!-- COUNCIL -->
+        <g class="node" style="--i:2">
+          <rect class="ring" x="676" y="62" width="104" height="94" fill="none" stroke="#fcaa2d" stroke-width="2"/>
+          <rect class="plate" x="692" y="74" width="72" height="70"/>
+          <line class="glyph thin" x1="704" y1="92" x2="752" y2="92"/>
+          <line class="glyph thin" x1="704" y1="106" x2="740" y2="106"/>
+          <line class="glyph thin" x1="704" y1="120" x2="748" y2="120"/>
+          <circle class="glyph" cx="756" cy="134" r="13"/>
+          <text class="cap" x="692" y="168">COUNCIL</text>
+          <text class="cap" x="692" y="184">FROZEN PDF</text>
+        </g>
+
+        <!-- HOMEOWNER -->
+        <g class="node" style="--i:3">
+          <rect class="ring" x="690" y="316" width="76" height="108" fill="none" stroke="#fcaa2d" stroke-width="2"/>
+          <rect class="plate" x="704" y="328" width="48" height="84"/>
+          <rect class="fill soft" x="710" y="344" width="36" height="40"/>
+          <line class="glyph thin" x1="718" y1="336" x2="738" y2="336"/>
+          <text class="cap" x="692" y="436">HOMEOWNER</text>
+          <text class="cap" x="692" y="452">ONE LINK</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <span class="w"><i></i> writes into the case</span>
+      <span class="r"><i></i> reads the same case</span>
+    </div>
+
+    <p class="pipe-note">Nobody re-types. Nobody chases. Nobody gets a login they did not ask for.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="opt">Option B</div>
+      <div class="label">One case, many hands</div>
+      <h2>The cards you already have, with the case handed along.</h2>
+      <p>Same four cards, same words. The chip is the case: it moves, the card it is sitting on lights, the wire between them marches for the hop.</p>
+    </div>
+
+    <div class="hands">
+      <div class="chip" aria-hidden="true"></div>
+      <div class="step-card" style="--i:0"><div class="num">ASSESSOR</div><h3>Writes it at the house.</h3><p>Photos, voice notes and old paperwork become the draft. They correct it and sign it.</p></div>
+      <div class="step-card" style="--i:1"><div class="num">LAB</div><h3>Adds the results.</h3><p>Core samples and test sheets land in the same case, not in an email thread.</p></div>
+      <div class="step-card" style="--i:2"><div class="num">COUNCIL</div><h3>Gets the same PDF it gets today.</h3><p>Frozen, dated, and the same file next year. No new portal to learn.</p></div>
+      <div class="step-card" style="--i:3"><div class="num">HOMEOWNER</div><h3>Sees where their house stands.</h3><p>A one-time link to upload what is missing and read the version they were sent. Nothing else.</p></div>
+    </div>
+
+    <p class="pipe-note">Honest warning on this one: a left-to-right chain says the case is <b>passed on</b>, which is the thing the section is arguing against. Option A says it sits still and four hands reach it.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="opt">Option C</div>
+      <div class="label">One case, many hands</div>
+      <h2>Every hand makes the report bigger. The last one seals it.</h2>
+      <p>The case is a chamber that does not move. What is inside it starts as an empty sheet and gains a part on every contribution &mdash; photos, core results, the I.S. 465 structure, the signature &mdash; until it stands as v1 and goes out.</p>
+    </div>
+
+    <div class="evo-frame">
+      <svg class="evo" viewBox="70 80 760 380" role="img" aria-labelledby="evo-t evo-d">
+        <title id="evo-t">A report growing a layer at a time inside the case</title>
+        <desc id="evo-d">An empty case gains the assessor's photos and notes, then the lab's core results, then the I.S. 465 structure, then a signature that freezes it as version one. The finished report goes to the council and the homeowner.</desc>
+
+        <path id="e1" class="wire" d="M180 140 C 240 158, 284 172, 336 196"/>
+        <path id="e2" class="wire" d="M176 250 C 232 250, 284 250, 336 250"/>
+        <path id="e3" class="wire" d="M180 362 C 240 344, 284 326, 336 304"/>
+        <path id="e4" class="wire" d="M544 214 C 600 200, 652 192, 700 186"/>
+        <path id="e5" class="wire" d="M544 288 C 600 302, 652 320, 706 332"/>
+        <use class="beam"    href="#e1"/>
+        <use class="beam b2" href="#e3"/>
+        <use class="beam b3" href="#e2"/>
+        <use class="out" href="#e4"/>
+        <use class="out" href="#e5" style="animation-delay:0s,-.6s"/>
+
+        <rect class="chamber" x="340" y="140" width="200" height="220"/>
+        <path class="bracket" d="M340 162v-22h22 M518 140h22v22 M540 338v22h-22 M362 360h-22v-22"/>
+        <text class="cap" x="340" y="130">CASE 04 &middot; ONE FILE</text>
+
+        <g class="doc">
+          <g class="L3">
+            <rect x="386" y="163" width="132" height="162" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
+            <rect x="380" y="169" width="132" height="162" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
+          </g>
+          <rect class="plate" x="374" y="175" width="132" height="162"/>
+          <line class="glyph thin" x1="388" y1="197" x2="492" y2="197"/>
+          <text class="tiny" x="388" y="191">I.S. 465</text>
+
+          <g class="L1">
+            <line class="glyph thin" x1="388" y1="214" x2="492" y2="214"/>
+            <line class="glyph thin" x1="388" y1="226" x2="476" y2="226"/>
+            <line class="glyph thin" x1="388" y1="238" x2="486" y2="238"/>
+            <rect x="388" y="250" width="30" height="24" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+            <rect x="422" y="250" width="30" height="24" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+            <path class="glyph thin" d="M460 268v-10 M466 268v-16 M472 268v-6 M478 268v-14 M484 268v-8 M490 268v-12"/>
+          </g>
+
+          <g class="L2">
+            <rect x="386" y="282" width="108" height="22" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+            <rect class="fill" x="389" y="285" width="44" height="16"/>
+            <text class="tiny" x="440" y="297">CORE 1-3</text>
+          </g>
+
+          <g class="L3">
+            <rect x="506" y="200" width="9" height="16" fill="#e9e8dc" stroke="#191918" stroke-width="1.5"/>
+            <rect x="506" y="224" width="9" height="16" fill="#e9e8dc" stroke="#191918" stroke-width="1.5"/>
+            <rect x="506" y="248" width="9" height="16" fill="#e9e8dc" stroke="#191918" stroke-width="1.5"/>
+            <rect x="506" y="272" width="9" height="16" fill="#e9e8dc" stroke="#191918" stroke-width="1.5"/>
+            <rect x="374" y="175" width="132" height="162" fill="none" stroke="#191918" stroke-width="3"/>
+          </g>
+
+          <g class="L4">
+            <line x1="386" y1="312" x2="494" y2="312" stroke="#fcaa2d" stroke-width="2.5"/>
+            <path class="glyph thin" d="M388 326c6-8 10 6 16-2s10 6 16-2 10 4 14 0"/>
+            <circle cx="478" cy="322" r="13" fill="none" stroke="#a36404" stroke-width="2"/>
+            <rect class="fill" x="473" y="317" width="10" height="10"/>
+          </g>
+
+          <rect class="flash" x="374" y="175" width="132" height="162"/>
+        </g>
+
+        <g class="src">
+          <rect class="plate" x="104" y="92" width="72" height="56"/>
+          <line class="glyph thin" x1="116" y1="110" x2="152" y2="110"/>
+          <line class="glyph thin" x1="116" y1="122" x2="164" y2="122"/>
+          <rect class="fill" x="116" y="132" width="24" height="6"/>
+          <text class="cap" x="104" y="172">ASSESSOR</text>
+          <text class="cap" x="104" y="188">AT THE HOUSE</text>
+        </g>
+
+        <g class="src s-str">
+          <rect class="plate" x="110" y="220" width="62" height="50"/>
+          <line class="glyph thin" x1="124" y1="234" x2="160" y2="234"/>
+          <line class="glyph thin" x1="124" y1="246" x2="152" y2="246"/>
+          <line class="glyph thin" x1="124" y1="258" x2="158" y2="258"/>
+          <line class="glyph" x1="118" y1="220" x2="118" y2="270"/>
+          <text class="cap" x="104" y="294">I.S. 465</text>
+          <text class="cap" x="104" y="310">STRUCTURE</text>
+        </g>
+
+        <g class="src s-lab">
+          <path class="fill soft" d="M118 370h52v26a26 7 0 0 1-52 0z"/>
+          <path class="glyph" d="M118 338v58a26 7 0 0 0 52 0v-58"/>
+          <ellipse class="plate" cx="144" cy="338" rx="26" ry="7"/>
+          <line class="glyph thin" x1="118" y1="370" x2="170" y2="370"/>
+          <text class="cap" x="104" y="428">LAB</text>
+          <text class="cap" x="104" y="444">CORE RESULTS</text>
+        </g>
+
+        <g class="dst">
+          <rect class="plate" x="704" y="152" width="66" height="64"/>
+          <line class="glyph thin" x1="716" y1="170" x2="758" y2="170"/>
+          <line class="glyph thin" x1="716" y1="182" x2="748" y2="182"/>
+          <line class="glyph thin" x1="716" y1="194" x2="754" y2="194"/>
+          <circle class="glyph" cx="762" cy="206" r="12"/>
+          <text class="cap" x="704" y="240">COUNCIL</text>
+        </g>
+
+        <g class="dst">
+          <rect class="plate" x="716" y="300" width="46" height="80"/>
+          <rect class="fill soft" x="722" y="316" width="34" height="38"/>
+          <line class="glyph thin" x1="730" y1="308" x2="748" y2="308"/>
+          <text class="cap" x="704" y="404">HOMEOWNER</text>
+        </g>
+
+        <text class="stage c0" x="440" y="392" text-anchor="middle">CASE OPENED &middot; EMPTY</text>
+        <text class="stage c1" x="440" y="392" text-anchor="middle">+ PHOTOS, VOICE NOTES, OLD PAPERWORK</text>
+        <text class="stage c2" x="440" y="392" text-anchor="middle">+ CORE RESULTS FROM THE LAB</text>
+        <text class="stage c3" x="440" y="392" text-anchor="middle">+ I.S. 465 SECTIONS AND SOURCES</text>
+        <text class="stage c4" x="440" y="392" text-anchor="middle">SIGNED &middot; V1 &middot; FROZEN</text>
+
+        <rect class="seg" x="344" y="410" width="44" height="6"/>
+        <rect class="seg" x="394" y="410" width="44" height="6"/>
+        <rect class="seg" x="444" y="410" width="44" height="6"/>
+        <rect class="seg" x="494" y="410" width="44" height="6"/>
+        <rect class="segf g1" x="344" y="410" width="44" height="6"/>
+        <rect class="segf g2" x="394" y="410" width="44" height="6"/>
+        <rect class="segf g3" x="444" y="410" width="44" height="6"/>
+        <rect class="segf g4" x="494" y="410" width="44" height="6"/>
+      </svg>
+    </div>
+
+    <p class="pipe-note">The seal is the only step that cannot be taken back, so it gets the biggest hit: the report jumps past its final size and drops onto it. After that nothing moves &mdash; <b>a frozen version should look finished, not busy</b>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="opt">Option D &mdash; replaces C</div>
+      <div class="label">One case, many hands</div>
+      <h2>Three people work the case. Two more are reached on paper.</h2>
+      <p>Four sections, one per hand: the practice opens and assigns it, the assessor works the house, the homeowner supplies what is missing, the lab result comes back. The signature adds no fifth section &mdash; it signs off the four. The lab and the council sit outside the app, because in the app a lab is a field on a sample and the council has no account at all.</p>
+    </div>
+
+    <div class="bnd-frame">
+      <svg class="bnd" viewBox="70 84 790 404" role="img" aria-labelledby="bnd-t bnd-d">
+        <title id="bnd-t">A report filling its sections, inside the app boundary</title>
+        <desc id="bnd-d">Inside the app: a practice administrator opens and assigns the case, an assessor captures at the house, and an invited homeowner supplies documents. Outside the app: a laboratory receives a manual order and returns a document that is recorded on the case, and the council or Agency receives a package by hand. The professional signs and freezes version one.</desc>
+
+        <rect class="boundary" x="88" y="96" width="530" height="372"/>
+        <text class="edge" x="96" y="112">IN THE APP</text>
+        <text class="edge" x="700" y="112">OUTSIDE &middot; ON PAPER</text>
+
+        <path id="d1" class="wire" d="M188 150 C 250 170, 280 212, 326 238"/>
+        <path id="d2" class="wire" d="M188 256 C 250 258, 280 260, 326 262"/>
+        <path id="d3" class="wire" d="M160 358 C 232 350, 282 318, 326 290"/>
+        <use class="beam"    href="#d1"/>
+        <use class="beam m2" href="#d2"/>
+        <use class="beam m3" href="#d3"/>
+        <use class="beam m5" href="#d2" style="animation-delay:0s,-.15s"/>
+
+        <line class="lane" x1="578" y1="188" x2="700" y2="188"/>
+        <line class="lane" x1="578" y1="220" x2="700" y2="220"/>
+        <line class="lane" x1="578" y1="392" x2="700" y2="392"/>
+        <text class="tiny" x="592" y="182">MANUAL ORDER</text>
+        <text class="tiny" x="592" y="234">DOCUMENT BACK</text>
+        <text class="tiny" x="592" y="386">MANUAL PACKAGE</text>
+
+        <g class="doc-out"><rect x="578" y="180" width="12" height="15" fill="#fffef2" stroke="#191918" stroke-width="1.5"/></g>
+        <g class="doc-in"><rect x="688" y="212" width="12" height="15" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/></g>
+        <g class="doc-pkg"><rect x="578" y="384" width="14" height="17" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/></g>
+
+        <rect class="chamber" x="330" y="130" width="240" height="300"/>
+        <path class="bracket" d="M330 154v-24h24 M546 130h24v24 M570 406v24h-24 M354 430h-24v-24"/>
+        <text class="cap" x="330" y="122">CASE 04 &middot; I.S. 465</text>
+
+        <g class="doc">
+          <g class="P5">
+            <rect x="382" y="158" width="160" height="220" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
+            <rect x="376" y="164" width="160" height="220" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
+          </g>
+
+          <g class="P1">
+            <rect class="plate" x="370" y="170" width="160" height="220"/>
+            <text class="tiny" x="382" y="188">I.S. 465 &middot; CASE 04</text>
+            <line class="glyph thin" x1="382" y1="195" x2="518" y2="195"/>
+            <line class="glyph thin" x1="370" y1="233" x2="530" y2="233"/>
+            <line class="glyph thin" x1="370" y1="287" x2="530" y2="287"/>
+            <line class="glyph thin" x1="370" y1="321" x2="530" y2="321"/>
+            <line class="glyph thin" x1="370" y1="355" x2="530" y2="355"/>
+            <text class="tiny" x="374" y="210">1</text>
+            <text class="tiny" x="374" y="250">2</text>
+            <text class="tiny" x="374" y="302">3</text>
+            <text class="tiny" x="374" y="336">4</text>
+            <rect x="530" y="200" width="10" height="20" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
+            <rect x="530" y="240" width="10" height="20" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
+            <rect x="530" y="292" width="10" height="20" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
+            <rect x="530" y="326" width="10" height="20" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
+            <line class="glyph thin" x1="386" y1="206" x2="500" y2="206"/>
+            <line class="glyph thin" x1="386" y1="216" x2="466" y2="216"/>
+            <rect class="fill" x="530" y="200" width="10" height="20"/>
+          </g>
+
+          <g class="P2">
+            <line class="glyph thin" x1="386" y1="244" x2="512" y2="244"/>
+            <line class="glyph thin" x1="386" y1="252" x2="494" y2="252"/>
+            <rect x="386" y="258" width="26" height="20" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+            <rect x="416" y="258" width="26" height="20" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+            <path class="glyph thin" d="M452 278v-10 M458 278v-16 M464 278v-6 M470 278v-14 M476 278v-8 M482 278v-12 M488 278v-5"/>
+            <rect class="fill" x="530" y="240" width="10" height="20"/>
+          </g>
+
+          <g class="P3">
+            <rect x="386" y="294" width="20" height="22" fill="#fffef2" stroke="#191918" stroke-width="1.5"/>
+            <rect x="410" y="294" width="20" height="22" fill="#fffef2" stroke="#191918" stroke-width="1.5"/>
+            <text class="tiny" x="438" y="309">SUPPLIED</text>
+            <rect class="fill" x="530" y="292" width="10" height="20"/>
+          </g>
+
+          <g class="P4">
+            <rect x="386" y="326" width="132" height="22" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+            <rect class="fill" x="389" y="329" width="48" height="16"/>
+            <text class="tiny" x="444" y="340">CORE 1-3 RESULT</text>
+            <rect class="fill" x="530" y="326" width="10" height="20"/>
+          </g>
+
+          <!-- the declaration is not a section: it signs off the four above it,
+               so it sits under the last rule and adds no tab of its own -->
+          <g class="P5">
+            <line x1="386" y1="363" x2="514" y2="363" stroke="#fcaa2d" stroke-width="2.5"/>
+            <path class="glyph thin" d="M386 379c7-9 12 7 19-2s12 7 19-2 12 5 17 0"/>
+            <circle cx="500" cy="375" r="12" fill="none" stroke="#a36404" stroke-width="2"/>
+            <rect class="fill" x="495" y="370" width="10" height="10"/>
+            <rect x="370" y="170" width="160" height="220" fill="none" stroke="#191918" stroke-width="3"/>
+          </g>
+
+          <g class="cover">
+            <rect x="370" y="170" width="160" height="220" fill="#fffef2" stroke="#191918" stroke-width="3"/>
+            <rect x="370" y="170" width="11" height="220" fill="#e9e8dc" stroke="#191918" stroke-width="2"/>
+            <text class="tiny" x="392" y="198">I.S. 465 &middot; CASE 04</text>
+            <line class="glyph thin" x1="392" y1="204" x2="514" y2="204"/>
+            <rect class="fill" x="392" y="214" width="44" height="6"/>
+            <line class="glyph thin" x1="392" y1="238" x2="492" y2="238"/>
+            <line class="glyph thin" x1="392" y1="248" x2="470" y2="248"/>
+            <line class="glyph thin" x1="392" y1="258" x2="484" y2="258"/>
+          </g>
+
+          <rect class="flash" x="370" y="170" width="160" height="220"/>
+
+          <g class="stamp">
+            <rect x="398" y="298" width="108" height="44" fill="none" stroke="#a36404" stroke-width="3"/>
+            <rect x="403" y="303" width="98" height="34" fill="none" stroke="#a36404" stroke-width="1.5"/>
+            <text class="stampword" x="452" y="326" text-anchor="middle">READY</text>
+          </g>
+        </g>
+
+        <g class="a-adm">
+          <rect class="plate" x="120" y="126" width="64" height="46"/>
+          <line class="glyph thin" x1="130" y1="140" x2="162" y2="140"/>
+          <line class="glyph thin" x1="130" y1="150" x2="172" y2="150"/>
+          <rect class="fill" x="130" y="158" width="18" height="5"/>
+          <text class="cap" x="120" y="188">ADMINISTRATOR</text>
+        </g>
+
+        <g class="a-ass">
+          <rect class="plate" x="120" y="232" width="64" height="46"/>
+          <line class="glyph thin" x1="130" y1="246" x2="158" y2="246"/>
+          <line class="glyph thin" x1="130" y1="256" x2="168" y2="256"/>
+          <rect class="fill" x="130" y="264" width="24" height="5"/>
+          <text class="cap" x="120" y="294">ASSESSOR</text>
+        </g>
+
+        <g class="a-own">
+          <rect class="plate" x="126" y="338" width="30" height="46"/>
+          <rect class="fill soft" x="130" y="346" width="22" height="26"/>
+          <text class="cap" x="120" y="400">HOMEOWNER</text>
+        </g>
+
+        <g class="a-lab">
+          <path class="fill soft" d="M712 196h44v22a22 6 0 0 1-44 0z"/>
+          <path class="glyph" d="M712 170v48a22 6 0 0 0 44 0v-48"/>
+          <ellipse class="plate" cx="734" cy="170" rx="22" ry="6"/>
+          <text class="cap" x="700" y="256">LABORATORY</text>
+        </g>
+
+        <g class="a-cnl">
+          <rect class="plate" x="706" y="340" width="56" height="56"/>
+          <line class="glyph thin" x1="716" y1="356" x2="752" y2="356"/>
+          <line class="glyph thin" x1="716" y1="366" x2="744" y2="366"/>
+          <line class="glyph thin" x1="716" y1="376" x2="750" y2="376"/>
+          <text class="cap" x="700" y="414">COUNCIL / AGENCY</text>
+        </g>
+
+        <text class="stage d0" x="450" y="452" text-anchor="middle">PRACTICE OPENS THE CASE</text>
+        <text class="stage d1" x="450" y="452" text-anchor="middle">+ CASE OPENED AND ASSIGNED &middot; SECTION 1</text>
+        <text class="stage d2" x="450" y="452" text-anchor="middle">+ PHOTOS, AUDIO, OBSERVATIONS &middot; SECTION 2</text>
+        <text class="stage d3" x="450" y="452" text-anchor="middle">+ HOMEOWNER DOCUMENTS &middot; SECTION 3</text>
+        <text class="stage d4" x="450" y="452" text-anchor="middle">+ LAB DOCUMENT RECORDED &middot; SECTION 4</text>
+        <text class="stage d5" x="450" y="452" text-anchor="middle">SIGNED &middot; V1 &middot; FROZEN</text>
+        <text class="stage d6" x="450" y="452" text-anchor="middle">CLOSED AND STAMPED READY</text>
+        <text class="stage d7" x="450" y="452" text-anchor="middle">SENT TO THE COUNCIL BY HAND</text>
+
+        <rect class="seg" x="348" y="470" width="38" height="6"/>
+        <rect class="seg" x="392" y="470" width="38" height="6"/>
+        <rect class="seg" x="436" y="470" width="38" height="6"/>
+        <rect class="seg" x="480" y="470" width="38" height="6"/>
+        <rect class="seg" x="524" y="470" width="38" height="6"/>
+        <rect class="segf n1" x="348" y="470" width="38" height="6"/>
+        <rect class="segf n2" x="392" y="470" width="38" height="6"/>
+        <rect class="segf n3" x="436" y="470" width="38" height="6"/>
+        <rect class="segf n4" x="480" y="470" width="38" height="6"/>
+        <rect class="segf n5" x="524" y="470" width="38" height="6"/>
+      </svg>
+      <svg class="bnd bnd-tall" viewBox="0 0 380 690" role="img" aria-labelledby="tall-t tall-d">
+        <title id="tall-t">A report filling its sections, inside the app boundary</title>
+        <desc id="tall-d">Above the line, in the app: the practice opens and assigns the case, the assessor captures at the house, the homeowner supplies documents, the lab result is recorded, and the professional signs and freezes version one. Below the line, on paper: the laboratory returns a document and the council receives a package by hand.</desc>
+
+        <text class="edge" x="14" y="26">IN THE APP</text>
+        <text class="cap" x="30" y="56">CASE 04 &middot; I.S. 465</text>
+        <rect class="chamber" x="30" y="64" width="320" height="414"/>
+        <path class="bracket" d="M30 88v-24h24 M326 64h24v24 M350 454v24h-24 M54 478h-24v-24"/>
+
+  <g class="doc">
+            <g class="P5">
+              <rect x="100.75" y="112.25" width="210.0" height="288.75" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
+              <rect x="92.88" y="120.12" width="210.0" height="288.75" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
+            </g>
+
+            <g class="P1">
+              <rect class="plate" x="85.0" y="128.0" width="210.0" height="288.75"/>
+              <text class="tiny" x="100.75" y="151.62">I.S. 465 &middot; CASE 04</text>
+              <line class="glyph thin" x1="100.75" y1="160.81" x2="279.25" y2="160.81"/>
+              <line class="glyph thin" x1="85.0" y1="210.69" x2="295.0" y2="210.69"/>
+              <line class="glyph thin" x1="85.0" y1="281.56" x2="295.0" y2="281.56"/>
+              <line class="glyph thin" x1="85.0" y1="326.19" x2="295.0" y2="326.19"/>
+              <line class="glyph thin" x1="85.0" y1="370.81" x2="295.0" y2="370.81"/>
+              <text class="tiny" x="90.25" y="180.5">1</text>
+              <text class="tiny" x="90.25" y="233.0">2</text>
+              <text class="tiny" x="90.25" y="301.25">3</text>
+              <text class="tiny" x="90.25" y="345.88">4</text>
+              <rect x="295.0" y="167.38" width="13.12" height="26.25" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
+              <rect x="295.0" y="219.88" width="13.12" height="26.25" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
+              <rect x="295.0" y="288.12" width="13.12" height="26.25" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
+              <rect x="295.0" y="332.75" width="13.12" height="26.25" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
+              <line class="glyph thin" x1="106.0" y1="175.25" x2="255.62" y2="175.25"/>
+              <line class="glyph thin" x1="106.0" y1="188.38" x2="211.0" y2="188.38"/>
+              <rect class="fill" x="295.0" y="167.38" width="13.12" height="26.25"/>
+            </g>
+
+            <g class="P2">
+              <line class="glyph thin" x1="106.0" y1="225.12" x2="271.38" y2="225.12"/>
+              <line class="glyph thin" x1="106.0" y1="235.62" x2="247.75" y2="235.62"/>
+              <rect x="106.0" y="243.5" width="34.12" height="26.25" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+              <rect x="145.38" y="243.5" width="34.12" height="26.25" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+              <path class="glyph thin" d="M192.62 269.75 v-13.12 M200.5 269.75 v-21.0 M208.38 269.75 v-7.88 M216.25 269.75 v-18.38 M224.12 269.75 v-10.5 M232.0 269.75 v-15.75 M239.88 269.75 v-6.56"/>
+              <rect class="fill" x="295.0" y="219.88" width="13.12" height="26.25"/>
+            </g>
+
+            <g class="P3">
+              <rect x="106.0" y="290.75" width="26.25" height="28.88" fill="#fffef2" stroke="#191918" stroke-width="1.5"/>
+              <rect x="137.5" y="290.75" width="26.25" height="28.88" fill="#fffef2" stroke="#191918" stroke-width="1.5"/>
+              <text class="tiny" x="174.25" y="310.44">SUPPLIED</text>
+              <rect class="fill" x="295.0" y="288.12" width="13.12" height="26.25"/>
+            </g>
+
+            <g class="P4">
+              <rect x="106.0" y="332.75" width="173.25" height="28.88" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
+              <rect class="fill" x="109.94" y="336.69" width="63.0" height="21.0"/>
+              <text class="tiny" x="182.12" y="351.12">CORE 1-3 RESULT</text>
+              <rect class="fill" x="295.0" y="332.75" width="13.12" height="26.25"/>
+            </g>
+
+            <!-- the declaration is not a section: it signs off the four above it,
+                 so it sits under the last rule and adds no tab of its own -->
+            <g class="P5">
+              <line x1="106.0" y1="381.31" x2="274.0" y2="381.31" stroke="#fcaa2d" stroke-width="2.5"/>
+              <path class="glyph thin" d="M106.0 402.31 c9.19 -11.81 15.75 9.19 24.94 -2.62 s15.75 9.19 24.94 -2.62 15.75 6.56 22.31 0.0"/>
+              <circle cx="255.62" cy="397.06" r="15.75" fill="none" stroke="#a36404" stroke-width="2"/>
+              <rect class="fill" x="249.06" y="390.5" width="13.12" height="13.12"/>
+              <rect x="85.0" y="128.0" width="210.0" height="288.75" fill="none" stroke="#191918" stroke-width="3"/>
+            </g>
+
+            <g class="cover">
+              <rect x="85.0" y="128.0" width="210.0" height="288.75" fill="#fffef2" stroke="#191918" stroke-width="3"/>
+              <rect x="85.0" y="128.0" width="14.44" height="288.75" fill="#e9e8dc" stroke="#191918" stroke-width="2"/>
+              <text class="tiny" x="113.88" y="164.75">I.S. 465 &middot; CASE 04</text>
+              <line class="glyph thin" x1="113.88" y1="172.62" x2="274.0" y2="172.62"/>
+              <rect class="fill" x="113.88" y="185.75" width="57.75" height="7.88"/>
+              <line class="glyph thin" x1="113.88" y1="217.25" x2="245.12" y2="217.25"/>
+              <line class="glyph thin" x1="113.88" y1="230.38" x2="216.25" y2="230.38"/>
+              <line class="glyph thin" x1="113.88" y1="243.5" x2="234.62" y2="243.5"/>
+            </g>
+
+            <rect class="flash" x="85.0" y="128.0" width="210.0" height="288.75"/>
+
+            <g class="stamp">
+              <rect x="121.75" y="296.0" width="141.75" height="57.75" fill="none" stroke="#a36404" stroke-width="3"/>
+              <rect x="128.31" y="302.56" width="128.62" height="44.62" fill="none" stroke="#a36404" stroke-width="1.5"/>
+              <text class="stampword" x="192.62" y="332.75" text-anchor="middle">READY</text>
+            </g>
+          </g>
+
+        <rect class="seg" x="44" y="496" width="52" height="7"/>
+        <rect class="seg" x="104" y="496" width="52" height="7"/>
+        <rect class="seg" x="164" y="496" width="52" height="7"/>
+        <rect class="seg" x="224" y="496" width="52" height="7"/>
+        <rect class="seg" x="284" y="496" width="52" height="7"/>
+        <rect class="segf n1" x="44" y="496" width="52" height="7"/>
+        <rect class="segf n2" x="104" y="496" width="52" height="7"/>
+        <rect class="segf n3" x="164" y="496" width="52" height="7"/>
+        <rect class="segf n4" x="224" y="496" width="52" height="7"/>
+        <rect class="segf n5" x="284" y="496" width="52" height="7"/>
+
+        <text class="who d0"  x="190" y="530" text-anchor="middle">CASE 04</text>
+        <text class="what d0" x="190" y="552" text-anchor="middle">NOTHING IN IT YET</text>
+        <text class="who d1"  x="190" y="530" text-anchor="middle">ADMINISTRATOR</text>
+        <text class="what d1" x="190" y="552" text-anchor="middle">CASE OPENED AND ASSIGNED</text>
+        <text class="who d2"  x="190" y="530" text-anchor="middle">ASSESSOR</text>
+        <text class="what d2" x="190" y="552" text-anchor="middle">PHOTOS, AUDIO, OBSERVATIONS</text>
+        <text class="who d3"  x="190" y="530" text-anchor="middle">HOMEOWNER</text>
+        <text class="what d3" x="190" y="552" text-anchor="middle">DOCUMENTS SUPPLIED</text>
+        <text class="who d4"  x="190" y="530" text-anchor="middle">LABORATORY</text>
+        <text class="what d4" x="190" y="552" text-anchor="middle">CORE RESULT RECORDED</text>
+        <text class="who d5"  x="190" y="530" text-anchor="middle">ASSESSOR</text>
+        <text class="what d5" x="190" y="552" text-anchor="middle">SIGNED &middot; V1 &middot; FROZEN</text>
+        <text class="who d6"  x="190" y="530" text-anchor="middle">THE REPORT</text>
+        <text class="what d6" x="190" y="552" text-anchor="middle">CLOSED AND STAMPED READY</text>
+        <text class="who d7"  x="190" y="530" text-anchor="middle">COUNCIL / AGENCY</text>
+        <text class="what d7" x="190" y="552" text-anchor="middle">SENT BY HAND</text>
+
+        <line class="boundary" x1="14" y1="580" x2="366" y2="580"/>
+        <text class="edge" x="14" y="600">OUTSIDE &middot; ON PAPER</text>
+
+        <line class="lane" x1="86" y1="620" x2="158" y2="620"/>
+        <line class="lane" x1="86" y1="642" x2="158" y2="642"/>
+        <line class="lane" x1="222" y1="632" x2="294" y2="632"/>
+        <g class="doc-out"><rect x="146" y="613" width="12" height="15" fill="#fffef2" stroke="#191918" stroke-width="1.5"/></g>
+        <g class="doc-in"><rect x="86" y="635" width="12" height="15" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/></g>
+        <g class="doc-pkg"><rect x="222" y="624" width="14" height="17" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/></g>
+
+        <g class="a-lab">
+          <path class="fill soft" d="M30 634h36v16a18 5 0 0 1-36 0z"/>
+          <path class="glyph" d="M30 612v38a18 5 0 0 0 36 0v-38"/>
+          <ellipse class="plate" cx="48" cy="612" rx="18" ry="5"/>
+          <text class="cap" x="14" y="676">LABORATORY</text>
+        </g>
+
+        <g class="a-cnl">
+          <rect class="plate" x="304" y="608" width="50" height="50"/>
+          <line class="glyph thin" x1="314" y1="622" x2="344" y2="622"/>
+          <line class="glyph thin" x1="314" y1="632" x2="338" y2="632"/>
+          <line class="glyph thin" x1="314" y1="642" x2="342" y2="642"/>
+          <text class="cap" x="366" y="676" text-anchor="end">COUNCIL / AGENCY</text>
+        </g>
+      </svg>
+    </div>
+
+    <p class="pipe-note">Two things this draws that the words alone do not: the <b>sections exist before the content does</b>, which is why nobody re-types into them, and the lab round trip is two pieces of paper crossing the line in opposite directions &mdash; an order out, a document back, recorded by the professional. The investigation engineer is left out: that is a second assessment on the same case and needs its own beat.</p>
+  </div>
+</section>
+
+</body>
+</html>
