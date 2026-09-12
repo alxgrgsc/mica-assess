@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23fcaa2d' stroke-width='9' stroke-linecap='square'%3E%3Cpath d='M10 20h44'/%3E%3Cpath d='M32 52V28'/%3E%3Cpath d='M17 52 32 28l15 24'/%3E%3C/svg%3E">
-<title>Releve — the I.S. 465 report, drafted at the house</title>
-<meta name="description" content="Releve is a reporting workspace for the assessment practices doing Defective Concrete Block work: photos, voice notes and the homeowner's old documents go in on a tablet, and the draft I.S. 465 report comes out as a frozen PDF, edited by the professional who signs it. Prototype for the TechIreland National AI Challenge 2026.">
+<title>Releve — the BCA report, drafted at the house</title>
+<meta name="description" content="Releve drafts the Building Condition Assessment for Ireland's Defective Concrete Blocks grant at the house, from the evidence gathered there, with a source for every value. The professional corrects it and signs it. Prototype by Crintus &amp; Co for the TechIreland National AI Challenge 2026.">
 <meta name="theme-color" content="#fffef2">
 <style>
   /* Look follows relace.ai: cream ground, near-black ink, one amber accent,
@@ -33,10 +33,16 @@
     --serif:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
     --sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
     --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',SFMono-Regular,Menlo,monospace;
-    --wrap:1080px;
+    --wrap:1280px;
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;scroll-snap-type:y proximity;scroll-padding-top:60px}
+  /* Snapping is a nicety: off for short windows, where a full-screen section would crop,
+     and off when the reader has asked for reduced motion. */
+  @media (max-height:700px){html{scroll-snap-type:none}}
+  /* on a phone the stacked sections are taller than the screen, so snapping would fight the reader */
+  @media (max-width:880px){html{scroll-snap-type:none}section,.hero{min-height:0}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;scroll-snap-type:none}}
   body{
     margin:0;background:var(--ground);color:var(--text);
     font-family:var(--sans);line-height:1.5;
@@ -55,10 +61,11 @@
   .label.done{color:var(--done)}
   h1,h2,h3{margin:0;font-family:var(--sans);font-weight:400;letter-spacing:-.045em;line-height:1.1}
   h1{font-size:clamp(36px,5.6vw,64px)}
-  h2{font-size:clamp(28px,4vw,46px);max-width:20ch}
-  h3{font-size:20px;line-height:1.3;letter-spacing:-.02em}
+  h2{font-size:clamp(30px,4.4vw,58px);max-width:20ch}
+  h3{font-size:clamp(20px,1.7vw,23px);line-height:1.3;letter-spacing:-.02em}
   .lede{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:56ch}
   .lede b{color:var(--text);font-weight:500}
+  .hero .lede b{display:block;margin-top:12px}
 
   .btn{
     display:inline-flex;align-items:center;gap:10px;
@@ -88,202 +95,327 @@ border-bottom:1px solid var(--line);
   nav .links{display:flex;gap:22px;align-items:center}
   nav .links a.txt{font-family:var(--sans);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text);text-decoration:none}
   nav .links a.txt:hover{color:var(--accent-deep)}
-  @media (max-width:720px){nav .links a.txt{display:none}.brand span{display:none}}
+  .brand b,nav .btn{white-space:nowrap}
+  @media (max-width:720px){nav .links a.txt{display:none}.brand span{display:none}nav .btn{padding:10px 14px}}
 
   /* ---- hero ---- */
-  .hero{padding:clamp(56px,9vw,120px) 0 clamp(48px,7vw,96px);border-bottom:1px solid var(--line)}
-  .hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center}
+  .hero{display:flex;align-items:center;min-height:100vh;min-height:100svh;scroll-snap-align:start;
+    padding:clamp(40px,6vh,110px) 0 clamp(36px,5vh,90px);border-bottom:1px solid var(--line)}
+  .hero > .wrap{width:100%}
+  .hero .wrap{max-width:1440px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(24px,3vw,48px);align-items:center}
+  @media (max-width:1180px){.hero .wrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
   @media (max-width:880px){.hero .wrap{grid-template-columns:1fr}}
-  .hero .copy{display:flex;flex-direction:column;gap:22px}
-  /* Three points under the lede. Noun phrases, not sentences: at projector
-     distance a reader takes a line at a glance or not at all. */
-  .points{list-style:none;margin:-6px 0 0;padding:0;display:flex;flex-direction:column;gap:9px;max-width:52ch}
-  .points li{position:relative;padding-left:24px;font-size:clamp(15.5px,1.3vw,17px);
-    line-height:1.45;color:var(--text)}
-  .points li::before{content:'';position:absolute;left:0;top:.62em;width:13px;height:0;
-    border-top:2px solid var(--accent)}
-  /* The same points laid across rather than down: what the buyer does not
-     have to do, which is the shape their last section closes on. */
-  .points.strip{flex-direction:row;flex-wrap:wrap;gap:10px 30px;max-width:none;margin-top:28px}
-  .points.strip li{font-size:15.5px}
+  .hero .copy{display:flex;flex-direction:column;gap:clamp(14px,2.4vh,22px)}
   .hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
   .hero .fine{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
   .hero .fine i{color:var(--done);font-style:normal}
-  /* The correction in the problem headline. The resting state, and what
-     shows without JS or with reduced motion, is the later one: 20,000.
-     With JS the old word is laid over the same slot, struck by hand, then
-     dropped out of the line while the new one falls in from above and
-     knocks the line about on landing. It settles a degree or two off
-     square, like something set down by hand rather than typeset. */
-  .swap{position:relative;display:inline-block;white-space:nowrap}
-  .was{display:none;text-decoration:none}
-  /* .4em down the line, not .54: the struck word is lining figures, which
-     sit taller than lowercase, and the old offset crossed them near the
-     baseline and read as an underline. */
-  .was .rub{position:absolute;left:-1%;top:.4em;width:102%;height:.4em;overflow:visible;pointer-events:none}
-  .was .rub path{fill:none;stroke:var(--accent-deep);stroke-width:3;stroke-linecap:round;
-    vector-effect:non-scaling-stroke;stroke-dasharray:none;stroke-dashoffset:0}
-  .now{display:inline-block;text-decoration:none;color:var(--accent-deep);transform:rotate(-1.8deg)}
-  .js .swap{width:var(--w0)}
-  .js .was{display:inline-block;position:absolute;left:0;top:0;white-space:nowrap;color:var(--text)}
-  .js .was .rub path{stroke-dasharray:var(--rub,320px);stroke-dashoffset:var(--rub,320px)}
-  .js .now{opacity:0}
-  .js h2.fix.on .was .rub path{animation:rub .45s cubic-bezier(.4,0,.2,1) 1s forwards}
-  .js h2.fix.on .was{animation:drop-out .5s cubic-bezier(.55,0,.9,.45) 1.45s forwards}
-  .js h2.fix.on .swap{animation:slot .4s cubic-bezier(.5,0,.6,1) 1.45s forwards}
-  .js h2.fix.on .now{animation:drop-in .5s cubic-bezier(.5,0,.6,1) 1.55s forwards}
-  .js h2.fix.on{animation:ground .34s ease-out 2s}
-  @keyframes rub{to{stroke-dashoffset:0}}
-  @keyframes slot{to{width:var(--w1)}}
-  @keyframes drop-out{
-    0%{opacity:1;transform:translateY(0) rotate(0)}
-    100%{opacity:0;transform:translateY(.85em) rotate(-5deg)}}
-  @keyframes drop-in{
-    0%{opacity:0;transform:translateY(-1.3em) rotate(5deg)}
-    12%{opacity:1}
-    72%{transform:translateY(.07em) rotate(-2.8deg)}
-    88%{transform:translateY(-.03em) rotate(-1.1deg)}
-    100%{opacity:1;transform:translateY(0) rotate(-1.8deg)}}
-  @keyframes ground{
-    0%{transform:translateY(0)}
-    18%{transform:translateY(3px)}
-    38%{transform:translateY(-2px)}
-    58%{transform:translateY(2px)}
-    78%{transform:translateY(-1px)}
-    100%{transform:translateY(0)}}
-  @media (prefers-reduced-motion:reduce){
-    .js .was{display:none}
-    .js .swap{width:auto}
-    .js .now{opacity:1}
-    .js h2.fix.on,.js h2.fix.on .was,.js h2.fix.on .now,.js h2.fix.on .was .rub path{animation:none}
-  }
-  .hero .say{font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--muted);margin:-8px 0 0}
-  .hero .say b{color:var(--text);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
-  .hero .say i{font-style:normal;color:var(--accent-deep);letter-spacing:.06em;text-transform:uppercase}
-  /* hero reel: 4 frames x 5s = 20s loop, pure CSS. Hover or focus pauses it. */
-  .reel{--n:4;--dur:20s}
-  .reel-frames{position:relative;aspect-ratio:1280/860;border:1px solid var(--line-2);background:var(--surface);overflow:hidden}
-  .reel-frames img{position:absolute;inset:0;border:0;opacity:0;animation:reel-fade var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
-  .reel-frames img:first-child{opacity:1}
-  .reel-tag{display:flex;align-items:center;gap:8px;margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
-  .reel-tag span{color:var(--muted)}
-  .reel-tag i{width:7px;height:7px;background:var(--accent);animation:reel-blink 1.2s ease-in-out infinite}
-  @keyframes reel-blink{0%,100%{opacity:1}50%{opacity:.25}}
-  .reel-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
-  .reel-bar i{display:block;height:3px;background:var(--line);overflow:hidden;position:relative}
-  .reel-bar i::after{content:"";position:absolute;inset:0;background:var(--accent);transform:scaleX(0);transform-origin:left;
-    animation:reel-bar var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
-  .reel-caps{position:relative;min-height:2.6em;margin-top:10px}
-  /* The captions cut rather than cross. Two of them are stacked in the
-     same box, so any overlap at all prints one line of text over another;
-     the images can cross because the top one simply covers the one under. */
-  .reel-caps span{position:absolute;inset:0;opacity:0;animation:reel-cap var(--dur) linear infinite;animation-delay:calc(var(--i) * var(--dur) / var(--n))}
-  .reel-caps b{color:var(--accent-deep);font-weight:500;margin-right:6px}
-  /* Frame i holds for its 25% of the loop, crosses out over the next 3%,
-     and crosses back in over the last 3% before its window comes round
-     again. Every frame uses this, the first one included, so the wrap is
-     the same crossfade as the other three. */
-  @keyframes reel-fade{0%{opacity:1}25%{opacity:1}28%{opacity:0}97%{opacity:0}100%{opacity:1}}
-  @keyframes reel-cap{0%{opacity:1}25%{opacity:1}25.01%{opacity:0}100%{opacity:0}}
-  @keyframes reel-bar{0%{transform:scaleX(0)}25%{transform:scaleX(1)}25.01%{transform:scaleX(0)}100%{transform:scaleX(0)}}
-  @media (prefers-reduced-motion:reduce){
-    .reel-frames img,.reel-caps span,.reel-bar i::after,.reel-tag i{animation:none}
-    .reel-tag{display:none}
-    .reel-frames img:first-child,.reel-caps span:first-child{opacity:1}
-    .reel-bar{display:none}
-  }
-  .shot{margin:0;width:100%;max-width:520px;justify-self:center}
-  .shot img{display:block;width:100%;height:auto;border:1px solid var(--line-2);border-radius:0;background:var(--surface)}
-  .shot figcaption{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em;margin-top:10px;line-height:1.5}
-  .shot.wide{max-width:none;grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:center;padding:8px 0}
-  .shot.wide img{max-width:560px}
-  .shot.wide figcaption{margin-top:0;font-family:var(--sans);font-size:15px;color:var(--text-2,var(--muted));letter-spacing:0;line-height:1.55}
-  @media (max-width:880px){.shot.wide{grid-template-columns:1fr}}
+  /* The product name leads the hero, so nobody has to hunt for it. */
+  .hero .name{display:flex;align-items:center;gap:14px;margin:0}
+  .hero .name svg{width:clamp(34px,3.6vw,44px);height:clamp(34px,3.6vw,44px);flex:0 0 auto;color:var(--accent)}
+  .hero .name b{font-size:clamp(32px,3.6vw,44px);font-weight:600;letter-spacing:-.045em;line-height:1}
+  .hero h1{font-size:clamp(34px,4.4vw,64px);text-wrap:balance}
+  .hero h1 .fix{color:var(--accent-deep)}
+  /* hero illustration: the paper is keyed out to transparent, so only the ink sits on the page */
+  .hero-art{margin:0}
+  .hero-art img{display:block;width:100%;height:auto}
+  .source-note{margin-top:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;line-height:1.6;color:var(--muted);max-width:80ch}
 
   /* ---- sections ---- */
-  section{padding:clamp(56px,7vw,96px) 0;border-bottom:1px solid var(--line)}
-  section .head{display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(28px,4vw,48px)}
-  section .head p{color:var(--muted);max-width:56ch;font-size:clamp(16.5px,1.5vw,19px)}
-  /* Where the headline number came from. Mono and ruled off, like the rest
-     of the apparatus on this page: it is a citation, not copy. */
-  .head .src{font-family:var(--mono);font-size:12.5px;line-height:1.7;letter-spacing:.01em;
-    color:var(--muted);max-width:66ch;padding-left:14px;border-left:2px solid var(--line-2)}
-  .head .src a{color:var(--accent-deep);text-decoration:none;
-    border-bottom:1px solid var(--line-2);white-space:nowrap}
-  .head .src a:hover,.head .src a:focus-visible{border-bottom-color:var(--accent-deep)}
+  section{display:flex;align-items:center;min-height:100vh;min-height:100svh;scroll-snap-align:start;
+    padding:clamp(36px,5vh,80px) 0;border-bottom:1px solid var(--line)}
+  section > .wrap{width:100%}
+  section .head{display:flex;flex-direction:column;gap:clamp(10px,1.6vh,14px);margin-bottom:clamp(18px,3.4vh,44px)}
+  section .head p{color:var(--muted);max-width:56ch;font-size:clamp(17px,1.7vw,22px)}
 
-  /* Today against the same morning with the tool. Two columns, five lines
-     each, the same rhythm on both sides: the comparison does the arguing, so
-     there is nothing to read in between. */
-  .vs{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:28px}
-  @media (max-width:720px){.vs{grid-template-columns:1fr}}
-  .vs-col{background:var(--surface);padding:22px 22px 24px}
-  .vs-col h3{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--muted);margin-bottom:14px}
-  .vs-col.with h3{color:var(--accent-deep)}
-  .vs-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-  .vs-col li{position:relative;padding-left:22px;font-size:15.5px;line-height:1.45;color:var(--muted)}
-  .vs-col.with li{color:var(--text)}
-  .vs-col li::before{content:'';position:absolute;left:0;top:.62em;width:11px;height:0;border-top:2px solid var(--line-2)}
-  .vs-col.with li::before{border-top-color:var(--accent)}
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:0;overflow:hidden}
-  @media (max-width:720px){.stats{grid-template-columns:1fr}}
-  .stat{background:var(--surface);padding:22px 22px 20px;display:flex;flex-direction:column;gap:6px}
-  /* word-spacing pulls the markup space back in: a mono space at 36px is
-     half an em wide and left the unit adrift. It scales with the clamp. */
-  .stat .n{font-family:var(--mono);font-size:clamp(28px,3vw,36px);font-weight:500;letter-spacing:-.02em;color:var(--text);font-variant-numeric:tabular-nums;word-spacing:-.32em}
-  /* The space before the unit is in the markup now, so it copies and reads
-     aloud. The margin only tops it up. */
-  .stat .n small{font-size:14px;color:var(--muted);letter-spacing:0;margin-left:1px;word-spacing:normal}
-  .stat .d{color:var(--muted);font-size:14px}
+  /* bottleneck: the split bar. Visit and write-up at their real proportions (about half a working
+     day against about ten). Fills checked with the dataviz palette validator: #a36404 / #e8a13a pass
+     lightness, chroma and colour-blind separation. Labels stay in ink; the swatch carries identity. */
+  .split{margin:0}
+  .split-bar{display:flex;gap:2px;height:24px}
+  .seg{position:relative;display:block;height:100%}
+  .seg.visit{flex:0 0 4.8%;min-width:12px;background:#a36404;border-radius:4px 0 0 4px}
+  .seg.desk{flex:1 1 auto;border-radius:0 4px 4px 0;
+    background:repeating-linear-gradient(45deg,rgba(25,25,24,.14) 0 1px,transparent 1px 7px),#e8a13a}
+  .seg::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:0;padding:6px 9px;white-space:nowrap;
+    background:var(--text);color:var(--ground);font:500 11px/1.2 var(--mono);letter-spacing:.04em;opacity:0;pointer-events:none;transition:opacity .15s}
+  .seg.desk::after{left:auto;right:0}
+  .seg:hover::after{opacity:1}
+  /* each label reads as a sentence: "The site visit takes a morning." / "The write-up takes ~2 weeks." */
+  .split-labels{display:flex;justify-content:space-between;gap:12px 24px;margin-top:clamp(10px,1.8vh,14px)}
+  .split-labels > div{display:flex;align-items:center;gap:10px;font-size:clamp(16px,1.5vw,20px);letter-spacing:-.01em;color:var(--text)}
+  .split-labels b{color:var(--text);font-weight:600}
+  .split-labels .sw{width:10px;height:10px;flex:0 0 auto;border-radius:2px;background:#a36404}
+  .split-labels .desk .sw{background:#e8a13a}
+  @media (max-width:640px){.split-labels{flex-direction:column}}
 
+  /* the hourglass sits beside the heading and the time line; paper keyed out like the hero cottage */
+  /* hourglass on the left, so the section doesn't mirror the hero's picture-on-the-right */
+  .bn-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.8fr);gap:clamp(24px,4vw,64px);align-items:center;margin-bottom:clamp(24px,4vh,56px)}
+  .bn-art{order:-1;margin:0;justify-self:center;width:100%;max-width:310px}
+  .bn-art img{display:block;width:100%;height:auto;max-height:42vh;object-fit:contain}
+  @media (max-width:880px){.bn-top{grid-template-columns:1fr}.bn-art{order:0;max-width:240px}}
 
-  /* One measured thing under the cards, the way their sections close on a
-     single figure. Not a claim about outcomes: a count of accounts. */
-  .onestat{margin:30px 0 0;display:flex;align-items:baseline;gap:12px}
-  .onestat b{font-family:var(--mono);font-size:clamp(28px,3vw,36px);font-weight:500;letter-spacing:-.02em;color:var(--accent-deep)}
-  .onestat span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  /* short factor cards: a big figure on a rule, its source underneath */
+  .factors{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vh,44px) clamp(20px,3vw,40px)}
+  @media (max-width:980px){.factors{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.factors{grid-template-columns:1fr}}
+  .factor{border-top:2px solid var(--text);padding-top:16px;display:flex;flex-direction:column;gap:10px}
+  .factor.hl{border-top-color:var(--accent)}
+  .factor .fig{font-size:clamp(40px,4.6vw,58px);letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+  .factor .fig small{font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:.04em;margin-left:8px}
+  .factor.hl .fig{color:var(--accent-deep)}
+  .factor p{color:var(--muted);font-size:clamp(15px,1.3vw,17px)}
+  .factor cite{margin-top:auto;padding-top:4px;font-family:var(--mono);font-size:10.5px;font-style:normal;letter-spacing:.04em;color:var(--muted)}
+
   .pipe-note{margin-top:28px;color:var(--muted);max-width:66ch;font-size:clamp(16px,1.4vw,18px)}
   .pipe-note b{color:var(--text);font-weight:500}
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  .steps.four,.hands{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  @media (max-width:980px){.steps.four,.hands{grid-template-columns:repeat(2,1fr)}}
-  @media (max-width:560px){.steps.four,.hands{grid-template-columns:1fr}}
-  .hands .num{letter-spacing:.16em}
-  @media (max-width:880px){.steps{grid-template-columns:repeat(2,1fr)}}
-  @media (max-width:560px){.steps{grid-template-columns:1fr}}
-  .step-card{background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:0;padding:22px 22px 24px;display:flex;flex-direction:column;gap:10px}
-  .step-card .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
-  .step-card p{color:var(--muted);font-size:15.5px}
 
+  /* the difference: a dark band. Source -> facts -> report, and the trace running back */
+  section.dark{background:var(--text);color:var(--ground);border-bottom-color:var(--text)}
+  .dark .label{color:rgba(255,254,242,.55)}
+  .dark .head p{color:rgba(255,254,242,.85)}
+  .dark .pipe-note{color:rgba(255,254,242,.82)}
+  .dark .pipe-note b{color:var(--ground)}
+  /* the scale: a black band of figures, then one bar of the same measure at three stages
+     (remediated, applied, affected) as a light-to-dark ramp with a number on each part */
+  #reach .head{margin-bottom:clamp(16px,2.6vh,34px)}
+  .scale-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.6vh,44px) clamp(22px,3vw,44px);padding-top:clamp(16px,2.6vh,24px);border-top:1px solid rgba(255,254,242,.2)}
+  @media (max-width:880px){.scale-facts{grid-template-columns:1fr}}
+  .scale-facts > div{display:flex;flex-direction:column;gap:8px}
+  .scale-facts b{font-family:var(--mono);font-size:clamp(38px,4.2vw,58px);font-weight:500;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+  .scale-facts .t{font-family:var(--mono);font-size:clamp(12px,1.1vw,14px);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,254,242,.75)}
+  .scale-facts p{font-size:clamp(16px,1.4vw,18px);line-height:1.55;color:rgba(255,254,242,.75);max-width:36ch}
+  .scale-facts i{display:block;font-style:normal;font-family:var(--mono);font-size:clamp(13px,1.15vw,15px);letter-spacing:.06em;color:var(--accent);margin-bottom:6px}
+  .progress{margin:clamp(24px,4vh,60px) 0 0}
+  .progress .k{font-family:var(--mono);font-size:clamp(12px,1.05vw,13px);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .progress-bar{display:flex;gap:2px;height:clamp(52px,6.5vh,76px)}
+  .p{display:flex;align-items:center;min-width:0;padding:0 14px}
+  .p b{font-family:var(--mono);font-size:clamp(16px,1.7vw,24px);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .p.done{position:relative;flex:0 0 2.71%;min-width:6px;padding:0;border-radius:4px 0 0 4px;background:var(--ground);color:var(--text)}
+  /* 542 is too thin a slice to letter inside, so its label hangs beneath on a tick */
+  .p.done b{position:absolute;top:calc(100% + 10px);left:0;color:var(--ground);white-space:nowrap}
+  .p.done::after{content:"";position:absolute;top:100%;left:0;width:1px;height:8px;background:rgba(255,254,242,.5)}
+  .p.applied{flex:0 0 15.28%;justify-content:flex-end;background:var(--accent);color:var(--accent-ink)}
+  .p.left{flex:1 1 auto;justify-content:flex-end;border-radius:0 4px 4px 0;background:rgba(255,254,242,.13);color:var(--ground)}
+  .progress-key{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:38px;font-size:clamp(15px,1.3vw,17px);color:rgba(255,254,242,.85)}
+  .progress-key span{display:flex;align-items:center;gap:9px}
+  .progress-key .sw{width:10px;height:10px;flex:0 0 auto;border-radius:2px;background:var(--ground)}
+  .progress-key .sw.applied{background:var(--accent)}
+  .progress-key .sw.left{background:rgba(255,254,242,.3)}
+  .progress-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;margin-top:14px;
+    font-family:var(--mono);font-size:clamp(11.5px,1vw,12.5px);letter-spacing:.06em;text-transform:uppercase;color:rgba(255,254,242,.65)}
+  #reach .source-note{margin-top:clamp(16px,2.4vh,26px);color:rgba(255,254,242,.65)}
+  /* on a phone the numbers no longer fit inside the bar; the key underneath carries them */
+  @media (max-width:700px){.p b{display:none}.progress-key{gap:8px 20px;font-size:14px}}
 
+  /* the trace: sources -> facts -> report, top-aligned, with live connector lines drawn between
+     whichever line is active. It cycles on its own until someone hovers, clicks or tabs into it. */
+  /* what the AI actually does, said plainly before the guardrails */
+  .ai-does{display:flex;flex-wrap:wrap;gap:8px 10px;margin:0 0 clamp(10px,1.8vh,26px);padding:0;list-style:none}
+  .ai-does li{padding:clamp(5px,1vh,7px) 11px;border:1px solid rgba(252,170,45,.5);color:var(--accent);
+    font-family:var(--mono);font-size:clamp(11px,1vw,12.5px);letter-spacing:.08em;text-transform:uppercase}
+  .trace{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr) 72px minmax(0,1fr);align-items:start}
+  .trace-col{position:relative;z-index:1;display:flex;flex-direction:column;gap:clamp(7px,1.2vh,10px)}
+  .trace-col .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:rgba(255,254,242,.72);margin-bottom:4px}
+  .trace-col .k b{color:var(--accent);font-weight:500;margin-right:8px}
+  .gutter{padding-top:1px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,254,242,.6);text-align:center}
+  .doc,.rep,.voice{background:var(--ground);color:var(--text);padding:clamp(11px,1.9vh,16px) 18px clamp(12px,2vh,18px)}
+  .doc .fn,.rep .fn,.voice .fn{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px}
+  .doc{font-size:13.5px;line-height:1.75}
+  .doc .ln{display:block;color:rgba(25,25,24,.45);padding:0 6px;margin:0 -6px;transition:background .25s,box-shadow .25s}
+  .doc .ln.t{color:var(--text);cursor:pointer}
+  .voice .wave{display:block;width:100%;height:28px;margin:2px 0 10px;fill:rgba(25,25,24,.5)}
+  .voice .quote{display:block;font-size:13.5px;line-height:1.6;color:var(--text);padding:2px 6px;margin:0 -6px;cursor:pointer;transition:background .25s,box-shadow .25s}
+  .doc .ln.on,.voice .quote.on{background:var(--accent-soft);box-shadow:inset 2px 0 0 var(--accent)}
+  .fact{all:unset;box-sizing:border-box;display:block;width:100%;text-align:left;cursor:pointer;border:1px solid rgba(255,254,242,.22);
+    padding:clamp(8px,1.5vh,11px) 13px;font-size:14.5px;color:var(--ground);transition:border-color .25s,background .25s}
+  .fact small{display:block;font-family:var(--mono);font-size:10.5px;color:rgba(255,254,242,.66);margin-top:3px;letter-spacing:.04em}
+  .fact:hover{border-color:rgba(255,254,242,.45)}
+  .fact.on{border-color:var(--accent);background:rgba(252,170,45,.12)}
+  .fact.on small{color:var(--accent)}
+  .rep .row{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;gap:12px;cursor:pointer;
+    width:calc(100% + 16px);margin:0 -8px;padding:10px 8px;border-bottom:1px solid var(--line);font-size:14px;transition:background .25s}
+  .rep .row:hover{background:var(--surface)}
+  .rep .row.on{background:var(--accent-soft)}
+  .rep .src{font-family:var(--mono);font-size:10.5px;color:var(--accent-deep);white-space:nowrap}
+  .fact:focus-visible,.rep .row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .trace-links{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:2}
+  .trace-links path{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-dasharray:4 4;animation:trace-flow 1s linear infinite}
+  .trace-links circle{fill:var(--accent)}
+  @keyframes trace-flow{to{stroke-dashoffset:-16}}
+  .traceback{grid-column:1 / -1;display:flex;align-items:center;gap:14px;margin-top:clamp(14px,2.4vh,22px);font-family:var(--mono);font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+  .traceback::before,.traceback::after{content:"";flex:1;border-top:1.5px dashed var(--accent)}
+  @media (max-width:880px){
+    .trace{grid-template-columns:1fr;gap:22px}
+    .gutter,.trace-links{display:none}
+    .traceback{white-space:normal;text-align:center}
+  }
+  @media (prefers-reduced-motion:reduce){.trace-links path{animation:none}}
+  /* the prototype caveat as a tag and one line, not a paragraph */
+  .stand-in{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:clamp(16px,2.8vh,28px);max-width:none;font-size:15px;color:rgba(255,254,242,.85)}
+  .stand-in .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--accent);color:var(--accent)}
 
-  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:0;background:var(--surface)}
-  table{width:100%;border-collapse:collapse;font-size:15px}
-  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
-  th{font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
-  tr:last-child td{border-bottom:0}
-  td.s{font-family:var(--mono);font-size:12px;letter-spacing:.06em;white-space:nowrap;width:1%}
-  td.s i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
-  td.s.built{color:var(--done)}td.s.built i{background:var(--done)}
-  td.s.next{color:var(--muted)}td.s.next i{background:var(--line-2)}
-  td.s.part{color:var(--accent-deep)}td.s.part i{background:var(--accent)}
+  /* on a short window the trace has a lot to hold, so it steps down a size */
+  @media (max-height:820px){
+    .ai-does{margin-bottom:10px}
+    .ai-does li{padding:4px 9px;font-size:10.5px}
+    #trace .head p{font-size:16px}
+    .doc{font-size:12.5px;line-height:1.6}
+    .voice .quote{font-size:12.5px}
+    .fact{font-size:13.5px}
+    .fact small{font-size:10px}
+    .rep .row{font-size:13px;padding:8px}
+    .traceback{margin-top:10px}
+    .stand-in{margin-top:12px;font-size:14px}
+  }
+  /* who it's for: documents flow in, the report flows out, the practice in the middle pays.
+     The parts arrive in order as the section lands, and the buyer card drops in last. */
+  .flow > *{opacity:0;transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
+  .flow > *:nth-child(1){transform:translateX(-28px)}
+  .flow > *:nth-child(5){transform:translateX(28px)}
+  .flow > .arrow{transform:scale(.92)}
+  .flow > .node.buyer{transform:translateY(-52px) rotate(-1.5deg)}
+  .flow.in > *{opacity:1;transform:none}
+  .flow.in > *:nth-child(1){transition-delay:.05s}
+  .flow.in > *:nth-child(5){transition-delay:.25s}
+  .flow.in > .arrow:nth-child(2){transition-delay:.5s}
+  .flow.in > .arrow:nth-child(4){transition-delay:.62s}
+  .flow.in > .node.buyer{transform:none;transition:opacity .3s ease .78s,transform .6s cubic-bezier(.34,1.4,.64,1) .78s}
+  @media (prefers-reduced-motion:reduce){.flow > *{opacity:1;transform:none;transition:none}}
+  /* one pen line under the cards: crack, handwriting, report rules, signature */
+  .flow-line{margin:clamp(12px,2.2vh,26px) 0 0;opacity:0;transition:opacity .7s ease 1.15s}
+  .flow.in ~ .flow-line{opacity:1}
+  .flow-line img{display:block;width:100%;height:auto}
+  @media (prefers-reduced-motion:reduce){.flow-line{opacity:1;transition:none}}
+  .flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.15fr) auto minmax(0,1fr);align-items:stretch}
+  .node{border:1px solid var(--line-2);padding:clamp(24px,3.4vh,38px) clamp(22px,2vw,30px);display:flex;flex-direction:column;gap:10px}
+  .node .num{font-family:var(--mono);font-size:clamp(11px,1vw,13px);letter-spacing:.14em;color:var(--accent-deep)}
+  .node p{color:var(--muted);font-size:clamp(16px,1.4vw,18px)}
+  .node.buyer{background:var(--accent);border-color:var(--accent)}
+  .node.buyer .num,.node.buyer p{color:var(--accent-ink)}
+  .node.buyer h3{font-weight:500}
+  .arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 12px;
+    font-family:var(--mono);font-size:clamp(11px,1vw,12.5px);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .arrow svg{width:44px;height:14px;color:var(--text)}
+  @media (max-width:880px){
+    .flow{grid-template-columns:1fr}
+    .arrow{flex-direction:row;padding:12px 0}
+    .arrow svg{transform:rotate(90deg);width:28px}
+  }
 
-  /* ---- footer ---- */
-  footer{padding:clamp(48px,6vw,80px) 0 40px}
-  footer .cta{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;padding-bottom:40px;border-bottom:1px solid var(--line);margin-bottom:28px}
-  footer .cta h2{max-width:none}
-  footer .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--muted)}
+  /* how it scales: the steps rise in turn, an amber sweep runs along them, and the star drops
+     onto the north star as it lands. All of it waits until the section is on screen. */
+  .ladder > .rung{opacity:0;transform:translateY(16px) scale(.96);
+    transition:opacity .5s ease,transform .55s cubic-bezier(.2,.7,.3,1)}
+  .ladder.in > .rung{opacity:1;transform:none}
+  .ladder.in > .rung:nth-child(1){transition-delay:.05s}
+  .ladder.in > .rung:nth-child(2){transition-delay:.22s}
+  .ladder.in > .rung:nth-child(3){transition-delay:.39s}
+  .ladder.in > .rung:nth-child(4){transition-delay:.56s}
+  @keyframes rung-lit{
+    0%,100%{background:var(--ground);border-color:var(--line-2)}
+    35%,60%{background:var(--accent-soft);border-color:var(--accent)}}
+  .ladder.in > .rung:nth-child(1){animation:rung-lit 1.6s ease .8s}
+  .ladder.in > .rung:nth-child(2){animation:rung-lit 1.6s ease 1.35s}
+  .ladder.in > .rung:nth-child(3){animation:rung-lit 1.6s ease 1.9s}
+  @keyframes star-land{
+    0%{box-shadow:0 0 0 0 rgba(252,170,45,0)}
+    40%{box-shadow:0 0 0 3px rgba(252,170,45,.9)}
+    100%{box-shadow:0 0 0 2px rgba(252,170,45,.55)}}
+  .ladder.in > .rung.star{animation:star-land 1.1s ease 2.75s forwards}
+  .drop-star{position:absolute;top:clamp(-116px,-9vw,-74px);right:clamp(-58px,-4.4vw,-30px);z-index:2;
+    width:clamp(124px,11.5vw,196px);height:auto;opacity:0}
+  @keyframes star-drop{
+    0%{opacity:0;transform:translateY(-120px) rotate(-14deg) scale(.8)}
+    45%{opacity:1}
+    70%{transform:translateY(6px) rotate(4deg) scale(1.04)}
+    100%{opacity:1;transform:none}}
+  .ladder.in > .rung.star .drop-star{animation:star-drop 1.15s cubic-bezier(.3,.9,.4,1) 2.5s forwards}
+  @media (prefers-reduced-motion:reduce){
+    .ladder > .rung{opacity:1;transform:none;transition:none;animation:none!important}
+    .drop-star{opacity:1;animation:none!important}
+  }
+  /* the star hangs past the card, so this section clips its edges instead of scrolling sideways */
+  #scale{overflow-x:clip}
+  .ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:end}
+  @media (max-width:880px){.ladder{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.ladder{grid-template-columns:1fr}}
+  .rung{position:relative;border:1px solid var(--line-2);padding:clamp(22px,3vh,34px) clamp(20px,1.8vw,28px);display:flex;flex-direction:column;gap:10px;min-height:calc(200px + var(--k) * 52px)}
+  @media (max-width:880px){.rung{min-height:0}}
+  .rung .num{font-family:var(--mono);font-size:clamp(11px,1vw,13px);letter-spacing:.14em;color:var(--accent-deep)}
+  .rung p{color:var(--muted);font-size:clamp(16px,1.4vw,18px)}
+  .rung.now{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+  .rung.star{background:var(--text);color:var(--ground);border-color:var(--text)}
+  .rung.star .num{color:var(--accent)}
+  .rung.star p{color:rgba(255,254,242,.62)}
 
-  /* ---- walkthrough: drag the pin, the scene follows ---- */
-  .scrub{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:28px 48px;align-items:center}
+  /* status: two lists, built and not yet */
+  .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,32px)}
+  @media (max-width:760px){.status-grid{grid-template-columns:1fr}}
+  .status-col{border-top:2px solid var(--accent);padding-top:16px}
+  .status-col.next{border-top-color:var(--line-2)}
+  .status-col h3{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px}
+  .status-col h3 small{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .status-col ul{list-style:none;margin:0;padding:0}
+  .status-col li{display:grid;grid-template-columns:20px 1fr;gap:14px;padding:clamp(8px,1.4vh,12px) 0;border-bottom:1px solid var(--line);font-size:clamp(15.5px,1.35vw,18px)}
+  .status-col li span{color:var(--muted)}
+  .status-col .box{width:19px;height:19px;margin-top:3px;border-radius:3px;display:grid;place-items:center}
+  .status-col.next .box{border:1.5px solid var(--line-2)}
+  .status-col.next li{color:var(--muted)}
+  /* the built items tick in one after another once the section is on screen */
+  .status-col.built .box{background:var(--accent);opacity:0;transform:scale(.4);
+    transition:opacity .25s ease,transform .35s cubic-bezier(.34,1.5,.64,1)}
+  .status-col.built .box svg{width:12px;height:12px;fill:none;stroke:var(--accent-ink);stroke-width:2.4;
+    stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:17;stroke-dashoffset:17;transition:stroke-dashoffset .3s ease}
+  #status.in .status-col.built .box{opacity:1;transform:none}
+  #status.in .status-col.built .box svg{stroke-dashoffset:0}
+  #status.in .status-col.built li:nth-child(1) .box{transition-delay:.15s}
+  #status.in .status-col.built li:nth-child(1) .box svg{transition-delay:.33s}
+  #status.in .status-col.built li:nth-child(2) .box{transition-delay:.28s}
+  #status.in .status-col.built li:nth-child(2) .box svg{transition-delay:.46s}
+  #status.in .status-col.built li:nth-child(3) .box{transition-delay:.41s}
+  #status.in .status-col.built li:nth-child(3) .box svg{transition-delay:.59s}
+  #status.in .status-col.built li:nth-child(4) .box{transition-delay:.54s}
+  #status.in .status-col.built li:nth-child(4) .box svg{transition-delay:.72s}
+  #status.in .status-col.built li:nth-child(5) .box{transition-delay:.67s}
+  #status.in .status-col.built li:nth-child(5) .box svg{transition-delay:.85s}
+  #status.in .status-col.built li:nth-child(6) .box{transition-delay:.8s}
+  #status.in .status-col.built li:nth-child(6) .box svg{transition-delay:.98s}
+  #status.in .status-col.built li:nth-child(7) .box{transition-delay:.93s}
+  #status.in .status-col.built li:nth-child(7) .box svg{transition-delay:1.11s}
+  /* how much of it exists, before anyone reads a row */
+  .tally{display:flex;flex-direction:column;gap:10px;margin-bottom:clamp(18px,3vh,34px)}
+  .tally-k{display:flex;align-items:baseline;gap:16px;font-family:var(--mono);font-size:clamp(12.5px,1.15vw,15px);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .tally-k b{font-family:var(--sans);font-size:clamp(28px,3vw,42px);font-weight:500;letter-spacing:-.03em;color:var(--text);text-transform:none}
+  .tally-bar{display:flex;gap:2px;height:10px}
+  .tally-bar span{display:block;border-radius:2px}
+  .tally-bar .done{flex:0 0 53.8%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform 1s cubic-bezier(.2,.7,.3,1) .1s}
+  .tally-bar .rest{flex:1 1 auto;background:var(--line)}
+  #status.in .tally-bar .done{transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .status-col.built .box,.status-col.built .box svg{opacity:1;transform:none;stroke-dashoffset:0;transition:none}
+    .tally-bar .done{transform:none;transition:none}
+  }
+
+  /* how it works: drag the pin, the screen and caption follow. Brought back from the original walkthrough. */
+  .scrub{display:grid;grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);gap:clamp(16px,2.6vh,28px) clamp(32px,4vw,56px);align-items:center}
   @media (max-width:880px){.scrub{grid-template-columns:1fr}}
-  .scrub-copy{display:flex;flex-direction:column;gap:12px;min-height:170px}
-  .scrub-copy .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
-  .scrub-copy h3{font-size:clamp(22px,2.4vw,28px);letter-spacing:-.03em;max-width:18ch}
-  .scrub-copy p{color:var(--muted);font-size:16px;max-width:44ch}
-  .scrub-scene{border:1px solid var(--line);background:var(--surface);aspect-ratio:16/10}
-  .scrub-scene svg{display:block;width:100%;height:100%}
+  .scrub-copy{display:flex;flex-direction:column;gap:12px;min-height:clamp(120px,18vh,170px)}
+  .scrub-copy .num{font-family:var(--mono);font-size:clamp(13px,1.1vw,15px);font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep)}
+  /* the heading follows the slider: every step in ink, the current one in brown */
+  #how .head{align-items:center;text-align:center;margin-bottom:clamp(24px,3.5vw,40px)}
+  #how .head h2{max-width:none}
+  #how .head p{color:var(--text)}
+  .scrub-title span{color:var(--text);cursor:pointer;transition:color .3s ease}
+  .scrub-title span.done{color:var(--text)}
+  .scrub-title span.on{color:var(--accent-deep)}
+  .scrub-copy h3{font-size:clamp(24px,2.6vw,34px);letter-spacing:-.03em;max-width:18ch}
+  .scrub-copy p{color:var(--muted);font-size:clamp(16px,1.4vw,19px);max-width:40ch}
+  .scrub-scene{position:relative;aspect-ratio:1440/1000;height:min(52vh,600px);width:auto;max-width:100%;justify-self:end;
+    border:1px solid var(--line-2);background:var(--surface);overflow:hidden}
+  .scrub-scene img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s ease}
+  .scrub-scene img.on{opacity:1}
   .scrub-track{grid-column:1 / -1;position:relative;margin-top:8px;touch-action:none;user-select:none;-webkit-user-select:none}
   .scrub-ticks{height:44px;pointer-events:none;
     background:
@@ -301,396 +433,35 @@ border-bottom:1px solid var(--line);
   .scrub-range:focus{outline:none}
   .scrub-range:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent);outline-offset:-2px}
   .scrub-range:focus-visible::-moz-range-thumb{outline:2px solid var(--accent);outline-offset:-2px}
-  .scrub-marks{display:grid;grid-template-columns:repeat(6,1fr);margin:6px 0 0;padding:0;list-style:none}
+  .scrub-marks{display:grid;grid-template-columns:repeat(4,1fr);margin:6px 0 0;padding:0;list-style:none}
   .scrub-marks button{all:unset;display:block;cursor:pointer;text-align:center;padding:8px 0;
-    font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted)}
+    font-family:var(--mono);font-size:clamp(12px,1.1vw,15px);font-weight:500;letter-spacing:.12em;color:var(--muted)}
   .scrub-marks button:hover{color:var(--text)}
   .scrub-marks button[aria-current]{color:var(--accent-deep)}
   .scrub-marks button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-  .scrub-hint{margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);
-    display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
-  .scrub-hint b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}
-  .scrub-copy .num b{color:var(--text);font-weight:500;font-size:15px;letter-spacing:0;font-variant-numeric:tabular-nums;margin:0 2px}
-  .scrub-marks button small{display:block;font-size:10px;letter-spacing:.04em;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
-  .scrub-marks button[aria-current] small{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){.scrub-scene img{transition:none}}
 
-  /* scene: every animation is 6s, paused, and scrubbed by the pin.
-     The drawing is stroke-dashoffset on paths carrying pathLength="1", so one
-     pair of keyframes works whatever the real length of the line is. Class
-     d43 means stage 4, slot 3; the numbers are generated, not typed. */
-  .scene *{animation-duration:6s;animation-timing-function:linear;animation-fill-mode:both;animation-play-state:paused}
-  .scene .ink{fill:none;stroke:var(--text);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-  .scene .ink2{fill:none;stroke:var(--text);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;opacity:.4}
-  .scene .crack{fill:none;stroke:var(--accent-deep);stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
-  .scene .dr{stroke-dasharray:1}
-  .scene .fill{stroke:none}
-  .scene .amber{fill:var(--accent)}
-  .scene .soft{fill:var(--accent-soft)}
-  .scene .grey{fill:var(--surface-2)}
-  .scene .t{font-family:var(--mono);font-size:12px;letter-spacing:.1em;fill:var(--text)}
-  .scene .t.m{fill:var(--muted)}
-  .scene .t.a{fill:var(--accent-deep)}
-  .scene .u{font-family:var(--sans);font-size:14px;fill:var(--text)}
-  .scene .u.m{fill:var(--muted)}
-  .scene .st{opacity:0}
-  .scene .st1{animation-name:st1}.scene .st2{animation-name:st2}.scene .st3{animation-name:st3}
-  .scene .st4{animation-name:st4}.scene .st5{animation-name:st5}.scene .st6{animation-name:st6}
-  .scene .d11{animation-name:d11}.scene .f11{animation-name:f11}.scene .r11{animation-name:r11}
-  .scene .d12{animation-name:d12}.scene .f12{animation-name:f12}.scene .r12{animation-name:r12}
-  .scene .d13{animation-name:d13}.scene .f13{animation-name:f13}.scene .r13{animation-name:r13}
-  .scene .d14{animation-name:d14}.scene .f14{animation-name:f14}.scene .r14{animation-name:r14}
-  .scene .d21{animation-name:d21}.scene .f21{animation-name:f21}.scene .r21{animation-name:r21}
-  .scene .d22{animation-name:d22}.scene .f22{animation-name:f22}.scene .r22{animation-name:r22}
-  .scene .d23{animation-name:d23}.scene .f23{animation-name:f23}.scene .r23{animation-name:r23}
-  .scene .d24{animation-name:d24}.scene .f24{animation-name:f24}.scene .r24{animation-name:r24}
-  .scene .d31{animation-name:d31}.scene .f31{animation-name:f31}.scene .r31{animation-name:r31}
-  .scene .d32{animation-name:d32}.scene .f32{animation-name:f32}.scene .r32{animation-name:r32}
-  .scene .d33{animation-name:d33}.scene .f33{animation-name:f33}.scene .r33{animation-name:r33}
-  .scene .d34{animation-name:d34}.scene .f34{animation-name:f34}.scene .r34{animation-name:r34}
-  .scene .d41{animation-name:d41}.scene .f41{animation-name:f41}.scene .r41{animation-name:r41}
-  .scene .d42{animation-name:d42}.scene .f42{animation-name:f42}.scene .r42{animation-name:r42}
-  .scene .d43{animation-name:d43}.scene .f43{animation-name:f43}.scene .r43{animation-name:r43}
-  .scene .d44{animation-name:d44}.scene .f44{animation-name:f44}.scene .r44{animation-name:r44}
-  .scene .d51{animation-name:d51}.scene .f51{animation-name:f51}.scene .r51{animation-name:r51}
-  .scene .d52{animation-name:d52}.scene .f52{animation-name:f52}.scene .r52{animation-name:r52}
-  .scene .d53{animation-name:d53}.scene .f53{animation-name:f53}.scene .r53{animation-name:r53}
-  .scene .d54{animation-name:d54}.scene .f54{animation-name:f54}.scene .r54{animation-name:r54}
-  .scene .d61{animation-name:d61}.scene .f61{animation-name:f61}.scene .r61{animation-name:r61}
-  .scene .d62{animation-name:d62}.scene .f62{animation-name:f62}.scene .r62{animation-name:r62}
-  .scene .d63{animation-name:d63}.scene .f63{animation-name:f63}.scene .r63{animation-name:r63}
-  .scene .d64{animation-name:d64}.scene .f64{animation-name:f64}.scene .r64{animation-name:r64}
-  @keyframes st1{0%,15.33%{opacity:1}16.67%,100%{opacity:0}}
-  @keyframes st2{0%,16.67%{opacity:0}18.0%,32.0%{opacity:1}33.33%,100%{opacity:0}}
-  @keyframes st3{0%,33.33%{opacity:0}34.67%,48.67%{opacity:1}50.0%,100%{opacity:0}}
-  @keyframes st4{0%,50.0%{opacity:0}51.33%,65.33%{opacity:1}66.67%,100%{opacity:0}}
-  @keyframes st5{0%,66.67%{opacity:0}68.0%,82.0%{opacity:1}83.33%,100%{opacity:0}}
-  @keyframes st6{0%,83.33%{opacity:0}84.67%,98.67%{opacity:1}}
-  @keyframes d11{0%,1.33%{stroke-dashoffset:1}4.13%,100%{stroke-dashoffset:0}}
-  @keyframes f11{0%,1.33%{opacity:0}4.13%,100%{opacity:1}}
-  @keyframes r11{0%,1.33%{opacity:0;transform:translateY(20px)}4.13%,100%{opacity:1;transform:none}}
-  @keyframes d12{0%,3.29%{stroke-dashoffset:1}5.53%,100%{stroke-dashoffset:0}}
-  @keyframes f12{0%,3.29%{opacity:0}5.53%,100%{opacity:1}}
-  @keyframes r12{0%,3.29%{opacity:0;transform:translateY(20px)}5.53%,100%{opacity:1;transform:none}}
-  @keyframes d13{0%,4.97%{stroke-dashoffset:1}6.93%,100%{stroke-dashoffset:0}}
-  @keyframes f13{0%,4.97%{opacity:0}6.93%,100%{opacity:1}}
-  @keyframes r13{0%,4.97%{opacity:0;transform:translateY(20px)}6.93%,100%{opacity:1;transform:none}}
-  @keyframes d14{0%,6.37%{stroke-dashoffset:1}8.05%,100%{stroke-dashoffset:0}}
-  @keyframes f14{0%,6.37%{opacity:0}8.05%,100%{opacity:1}}
-  @keyframes r14{0%,6.37%{opacity:0;transform:translateY(20px)}8.05%,100%{opacity:1;transform:none}}
-  @keyframes d21{0%,18.0%{stroke-dashoffset:1}20.8%,100%{stroke-dashoffset:0}}
-  @keyframes f21{0%,18.0%{opacity:0}20.8%,100%{opacity:1}}
-  @keyframes r21{0%,18.0%{opacity:0;transform:translateY(20px)}20.8%,100%{opacity:1;transform:none}}
-  @keyframes d22{0%,19.96%{stroke-dashoffset:1}22.2%,100%{stroke-dashoffset:0}}
-  @keyframes f22{0%,19.96%{opacity:0}22.2%,100%{opacity:1}}
-  @keyframes r22{0%,19.96%{opacity:0;transform:translateY(20px)}22.2%,100%{opacity:1;transform:none}}
-  @keyframes d23{0%,21.64%{stroke-dashoffset:1}23.6%,100%{stroke-dashoffset:0}}
-  @keyframes f23{0%,21.64%{opacity:0}23.6%,100%{opacity:1}}
-  @keyframes r23{0%,21.64%{opacity:0;transform:translateY(20px)}23.6%,100%{opacity:1;transform:none}}
-  @keyframes d24{0%,23.04%{stroke-dashoffset:1}24.72%,100%{stroke-dashoffset:0}}
-  @keyframes f24{0%,23.04%{opacity:0}24.72%,100%{opacity:1}}
-  @keyframes r24{0%,23.04%{opacity:0;transform:translateY(20px)}24.72%,100%{opacity:1;transform:none}}
-  @keyframes d31{0%,34.66%{stroke-dashoffset:1}37.46%,100%{stroke-dashoffset:0}}
-  @keyframes f31{0%,34.66%{opacity:0}37.46%,100%{opacity:1}}
-  @keyframes r31{0%,34.66%{opacity:0;transform:translateY(20px)}37.46%,100%{opacity:1;transform:none}}
-  @keyframes d32{0%,36.62%{stroke-dashoffset:1}38.86%,100%{stroke-dashoffset:0}}
-  @keyframes f32{0%,36.62%{opacity:0}38.86%,100%{opacity:1}}
-  @keyframes r32{0%,36.62%{opacity:0;transform:translateY(20px)}38.86%,100%{opacity:1;transform:none}}
-  @keyframes d33{0%,38.3%{stroke-dashoffset:1}40.26%,100%{stroke-dashoffset:0}}
-  @keyframes f33{0%,38.3%{opacity:0}40.26%,100%{opacity:1}}
-  @keyframes r33{0%,38.3%{opacity:0;transform:translateY(20px)}40.26%,100%{opacity:1;transform:none}}
-  @keyframes d34{0%,39.7%{stroke-dashoffset:1}41.38%,100%{stroke-dashoffset:0}}
-  @keyframes f34{0%,39.7%{opacity:0}41.38%,100%{opacity:1}}
-  @keyframes r34{0%,39.7%{opacity:0;transform:translateY(20px)}41.38%,100%{opacity:1;transform:none}}
-  @keyframes d41{0%,51.33%{stroke-dashoffset:1}54.13%,100%{stroke-dashoffset:0}}
-  @keyframes f41{0%,51.33%{opacity:0}54.13%,100%{opacity:1}}
-  @keyframes r41{0%,51.33%{opacity:0;transform:translateY(20px)}54.13%,100%{opacity:1;transform:none}}
-  @keyframes d42{0%,53.29%{stroke-dashoffset:1}55.53%,100%{stroke-dashoffset:0}}
-  @keyframes f42{0%,53.29%{opacity:0}55.53%,100%{opacity:1}}
-  @keyframes r42{0%,53.29%{opacity:0;transform:translateY(20px)}55.53%,100%{opacity:1;transform:none}}
-  @keyframes d43{0%,54.97%{stroke-dashoffset:1}56.93%,100%{stroke-dashoffset:0}}
-  @keyframes f43{0%,54.97%{opacity:0}56.93%,100%{opacity:1}}
-  @keyframes r43{0%,54.97%{opacity:0;transform:translateY(20px)}56.93%,100%{opacity:1;transform:none}}
-  @keyframes d44{0%,56.37%{stroke-dashoffset:1}58.05%,100%{stroke-dashoffset:0}}
-  @keyframes f44{0%,56.37%{opacity:0}58.05%,100%{opacity:1}}
-  @keyframes r44{0%,56.37%{opacity:0;transform:translateY(20px)}58.05%,100%{opacity:1;transform:none}}
-  @keyframes d51{0%,68.0%{stroke-dashoffset:1}70.8%,100%{stroke-dashoffset:0}}
-  @keyframes f51{0%,68.0%{opacity:0}70.8%,100%{opacity:1}}
-  @keyframes r51{0%,68.0%{opacity:0;transform:translateY(20px)}70.8%,100%{opacity:1;transform:none}}
-  @keyframes d52{0%,69.96%{stroke-dashoffset:1}72.2%,100%{stroke-dashoffset:0}}
-  @keyframes f52{0%,69.96%{opacity:0}72.2%,100%{opacity:1}}
-  @keyframes r52{0%,69.96%{opacity:0;transform:translateY(20px)}72.2%,100%{opacity:1;transform:none}}
-  @keyframes d53{0%,71.64%{stroke-dashoffset:1}73.6%,100%{stroke-dashoffset:0}}
-  @keyframes f53{0%,71.64%{opacity:0}73.6%,100%{opacity:1}}
-  @keyframes r53{0%,71.64%{opacity:0;transform:translateY(20px)}73.6%,100%{opacity:1;transform:none}}
-  @keyframes d54{0%,73.04%{stroke-dashoffset:1}74.72%,100%{stroke-dashoffset:0}}
-  @keyframes f54{0%,73.04%{opacity:0}74.72%,100%{opacity:1}}
-  @keyframes r54{0%,73.04%{opacity:0;transform:translateY(20px)}74.72%,100%{opacity:1;transform:none}}
-  @keyframes d61{0%,84.66%{stroke-dashoffset:1}87.46%,100%{stroke-dashoffset:0}}
-  @keyframes f61{0%,84.66%{opacity:0}87.46%,100%{opacity:1}}
-  @keyframes r61{0%,84.66%{opacity:0;transform:translateY(20px)}87.46%,100%{opacity:1;transform:none}}
-  @keyframes d62{0%,86.62%{stroke-dashoffset:1}88.86%,100%{stroke-dashoffset:0}}
-  @keyframes f62{0%,86.62%{opacity:0}88.86%,100%{opacity:1}}
-  @keyframes r62{0%,86.62%{opacity:0;transform:translateY(20px)}88.86%,100%{opacity:1;transform:none}}
-  @keyframes d63{0%,88.3%{stroke-dashoffset:1}90.26%,100%{stroke-dashoffset:0}}
-  @keyframes f63{0%,88.3%{opacity:0}90.26%,100%{opacity:1}}
-  @keyframes r63{0%,88.3%{opacity:0;transform:translateY(20px)}90.26%,100%{opacity:1;transform:none}}
-  @keyframes d64{0%,89.7%{stroke-dashoffset:1}91.38%,100%{stroke-dashoffset:0}}
-  @keyframes f64{0%,89.7%{opacity:0}91.38%,100%{opacity:1}}
-  @keyframes r64{0%,89.7%{opacity:0;transform:translateY(20px)}91.38%,100%{opacity:1;transform:none}}
-  /* ---- one case, many hands: the case filling its sections ----
-     Lifted from spikes/hands-flow.html (option D). The dot-marching
-     keyframe is shared with nothing else here, so it comes along. */
-  @keyframes march{to{stroke-dashoffset:-32}}
-  /* ================= OPTION D - the right actors =================
-     Option C drew the lab and the council as peers of the assessor, which
-     claims two integrations that do not exist. In the app a lab is a text
-     field on a sample and its result arrives as a recorded document; the
-     council has no account at all and gets a package by hand. So the
-     drawing is now mostly about a boundary: inside it are the four people
-     with logins, outside it are the two parties reached on paper.
+  /* ---- footer ---- */
+  /* the footer closes the page in ink, kept tight so it does not read as another screen */
+  footer{background:var(--text);color:var(--ground);padding:clamp(34px,5vh,60px) 0 clamp(22px,3vh,34px)}
+  footer .cta{display:flex;flex-wrap:wrap;gap:20px 28px;align-items:center;justify-content:space-between;
+    padding-bottom:clamp(22px,3vh,32px);border-bottom:1px solid rgba(255,254,242,.2);margin-bottom:clamp(16px,2.4vh,24px)}
+  footer .cta h2{max-width:none;font-size:clamp(26px,3.4vw,44px)}
+  footer .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:rgba(255,254,242,.62)}
 
-     The I.S. 465 structure is not a party either. It lands on the first
-     hit as four empty numbered sections, and every later hit fills one.
-     That is the claim worth making - the sections are there before the
-     content is, which is why nobody has to re-type anything into them.
-
-     Cycle 12s: hits at 10, 25, 40, 55 and 70 per cent, then a 3.6s hold
-     on the frozen version while the package leaves. */
-  .bnd-frame{background:var(--surface);border:1px solid var(--line-2);padding:8px;--evo:15s}
-  .bnd{display:block;width:100%;height:auto}
-
-  .bnd .wire{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:2 6;opacity:.5}
-  .bnd .beam{fill:none;stroke:var(--accent);stroke-width:4.5;stroke-linecap:round;stroke-dasharray:.01 15;
-    opacity:0;animation:march 1.1s linear infinite, bm1 var(--evo) linear infinite}
-  .bnd .beam.m2{animation:march 1.1s linear infinite, bm2 var(--evo) linear infinite}
-  .bnd .beam.m3{animation:march 1.1s linear infinite, bm3 var(--evo) linear infinite}
-  .bnd .beam.m5{animation:march 1.1s linear infinite, bm5 var(--evo) linear infinite}
-  @keyframes bm1{0%,1%{opacity:0}3%,9.6%{opacity:1}10.4%,100%{opacity:0}}
-  @keyframes bm2{0%,16%{opacity:0}18%,24.6%{opacity:1}25.4%,100%{opacity:0}}
-  @keyframes bm3{0%,31%{opacity:0}33%,39.6%{opacity:1}40.4%,100%{opacity:0}}
-  @keyframes bm5{0%,61%{opacity:0}63%,69.6%{opacity:1}70.4%,100%{opacity:0}}
-
-  /* Paper lanes read differently on purpose: a long dash that does not
-     march, with a document sliding along it. Nothing streams, because
-     nothing streams in real life either. */
-  .bnd .lane{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:9 7}
-  .bnd .doc-out,.bnd .doc-in,.bnd .doc-pkg{opacity:0}
-  .bnd .doc-out{animation:paperOut var(--evo) linear infinite}
-  .bnd .doc-in{animation:paperIn var(--evo) linear infinite}
-  .bnd .doc-pkg{animation:paperPkg var(--evo) linear infinite}
-  @keyframes paperOut{
-    0%,26%{opacity:0;transform:translateX(0)}
-    28%{opacity:1;transform:translateX(4px)}
-    35%{opacity:1;transform:translateX(104px)}
-    37%,100%{opacity:0;transform:translateX(112px)}}
-  @keyframes paperIn{
-    0%,46%{opacity:0;transform:translateX(0)}
-    48%{opacity:1;transform:translateX(-4px)}
-    54.5%{opacity:1;transform:translateX(-104px)}
-    56%,100%{opacity:0;transform:translateX(-112px)}}
-  @keyframes paperPkg{
-    0%,85%{opacity:0;transform:translateX(0)}
-    87%{opacity:1;transform:translateX(6px)}
-    97%,100%{opacity:1;transform:translateX(108px)}}
-
-  .bnd .glyph{fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:square}
-  .bnd .glyph.thin{stroke-width:1.5;stroke:var(--line-2)}
-  .bnd .plate{fill:var(--ground);stroke:var(--text);stroke-width:2}
-  .bnd .fill{fill:var(--accent)}
-  .bnd .fill.soft{fill:var(--accent-soft)}
-  .bnd .cap{font-family:var(--mono);font-size:10px;letter-spacing:.11em;fill:var(--muted);text-transform:uppercase}
-  .bnd .edge{font-family:var(--mono);font-size:10px;letter-spacing:.16em;fill:var(--line-2);text-transform:uppercase}
-  .bnd .stage{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;fill:var(--text);text-transform:uppercase}
-  .bnd .tiny{font-family:var(--mono);font-size:7.5px;letter-spacing:.06em;fill:var(--muted)}
-
-  /* the app boundary, and the chamber inside it */
-  .bnd .boundary{fill:none;stroke:var(--line-2);stroke-width:1.5;stroke-dasharray:5 5}
-  .bnd .chamber{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 7}
-  .bnd .bracket{fill:none;stroke:var(--text);stroke-width:2;animation:bracket5 var(--evo) linear infinite}
-  @keyframes bracket5{
-    0%,9.6%{stroke:#191918}  10%{stroke:#fcaa2d}  13%{stroke:#191918}
-    24.6%{stroke:#191918}    25%{stroke:#fcaa2d}  28%{stroke:#191918}
-    39.6%{stroke:#191918}    40%{stroke:#fcaa2d}  43%{stroke:#191918}
-    54.6%{stroke:#191918}    55%{stroke:#fcaa2d}  58%{stroke:#191918}
-    69.6%{stroke:#191918}    70%{stroke:#fcaa2d}  75%{stroke:#fcaa2d}
-    79%,100%{stroke:#191918}}
-
-  .bnd .doc{transform-box:view-box;transform-origin:450px 280px;
-    animation:grow5 var(--evo) linear infinite}
-  @keyframes grow5{
-    0%,9.6%{transform:scale(.50)}
-    10.9%{transform:scale(.66)}
-    12.4%,24.6%{transform:scale(.58)}
-    25.9%{transform:scale(.79)}
-    27.4%,39.6%{transform:scale(.70)}
-    40.9%{transform:scale(.89)}
-    42.4%,54.6%{transform:scale(.80)}
-    55.9%{transform:scale(.98)}
-    57.4%,69.6%{transform:scale(.89)}
-    71%{transform:scale(1.12)}
-    72.6%{transform:scale(.98)}
-    74%,100%{transform:scale(1)}}
-
-  .bnd .P1,.bnd .P2,.bnd .P3,.bnd .P4,.bnd .P5{opacity:0}
-  .bnd .P1{animation:v1 var(--evo) steps(1,end) infinite}
-  .bnd .P2{animation:v2 var(--evo) steps(1,end) infinite}
-  .bnd .P3{animation:v3 var(--evo) steps(1,end) infinite}
-  .bnd .P4{animation:v4 var(--evo) steps(1,end) infinite}
-  .bnd .P5{animation:v5 var(--evo) steps(1,end) infinite}
-  @keyframes v1{0%{opacity:0}10%,100%{opacity:1}}
-  @keyframes v2{0%{opacity:0}25%,100%{opacity:1}}
-  @keyframes v3{0%{opacity:0}40%,100%{opacity:1}}
-  @keyframes v4{0%{opacity:0}55%,100%{opacity:1}}
-  @keyframes v5{0%{opacity:0}70%,100%{opacity:1}}
-
-  .bnd .cover{transform-box:view-box;transform-origin:450px 170px;transform:scaleY(0);
-    animation:closeUp var(--evo) linear infinite}
-  @keyframes closeUp{
-    0%,76.8%{transform:scaleY(0)}
-    78.4%{transform:scaleY(1.04)}
-    79.4%,100%{transform:scaleY(1)}}
-  /* the stamp arrives the way a stamp does: from above, too big, hard, once */
-  .bnd .stamp{transform-box:view-box;transform-origin:452px 320px;opacity:0;
-    animation:stampDown var(--evo) linear infinite}
-  @keyframes stampDown{
-    0%,81%{opacity:0;transform:rotate(-9deg) scale(1.55)}
-    81.3%{opacity:1;transform:rotate(-9deg) scale(1.3)}
-    82.4%{opacity:1;transform:rotate(-9deg) scale(.93)}
-    83.4%,100%{opacity:1;transform:rotate(-9deg) scale(1)}}
-  .bnd .stampword{font-family:var(--mono);font-size:19px;font-weight:600;
-    letter-spacing:.12em;fill:#a36404}
-
-  .bnd .flash{fill:var(--accent-soft);opacity:0;animation:flash5 var(--evo) linear infinite}
-  @keyframes flash5{
-    0%,9.7%{opacity:0} 10%{opacity:.85} 12.6%{opacity:0}
-    24.7%{opacity:0}   25%{opacity:.85} 27.6%{opacity:0}
-    39.7%{opacity:0}   40%{opacity:.85} 42.6%{opacity:0}
-    54.7%{opacity:0}   55%{opacity:.85} 57.6%{opacity:0}
-    69.7%{opacity:0}   70%{opacity:.95} 75%{opacity:0}
-    81%{opacity:0}     81.4%{opacity:.7}  84%,100%{opacity:0}}
-
-  /* the assessor lights twice: once at the house, once to sign */
-  .bnd .a-adm{opacity:.35;animation:lAdm var(--evo) linear infinite}
-  .bnd .a-ass{opacity:.35;animation:lAss var(--evo) linear infinite}
-  .bnd .a-own{opacity:.35;animation:lOwn var(--evo) linear infinite}
-  .bnd .a-lab{opacity:.35;animation:lLab var(--evo) linear infinite}
-  .bnd .a-cnl{opacity:.35;animation:lCnl var(--evo) linear infinite}
-  @keyframes lAdm{0%,1%{opacity:.35}3%,13%{opacity:1}17%,73%{opacity:.35}77%,100%{opacity:1}}
-  @keyframes lAss{0%,16%{opacity:.35}18%,28%{opacity:1}32%,61%{opacity:.35}63%,73%{opacity:1}77%,100%{opacity:1}}
-  @keyframes lOwn{0%,31%{opacity:.35}33%,43%{opacity:1}47%,73%{opacity:.35}77%,100%{opacity:1}}
-  @keyframes lLab{0%,26%{opacity:.35}28%,36%{opacity:1}40%,46%{opacity:.35}48%,58%{opacity:1}62%,73%{opacity:.35}77%,100%{opacity:1}}
-  @keyframes lCnl{0%,87%{opacity:.35}93%,100%{opacity:1}}
-
-  .bnd .d0,.bnd .d1,.bnd .d2,.bnd .d3,.bnd .d4,.bnd .d5,.bnd .d6,.bnd .d7{opacity:0}
-  .bnd .d0{animation:q0 var(--evo) steps(1,end) infinite}
-  .bnd .d1{animation:q1 var(--evo) steps(1,end) infinite}
-  .bnd .d2{animation:q2 var(--evo) steps(1,end) infinite}
-  .bnd .d3{animation:q3 var(--evo) steps(1,end) infinite}
-  .bnd .d4{animation:q4 var(--evo) steps(1,end) infinite}
-  .bnd .d5{animation:q5 var(--evo) steps(1,end) infinite}
-  .bnd .d6{animation:q6 var(--evo) steps(1,end) infinite}
-  .bnd .d7{animation:q7 var(--evo) steps(1,end) infinite}
-  @keyframes q0{0%{opacity:1}10%,100%{opacity:0}}
-  @keyframes q1{0%{opacity:0}10%{opacity:1}25%,100%{opacity:0}}
-  @keyframes q2{0%{opacity:0}25%{opacity:1}40%,100%{opacity:0}}
-  @keyframes q3{0%{opacity:0}40%{opacity:1}55%,100%{opacity:0}}
-  @keyframes q4{0%{opacity:0}55%{opacity:1}70%,100%{opacity:0}}
-  @keyframes q5{0%{opacity:0}70%{opacity:1}77%,100%{opacity:0}}
-  @keyframes q6{0%{opacity:0}77%{opacity:1}86%,100%{opacity:0}}
-  @keyframes q7{0%{opacity:0}86%,100%{opacity:1}}
-
-  .bnd .seg{fill:var(--surface-2)}
-  .bnd .segf{fill:var(--accent);opacity:0}
-  .bnd .segf.n1{animation:v1 var(--evo) steps(1,end) infinite}
-  .bnd .segf.n2{animation:v2 var(--evo) steps(1,end) infinite}
-  .bnd .segf.n3{animation:v3 var(--evo) steps(1,end) infinite}
-  .bnd .segf.n4{animation:v4 var(--evo) steps(1,end) infinite}
-  .bnd .segf.n5{animation:v5 var(--evo) steps(1,end) infinite}
-  /* ---- the same scene stood up for a phone ----
-     Nothing about the beats changes: every animation is bound to a class
-     (.P1-.P5, .cover, .stamp, .segf, .d0-.d7) and none of them mentions a
-     coordinate, so the portrait scene inherits the lot. Only the three
-     transform origins are geometry, and they are overridden here.
-
-     What is dropped is the actor column. Three glyphs and their labels
-     cannot survive 380px, and they were never the argument - so the actor
-     becomes the first line of the caption instead, and the app boundary
-     stops being a box and becomes a rule, which reads better upright. */
-  .bnd-tall{display:none}
-  .bnd-tall .doc{transform-origin:190px 272.38px}
-  .bnd-tall .cover{transform-origin:190px 128px}
-  .bnd-tall .stamp{transform-origin:192.62px 324.88px}
-  .bnd-tall .tiny{font-size:10px}
-  .bnd-tall .stampword{font-size:25px}
-  .bnd-tall .cap,.bnd-tall .edge{font-size:11px}
-  .bnd-tall .who{font-family:var(--mono);font-size:13px;letter-spacing:.14em;
-    fill:var(--accent-deep);text-transform:uppercase}
-  .bnd-tall .what{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;
-    fill:var(--text);text-transform:uppercase}
-  /* the paper lanes are shorter and the order now travels left, to the lab */
-  .bnd-tall .doc-out{animation-name:tallOut}
-  .bnd-tall .doc-in{animation-name:tallIn}
-  .bnd-tall .doc-pkg{animation-name:tallPkg}
-  @keyframes tallOut{
-    0%,26%{opacity:0;transform:translateX(0)}
-    28%{opacity:1;transform:translateX(-4px)}
-    35%{opacity:1;transform:translateX(-62px)}
-    37%,100%{opacity:0;transform:translateX(-68px)}}
-  @keyframes tallIn{
-    0%,46%{opacity:0;transform:translateX(0)}
-    48%{opacity:1;transform:translateX(4px)}
-    54.5%{opacity:1;transform:translateX(62px)}
-    56%,100%{opacity:0;transform:translateX(68px)}}
-  @keyframes tallPkg{
-    0%,85%{opacity:0;transform:translateX(0)}
-    87%{opacity:1;transform:translateX(6px)}
-    97%,100%{opacity:1;transform:translateX(64px)}}
-  @media (max-width:720px){
-    .bnd:not(.bnd-tall){display:none}
-    .bnd-tall{display:block}
-  }
-
-  @media (prefers-reduced-motion:reduce){
-    .bnd .doc,.bnd .flash,.bnd .bracket,.bnd .beam{animation:none}
-    .bnd .doc{transform:none}
-    .bnd .flash{opacity:0}
-    .bnd .beam{display:none}
-    .bnd .doc-out,.bnd .doc-in{display:none}
-    .bnd .doc-pkg{animation:none;opacity:1;transform:translateX(108px)}
-    .bnd-tall .doc-pkg{transform:translateX(64px)}
-    .bnd .P1,.bnd .P2,.bnd .P3,.bnd .P4,.bnd .P5{animation:none;opacity:1}
-    .bnd .a-adm,.bnd .a-ass,.bnd .a-own,.bnd .a-lab,.bnd .a-cnl{animation:none;opacity:1}
-    .bnd .cover{animation:none;transform:scaleY(1)}
-    .bnd .stamp{animation:none;opacity:1;transform:rotate(-9deg)}
-    .bnd .doc-pkg{animation:none;opacity:1;transform:translateX(108px)}
-    .bnd .d0,.bnd .d1,.bnd .d2,.bnd .d3,.bnd .d4,.bnd .d5,.bnd .d6{animation:none;opacity:0}
-    .bnd .d7{animation:none;opacity:1}
-    .bnd .segf{animation:none;opacity:1}
-  }
-
-  /* ---- brand lock-up ----
-     The mark and the wordmark are one SVG so they hold their relationship at any
-     size. The mark rides up 4.1: its legs end at y 68 and their square caps run
-     further down the slope, so without the lift its feet would hang below the
-     line the letters sit on. Only the benchmark line is amber. */
-  .brand{align-items:center}
-  .brand .lock{width:141px;height:auto;flex:0 0 auto;align-self:center;overflow:visible}
-  .brand .lock text{font-size:46.77px;font-weight:600;letter-spacing:-1.45px}
 </style>
 </head>
 <body>
-<script>document.documentElement.className+=" js"</script>
-
 <nav>
   <div class="wrap">
-    <a class="brand" href="#top"><svg class="lock" viewBox="0 0 226 96" fill="none" role="img" aria-label="Releve"><text x="79" y="66" font-family="Inter, sans-serif" fill="var(--text)">Releve</text><g transform="translate(0,-4.1)" stroke-width="5" stroke-linecap="square"><path d="M10 36h44" stroke="var(--accent)"/><path d="M32 68V44" stroke="var(--text)"/><path d="M17 68 32 44l15 24" stroke="var(--text)"/></g></svg><span>I.S. 465 reporting</span></a>
+    <a class="brand" href="#top"><svg class="mark" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><b>Releve</b><span>BCA reporting</span></a>
     <div class="links">
-      <a class="txt" href="#walkthrough">One visit</a>
-      <a class="txt" href="#hands">One case</a>
+      <a class="txt" href="#problem">The bottleneck</a>
       <a class="txt" href="#how">How it works</a>
-      <a class="txt" href="#ai">The AI</a>
-      <a class="txt" href="#buyer">Who pays</a>
-      <a class="btn primary" href="#walkthrough">Drag through it
+      <a class="txt" href="#trace">Traceable</a>
+      <a class="txt" href="#buyer">Who it's for</a>
+      <a class="txt" href="#scale">How it scales</a>
+      <a class="btn primary" href="#how">See it working
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
     </div>
@@ -701,594 +472,105 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="copy">
       <div class="label accent">TechIreland National AI Challenge 2026 · Prototype</div>
-      <h1>The report is written while the work is done.</h1>
-      <p class="say"><b>Releve</b> <i>rel-uh-VAY</i> · French for a survey reading.</p>
-      <p class="lede">Releve turns the visit into the report. <b>The draft is written while the assessor is still in the house.</b></p>
-      <ul class="points">
-        <li>Photos, voice notes and old paperwork in, draft out</li>
-        <li>Nothing the assessor types is overwritten</li>
-        <li>One frozen version for everyone on the case</li>
-      </ul>
+      <p class="name"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><b>Releve</b></p>
+      <h1>Your defective block assessments,<br> <span class="fix">drafted before you leave the site.</span></h1>
+      <p class="lede">Every application to the Defective Concrete Blocks Grant Scheme needs a Building Condition Assessment. The visit takes a morning; writing it up can take two weeks. <b>Releve's AI reads the homeowner's paperwork, your site photos and your voice notes, and drafts the report on site.</b></p>
       <div class="actions">
-        <a class="btn primary" href="#walkthrough">Drag through one visit
+        <a class="btn primary" href="#how">See how it works
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
         </a>
-        <a class="btn ghost" href="#hands">Who sees it</a>
+        <a class="btn ghost" href="#trace">Why it's traceable</a>
       </div>
     </div>
-    <figure class="shot hero-shot reel" aria-label="Twenty-second loop through the app: open the case, capture on site, edit the draft, freeze a version.">
-      <div class="reel-frames">
-        <img src="img/app-cases.png" width="1280" height="860" alt="The practice work list in the app: two synthetic cases, one capturing and one writing." loading="eager" style="--i:0">
-        <img src="img/app-capture.png" width="1280" height="860" alt="Field capture: front elevation, rear elevation, sitting room and roof void, with photo and finding counts." loading="eager" style="--i:1">
-        <img src="img/app-report.png" width="1280" height="860" alt="The editable I.S. 465 draft beside its rendered preview, with a fixture-generated AI content warning." loading="eager" style="--i:2">
-        <img src="img/app-versions.png" width="1280" height="860" alt="Report versions: each download stays tied to a frozen snapshot." loading="eager" style="--i:3">
-      </div>
-      <div class="reel-tag" aria-hidden="true"><i></i>20-second walk through the app</div>
-      <div class="reel-bar" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i></div>
-      <figcaption class="reel-caps">
-        <span style="--i:0"><b>01</b> Open the case. One list of houses, and who has each one.</span>
-        <span style="--i:1"><b>02</b> Capture at the house. Photos and voice notes, with or without signal.</span>
-        <span style="--i:2"><b>03</b> The draft fills itself in. The assessor corrects it.</span>
-        <span style="--i:3"><b>04</b> Freeze a version and share it. It never changes afterwards.</span>
-      </figcaption>
+    <figure class="hero-art">
+      <img src="img/hero-cottage.png" width="1060" height="570" alt="Pen sketch of a single-storey Irish cottage with a long crack running down its gable wall." loading="eager">
     </figure>
   </div>
 </header>
 
+<section id="reach" class="dark">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">The scale</div>
+      <h2>This is not a Donegal problem.</h2>
+    </div>
+    <div class="scale-facts">
+      <div>
+        <b>20,000</b>
+        <span class="t">Homes may be affected</span>
+        <p>Petrolab's survey of 48 estates, presented to the Oireachtas in June 2026. It excludes social housing, businesses and duplexes. Councils have counted 9,500 so far.</p>
+      </div>
+      <div>
+        <b>9</b>
+        <span class="t">Counties in the scheme</span>
+        <p><i>6 in full, parts of 3</i>Carlow, Clare, Donegal, Limerick, Mayo and Sligo, plus parts of Fingal, Meath and Wexford.</p>
+      </div>
+      <div>
+        <b>8,000</b>
+        <span class="t">Of them outside Donegal</span>
+        <p>Petrolab projects 12,000 in Donegal, 4,500 in Clare, 2,500 in Limerick and 1,000 in Mayo. Two in five are elsewhere.</p>
+      </div>
+    </div>
+    <figure class="progress" role="img" aria-label="Of about 9,500 affected homes, 3,598 have applied to the scheme and 542 have been remediated.">
+      <figcaption class="k">How far the scheme has got, against the 20,000 estimate</figcaption>
+      <div class="progress-bar">
+        <span class="p done"><b>542</b></span>
+        <span class="p applied"><b>3,598</b></span>
+        <span class="p left"><b>20,000</b></span>
+      </div>
+      <div class="progress-key">
+        <span><i class="sw done" aria-hidden="true"></i>542 homes remediated</span>
+        <span><i class="sw applied" aria-hidden="true"></i>3,598 applications received</span>
+        <span><i class="sw left" aria-hidden="true"></i>Up to 20,000 may be affected · 9,500 counted so far</span>
+      </div>
+      <div class="progress-foot"><span>€361m spent since 2020</span><span>To 30 June 2026</span></div>
+    </figure>
+    <p class="source-note">Petrolab analysis presented at Leinster House, June 2026 (RTÉ News) · CCMA to the Oireachtas Housing Committee, 2026 · Dept. of Housing scheme statistics to 30 June 2026</p>
+  </div>
+</section>
+
 <section id="problem">
   <div class="wrap">
+    <div class="bn-top">
+    <div class="bn-copy">
     <div class="head">
-      <div class="label">The problem</div>
-      <h2 class="fix"><span class="swap"><del class="was">9,500<svg class="rub" viewBox="0 0 120 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9 C 26 4, 48 11, 70 6 S 104 9, 117 4"/></svg></del><ins class="now">20,000</ins></span> houses. One report each. Written days later, from memory.</h2>
-      <p class="src">A team led by Dr Chris Brough presented the research to TDs and senators at Leinster House: the number of properties built with defective blocks could rise to 20,000, counting housing estates alone. <a href="https://www.rte.ie/news/2026/0623/1579993-defective-concrete-blocks/" target="_blank" rel="noopener">RTÉ, 23 June 2026</a></p>
+      <div class="label">The bottleneck</div>
+      <h2>Every application to the scheme starts with this report.</h2>
+      <p>A registered engineer, architect or surveyor must inspect the house and sign a Building Condition Assessment before the homeowner can apply.</p>
     </div>
-    <div class="vs">
-      <div class="vs-col">
-        <h3>Today</h3>
-        <ul>
-          <li>A morning at the house, then a week at the desk</li>
-          <li>The report written days later, from a camera roll and a notebook</li>
-          <li>Three copies out: lab, council, homeowner</li>
-          <li>Each one comes back asking for something missing</li>
-          <li>Nobody is certain which version is current</li>
-        </ul>
+    <figure class="split" role="img" aria-label="The site visit takes about half a working day; the write-up takes about ten working days, roughly twenty times as long.">
+      <div class="split-bar" aria-hidden="true">
+        <span class="seg visit" data-tip="Site visit · about half a day"></span>
+        <span class="seg desk" data-tip="Write-up · about 10 working days"></span>
       </div>
-      <div class="vs-col with">
-        <h3>With Releve</h3>
-        <ul>
-          <li>The draft is written at the house, while the work is being done</li>
-          <li>Photos, voice notes and the homeowner's paperwork become that draft</li>
-          <li>One case, one version, whoever needs it</li>
-          <li>Missing documents requested from inside the case</li>
-          <li>Version 1 is frozen and dated; edit it and you get version 2</li>
-        </ul>
+      <figcaption class="split-labels">
+        <div class="visit"><i class="sw" aria-hidden="true"></i><span>The site visit takes <b>a morning</b>.</span></div>
+        <div class="desk"><i class="sw" aria-hidden="true"></i><span>The write-up takes <b>~2 weeks</b>.</span></div>
+      </figcaption>
+    </figure>
+    </div>
+    <figure class="bn-art">
+      <img src="img/bottleneck-hourglass.png" width="660" height="1250" loading="lazy" alt="Pen sketch of an hourglass: the top crammed with photos, notes, planning drawings, a voice recorder and tiny cottages; a single amber sheet squeezes through the narrow neck; one finished report lies at the bottom.">
+    </figure>
+    </div>
+    <div class="factors">
+      <div class="factor">
+        <div class="fig">3,598</div>
+        <h3>Applications so far.</h3>
+        <p>Every one of them needed a signed assessment before it could be made, and thousands of homes have yet to apply.</p>
+        <cite>Dept. of Housing, to 30 June 2026</cite>
       </div>
-    </div>
-    <div class="stats">
-      <div class="stat"><div class="n">~9,500 <small>homes</small></div><div class="d">The councils' own estimate, February 2026. The floor under the number above.</div></div>
-      <div class="stat"><div class="n">7 <small>counties</small></div><div class="d">Donegal, Mayo, Clare, Limerick, Sligo, Carlow and parts of Meath. The last two were designated in July 2026.</div></div>
-      <div class="stat"><div class="n">4 <small>people per case</small></div><div class="d">Assessor, lab, council, homeowner. Today, four versions of the truth.</div></div>
-    </div>
-  </div>
-</section>
-
-<section id="hands">
-  <div class="wrap">
-    <div class="head">
-      <div class="label">The case</div>
-      <h2>Everyone sees the same case. Nobody re-types it.</h2>
-      <p>Four sections, one per hand, filled in the order the work happens. The signature at the end signs off all four.</p>
-    </div>
-    <div class="bnd-frame">
-      <svg class="bnd" viewBox="70 84 790 404" role="img" aria-labelledby="bnd-t bnd-d">
-        <title id="bnd-t">A report filling its sections, inside the app boundary</title>
-        <desc id="bnd-d">Inside the app: a practice administrator opens and assigns the case, an assessor captures at the house, and an invited homeowner supplies documents. Outside the app: a laboratory receives a manual order and returns a document that is recorded on the case, and the council or Agency receives a package by hand. The professional signs and freezes version one.</desc>
-
-        <rect class="boundary" x="88" y="96" width="530" height="372"/>
-        <text class="edge" x="96" y="112">IN THE APP</text>
-        <text class="edge" x="700" y="112">OUTSIDE &middot; ON PAPER</text>
-
-        <path id="d1" class="wire" d="M188 150 C 250 170, 280 212, 326 238"/>
-        <path id="d2" class="wire" d="M188 256 C 250 258, 280 260, 326 262"/>
-        <path id="d3" class="wire" d="M160 358 C 232 350, 282 318, 326 290"/>
-        <use class="beam"    href="#d1"/>
-        <use class="beam m2" href="#d2"/>
-        <use class="beam m3" href="#d3"/>
-        <use class="beam m5" href="#d2" style="animation-delay:0s,-.15s"/>
-
-        <line class="lane" x1="578" y1="188" x2="700" y2="188"/>
-        <line class="lane" x1="578" y1="220" x2="700" y2="220"/>
-        <line class="lane" x1="578" y1="392" x2="700" y2="392"/>
-        <text class="tiny" x="592" y="182">MANUAL ORDER</text>
-        <text class="tiny" x="592" y="234">DOCUMENT BACK</text>
-        <text class="tiny" x="592" y="386">MANUAL PACKAGE</text>
-
-        <g class="doc-out"><rect x="578" y="180" width="12" height="15" fill="#fffef2" stroke="#191918" stroke-width="1.5"/></g>
-        <g class="doc-in"><rect x="688" y="212" width="12" height="15" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/></g>
-        <g class="doc-pkg"><rect x="578" y="384" width="14" height="17" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/></g>
-
-        <rect class="chamber" x="330" y="130" width="240" height="300"/>
-        <path class="bracket" d="M330 154v-24h24 M546 130h24v24 M570 406v24h-24 M354 430h-24v-24"/>
-        <text class="cap" x="330" y="122">CASE 04 &middot; I.S. 465</text>
-
-        <g class="doc">
-          <g class="P5">
-            <rect x="382" y="158" width="160" height="220" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
-            <rect x="376" y="164" width="160" height="220" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
-          </g>
-
-          <g class="P1">
-            <rect class="plate" x="370" y="170" width="160" height="220"/>
-            <text class="tiny" x="382" y="188">I.S. 465 &middot; CASE 04</text>
-            <line class="glyph thin" x1="382" y1="195" x2="518" y2="195"/>
-            <line class="glyph thin" x1="370" y1="233" x2="530" y2="233"/>
-            <line class="glyph thin" x1="370" y1="287" x2="530" y2="287"/>
-            <line class="glyph thin" x1="370" y1="321" x2="530" y2="321"/>
-            <line class="glyph thin" x1="370" y1="355" x2="530" y2="355"/>
-            <text class="tiny" x="374" y="210">1</text>
-            <text class="tiny" x="374" y="250">2</text>
-            <text class="tiny" x="374" y="302">3</text>
-            <text class="tiny" x="374" y="336">4</text>
-            <rect x="530" y="200" width="10" height="20" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
-            <rect x="530" y="240" width="10" height="20" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
-            <rect x="530" y="292" width="10" height="20" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
-            <rect x="530" y="326" width="10" height="20" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
-            <line class="glyph thin" x1="386" y1="206" x2="500" y2="206"/>
-            <line class="glyph thin" x1="386" y1="216" x2="466" y2="216"/>
-            <rect class="fill" x="530" y="200" width="10" height="20"/>
-          </g>
-
-          <g class="P2">
-            <line class="glyph thin" x1="386" y1="244" x2="512" y2="244"/>
-            <line class="glyph thin" x1="386" y1="252" x2="494" y2="252"/>
-            <rect x="386" y="258" width="26" height="20" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
-            <rect x="416" y="258" width="26" height="20" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
-            <path class="glyph thin" d="M452 278v-10 M458 278v-16 M464 278v-6 M470 278v-14 M476 278v-8 M482 278v-12 M488 278v-5"/>
-            <rect class="fill" x="530" y="240" width="10" height="20"/>
-          </g>
-
-          <g class="P3">
-            <rect x="386" y="294" width="20" height="22" fill="#fffef2" stroke="#191918" stroke-width="1.5"/>
-            <rect x="410" y="294" width="20" height="22" fill="#fffef2" stroke="#191918" stroke-width="1.5"/>
-            <text class="tiny" x="438" y="309">SUPPLIED</text>
-            <rect class="fill" x="530" y="292" width="10" height="20"/>
-          </g>
-
-          <g class="P4">
-            <rect x="386" y="326" width="132" height="22" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
-            <rect class="fill" x="389" y="329" width="48" height="16"/>
-            <text class="tiny" x="444" y="340">CORE 1-3 RESULT</text>
-            <rect class="fill" x="530" y="326" width="10" height="20"/>
-          </g>
-
-          <!-- the declaration is not a section: it signs off the four above it,
-               so it sits under the last rule and adds no tab of its own -->
-          <g class="P5">
-            <line x1="386" y1="363" x2="514" y2="363" stroke="#fcaa2d" stroke-width="2.5"/>
-            <path class="glyph thin" d="M386 379c7-9 12 7 19-2s12 7 19-2 12 5 17 0"/>
-            <circle cx="500" cy="375" r="12" fill="none" stroke="#a36404" stroke-width="2"/>
-            <rect class="fill" x="495" y="370" width="10" height="10"/>
-            <rect x="370" y="170" width="160" height="220" fill="none" stroke="#191918" stroke-width="3"/>
-          </g>
-
-          <g class="cover">
-            <rect x="370" y="170" width="160" height="220" fill="#fffef2" stroke="#191918" stroke-width="3"/>
-            <rect x="370" y="170" width="11" height="220" fill="#e9e8dc" stroke="#191918" stroke-width="2"/>
-            <text class="tiny" x="392" y="198">I.S. 465 &middot; CASE 04</text>
-            <line class="glyph thin" x1="392" y1="204" x2="514" y2="204"/>
-            <rect class="fill" x="392" y="214" width="44" height="6"/>
-            <line class="glyph thin" x1="392" y1="238" x2="492" y2="238"/>
-            <line class="glyph thin" x1="392" y1="248" x2="470" y2="248"/>
-            <line class="glyph thin" x1="392" y1="258" x2="484" y2="258"/>
-          </g>
-
-          <rect class="flash" x="370" y="170" width="160" height="220"/>
-
-          <g class="stamp">
-            <rect x="398" y="298" width="108" height="44" fill="none" stroke="#a36404" stroke-width="3"/>
-            <rect x="403" y="303" width="98" height="34" fill="none" stroke="#a36404" stroke-width="1.5"/>
-            <text class="stampword" x="452" y="326" text-anchor="middle">READY</text>
-          </g>
-        </g>
-
-        <g class="a-adm">
-          <rect class="plate" x="120" y="126" width="64" height="46"/>
-          <line class="glyph thin" x1="130" y1="140" x2="162" y2="140"/>
-          <line class="glyph thin" x1="130" y1="150" x2="172" y2="150"/>
-          <rect class="fill" x="130" y="158" width="18" height="5"/>
-          <text class="cap" x="120" y="188">ADMINISTRATOR</text>
-        </g>
-
-        <g class="a-ass">
-          <rect class="plate" x="120" y="232" width="64" height="46"/>
-          <line class="glyph thin" x1="130" y1="246" x2="158" y2="246"/>
-          <line class="glyph thin" x1="130" y1="256" x2="168" y2="256"/>
-          <rect class="fill" x="130" y="264" width="24" height="5"/>
-          <text class="cap" x="120" y="294">ASSESSOR</text>
-        </g>
-
-        <g class="a-own">
-          <rect class="plate" x="126" y="338" width="30" height="46"/>
-          <rect class="fill soft" x="130" y="346" width="22" height="26"/>
-          <text class="cap" x="120" y="400">HOMEOWNER</text>
-        </g>
-
-        <g class="a-lab">
-          <path class="fill soft" d="M712 196h44v22a22 6 0 0 1-44 0z"/>
-          <path class="glyph" d="M712 170v48a22 6 0 0 0 44 0v-48"/>
-          <ellipse class="plate" cx="734" cy="170" rx="22" ry="6"/>
-          <text class="cap" x="700" y="256">LABORATORY</text>
-        </g>
-
-        <g class="a-cnl">
-          <rect class="plate" x="706" y="340" width="56" height="56"/>
-          <line class="glyph thin" x1="716" y1="356" x2="752" y2="356"/>
-          <line class="glyph thin" x1="716" y1="366" x2="744" y2="366"/>
-          <line class="glyph thin" x1="716" y1="376" x2="750" y2="376"/>
-          <text class="cap" x="700" y="414">COUNCIL / AGENCY</text>
-        </g>
-
-        <text class="stage d0" x="450" y="452" text-anchor="middle">PRACTICE OPENS THE CASE</text>
-        <text class="stage d1" x="450" y="452" text-anchor="middle">+ CASE OPENED AND ASSIGNED &middot; SECTION 1</text>
-        <text class="stage d2" x="450" y="452" text-anchor="middle">+ PHOTOS, AUDIO, OBSERVATIONS &middot; SECTION 2</text>
-        <text class="stage d3" x="450" y="452" text-anchor="middle">+ HOMEOWNER DOCUMENTS &middot; SECTION 3</text>
-        <text class="stage d4" x="450" y="452" text-anchor="middle">+ LAB DOCUMENT RECORDED &middot; SECTION 4</text>
-        <text class="stage d5" x="450" y="452" text-anchor="middle">SIGNED &middot; V1 &middot; FROZEN</text>
-        <text class="stage d6" x="450" y="452" text-anchor="middle">CLOSED AND STAMPED READY</text>
-        <text class="stage d7" x="450" y="452" text-anchor="middle">SENT TO THE COUNCIL BY HAND</text>
-
-        <rect class="seg" x="348" y="470" width="38" height="6"/>
-        <rect class="seg" x="392" y="470" width="38" height="6"/>
-        <rect class="seg" x="436" y="470" width="38" height="6"/>
-        <rect class="seg" x="480" y="470" width="38" height="6"/>
-        <rect class="seg" x="524" y="470" width="38" height="6"/>
-        <rect class="segf n1" x="348" y="470" width="38" height="6"/>
-        <rect class="segf n2" x="392" y="470" width="38" height="6"/>
-        <rect class="segf n3" x="436" y="470" width="38" height="6"/>
-        <rect class="segf n4" x="480" y="470" width="38" height="6"/>
-        <rect class="segf n5" x="524" y="470" width="38" height="6"/>
-      </svg>
-      <svg class="bnd bnd-tall" viewBox="0 0 380 690" role="img" aria-labelledby="tall-t tall-d">
-        <title id="tall-t">A report filling its sections, inside the app boundary</title>
-        <desc id="tall-d">Above the line, in the app: the practice opens and assigns the case, the assessor captures at the house, the homeowner supplies documents, the lab result is recorded, and the professional signs and freezes version one. Below the line, on paper: the laboratory returns a document and the council receives a package by hand.</desc>
-
-        <text class="edge" x="14" y="26">IN THE APP</text>
-        <text class="cap" x="30" y="56">CASE 04 &middot; I.S. 465</text>
-        <rect class="chamber" x="30" y="64" width="320" height="414"/>
-        <path class="bracket" d="M30 88v-24h24 M326 64h24v24 M350 454v24h-24 M54 478h-24v-24"/>
-
-  <g class="doc">
-            <g class="P5">
-              <rect x="100.75" y="112.25" width="210.0" height="288.75" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
-              <rect x="92.88" y="120.12" width="210.0" height="288.75" fill="#fffef2" stroke="#bab9b0" stroke-width="1.5"/>
-            </g>
-
-            <g class="P1">
-              <rect class="plate" x="85.0" y="128.0" width="210.0" height="288.75"/>
-              <text class="tiny" x="100.75" y="151.62">I.S. 465 &middot; CASE 04</text>
-              <line class="glyph thin" x1="100.75" y1="160.81" x2="279.25" y2="160.81"/>
-              <line class="glyph thin" x1="85.0" y1="210.69" x2="295.0" y2="210.69"/>
-              <line class="glyph thin" x1="85.0" y1="281.56" x2="295.0" y2="281.56"/>
-              <line class="glyph thin" x1="85.0" y1="326.19" x2="295.0" y2="326.19"/>
-              <line class="glyph thin" x1="85.0" y1="370.81" x2="295.0" y2="370.81"/>
-              <text class="tiny" x="90.25" y="180.5">1</text>
-              <text class="tiny" x="90.25" y="233.0">2</text>
-              <text class="tiny" x="90.25" y="301.25">3</text>
-              <text class="tiny" x="90.25" y="345.88">4</text>
-              <rect x="295.0" y="167.38" width="13.12" height="26.25" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
-              <rect x="295.0" y="219.88" width="13.12" height="26.25" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
-              <rect x="295.0" y="288.12" width="13.12" height="26.25" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
-              <rect x="295.0" y="332.75" width="13.12" height="26.25" fill="#f3f2e7" stroke="#bab9b0" stroke-width="1.5"/>
-              <line class="glyph thin" x1="106.0" y1="175.25" x2="255.62" y2="175.25"/>
-              <line class="glyph thin" x1="106.0" y1="188.38" x2="211.0" y2="188.38"/>
-              <rect class="fill" x="295.0" y="167.38" width="13.12" height="26.25"/>
-            </g>
-
-            <g class="P2">
-              <line class="glyph thin" x1="106.0" y1="225.12" x2="271.38" y2="225.12"/>
-              <line class="glyph thin" x1="106.0" y1="235.62" x2="247.75" y2="235.62"/>
-              <rect x="106.0" y="243.5" width="34.12" height="26.25" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
-              <rect x="145.38" y="243.5" width="34.12" height="26.25" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
-              <path class="glyph thin" d="M192.62 269.75 v-13.12 M200.5 269.75 v-21.0 M208.38 269.75 v-7.88 M216.25 269.75 v-18.38 M224.12 269.75 v-10.5 M232.0 269.75 v-15.75 M239.88 269.75 v-6.56"/>
-              <rect class="fill" x="295.0" y="219.88" width="13.12" height="26.25"/>
-            </g>
-
-            <g class="P3">
-              <rect x="106.0" y="290.75" width="26.25" height="28.88" fill="#fffef2" stroke="#191918" stroke-width="1.5"/>
-              <rect x="137.5" y="290.75" width="26.25" height="28.88" fill="#fffef2" stroke="#191918" stroke-width="1.5"/>
-              <text class="tiny" x="174.25" y="310.44">SUPPLIED</text>
-              <rect class="fill" x="295.0" y="288.12" width="13.12" height="26.25"/>
-            </g>
-
-            <g class="P4">
-              <rect x="106.0" y="332.75" width="173.25" height="28.88" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/>
-              <rect class="fill" x="109.94" y="336.69" width="63.0" height="21.0"/>
-              <text class="tiny" x="182.12" y="351.12">CORE 1-3 RESULT</text>
-              <rect class="fill" x="295.0" y="332.75" width="13.12" height="26.25"/>
-            </g>
-
-            <!-- the declaration is not a section: it signs off the four above it,
-                 so it sits under the last rule and adds no tab of its own -->
-            <g class="P5">
-              <line x1="106.0" y1="381.31" x2="274.0" y2="381.31" stroke="#fcaa2d" stroke-width="2.5"/>
-              <path class="glyph thin" d="M106.0 402.31 c9.19 -11.81 15.75 9.19 24.94 -2.62 s15.75 9.19 24.94 -2.62 15.75 6.56 22.31 0.0"/>
-              <circle cx="255.62" cy="397.06" r="15.75" fill="none" stroke="#a36404" stroke-width="2"/>
-              <rect class="fill" x="249.06" y="390.5" width="13.12" height="13.12"/>
-              <rect x="85.0" y="128.0" width="210.0" height="288.75" fill="none" stroke="#191918" stroke-width="3"/>
-            </g>
-
-            <g class="cover">
-              <rect x="85.0" y="128.0" width="210.0" height="288.75" fill="#fffef2" stroke="#191918" stroke-width="3"/>
-              <rect x="85.0" y="128.0" width="14.44" height="288.75" fill="#e9e8dc" stroke="#191918" stroke-width="2"/>
-              <text class="tiny" x="113.88" y="164.75">I.S. 465 &middot; CASE 04</text>
-              <line class="glyph thin" x1="113.88" y1="172.62" x2="274.0" y2="172.62"/>
-              <rect class="fill" x="113.88" y="185.75" width="57.75" height="7.88"/>
-              <line class="glyph thin" x1="113.88" y1="217.25" x2="245.12" y2="217.25"/>
-              <line class="glyph thin" x1="113.88" y1="230.38" x2="216.25" y2="230.38"/>
-              <line class="glyph thin" x1="113.88" y1="243.5" x2="234.62" y2="243.5"/>
-            </g>
-
-            <rect class="flash" x="85.0" y="128.0" width="210.0" height="288.75"/>
-
-            <g class="stamp">
-              <rect x="121.75" y="296.0" width="141.75" height="57.75" fill="none" stroke="#a36404" stroke-width="3"/>
-              <rect x="128.31" y="302.56" width="128.62" height="44.62" fill="none" stroke="#a36404" stroke-width="1.5"/>
-              <text class="stampword" x="192.62" y="332.75" text-anchor="middle">READY</text>
-            </g>
-          </g>
-
-        <rect class="seg" x="44" y="496" width="52" height="7"/>
-        <rect class="seg" x="104" y="496" width="52" height="7"/>
-        <rect class="seg" x="164" y="496" width="52" height="7"/>
-        <rect class="seg" x="224" y="496" width="52" height="7"/>
-        <rect class="seg" x="284" y="496" width="52" height="7"/>
-        <rect class="segf n1" x="44" y="496" width="52" height="7"/>
-        <rect class="segf n2" x="104" y="496" width="52" height="7"/>
-        <rect class="segf n3" x="164" y="496" width="52" height="7"/>
-        <rect class="segf n4" x="224" y="496" width="52" height="7"/>
-        <rect class="segf n5" x="284" y="496" width="52" height="7"/>
-
-        <text class="who d0"  x="190" y="530" text-anchor="middle">CASE 04</text>
-        <text class="what d0" x="190" y="552" text-anchor="middle">NOTHING IN IT YET</text>
-        <text class="who d1"  x="190" y="530" text-anchor="middle">ADMINISTRATOR</text>
-        <text class="what d1" x="190" y="552" text-anchor="middle">CASE OPENED AND ASSIGNED</text>
-        <text class="who d2"  x="190" y="530" text-anchor="middle">ASSESSOR</text>
-        <text class="what d2" x="190" y="552" text-anchor="middle">PHOTOS, AUDIO, OBSERVATIONS</text>
-        <text class="who d3"  x="190" y="530" text-anchor="middle">HOMEOWNER</text>
-        <text class="what d3" x="190" y="552" text-anchor="middle">DOCUMENTS SUPPLIED</text>
-        <text class="who d4"  x="190" y="530" text-anchor="middle">LABORATORY</text>
-        <text class="what d4" x="190" y="552" text-anchor="middle">CORE RESULT RECORDED</text>
-        <text class="who d5"  x="190" y="530" text-anchor="middle">ASSESSOR</text>
-        <text class="what d5" x="190" y="552" text-anchor="middle">SIGNED &middot; V1 &middot; FROZEN</text>
-        <text class="who d6"  x="190" y="530" text-anchor="middle">THE REPORT</text>
-        <text class="what d6" x="190" y="552" text-anchor="middle">CLOSED AND STAMPED READY</text>
-        <text class="who d7"  x="190" y="530" text-anchor="middle">COUNCIL / AGENCY</text>
-        <text class="what d7" x="190" y="552" text-anchor="middle">SENT BY HAND</text>
-
-        <line class="boundary" x1="14" y1="580" x2="366" y2="580"/>
-        <text class="edge" x="14" y="600">OUTSIDE &middot; ON PAPER</text>
-
-        <line class="lane" x1="86" y1="620" x2="158" y2="620"/>
-        <line class="lane" x1="86" y1="642" x2="158" y2="642"/>
-        <line class="lane" x1="222" y1="632" x2="294" y2="632"/>
-        <g class="doc-out"><rect x="146" y="613" width="12" height="15" fill="#fffef2" stroke="#191918" stroke-width="1.5"/></g>
-        <g class="doc-in"><rect x="86" y="635" width="12" height="15" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/></g>
-        <g class="doc-pkg"><rect x="222" y="624" width="14" height="17" fill="#fdeac4" stroke="#191918" stroke-width="1.5"/></g>
-
-        <g class="a-lab">
-          <path class="fill soft" d="M30 634h36v16a18 5 0 0 1-36 0z"/>
-          <path class="glyph" d="M30 612v38a18 5 0 0 0 36 0v-38"/>
-          <ellipse class="plate" cx="48" cy="612" rx="18" ry="5"/>
-          <text class="cap" x="14" y="676">LABORATORY</text>
-        </g>
-
-        <g class="a-cnl">
-          <rect class="plate" x="304" y="608" width="50" height="50"/>
-          <line class="glyph thin" x1="314" y1="622" x2="344" y2="622"/>
-          <line class="glyph thin" x1="314" y1="632" x2="338" y2="632"/>
-          <line class="glyph thin" x1="314" y1="642" x2="342" y2="642"/>
-          <text class="cap" x="366" y="676" text-anchor="end">COUNCIL / AGENCY</text>
-        </g>
-      </svg>
-    </div>
-    <div class="hands">
-      <div class="step-card"><div class="num">THE PRACTICE</div><h3>Opens the case and assigns it.</h3><p>The administrator sees the whole queue; everyone else sees only the cases they are put on.</p></div>
-      <div class="step-card"><div class="num">ASSESSOR</div><h3>Writes it at the house, then signs it.</h3><p>Photos, voice notes and the homeowner's old paperwork become the draft they correct and sign.</p></div>
-      <div class="step-card"><div class="num">HOMEOWNER</div><h3>Sees where their house stands.</h3><p>A one-time link to upload what is missing and read the version they were sent. Revocable, and nothing else.</p></div>
-      <div class="step-card"><div class="num">LAB &amp; COUNCIL</div><h3>Are not asked to sign up.</h3><p>The lab gets an order and sends a document back, recorded on the case. The council gets a package by hand.</p></div>
-    </div>
-    <p class="onestat"><b>0</b> <span>accounts needed outside the practice</span></p>
-  </div>
-</section>
-
-<section id="walkthrough">
-  <div class="wrap">
-    <div class="head">
-      <div class="label">The visit</div>
-      <h2>One morning. Desk to frozen PDF.</h2>
-      <p>The pin is the clock. Pull it from 08:40 at the practice to 12:55 at the house. Six steps, one case, nothing done twice.</p>
-    </div>
-    <div class="scrub">
-      <div class="scrub-copy" aria-live="polite">
-        <div class="num"><span id="scrub-num">01</span> · <b id="scrub-time">08:40</b> · <span id="scrub-where">At the practice</span></div>
-        <h3 id="scrub-label">Open the case.</h3>
-        <p id="scrub-caption">The practice creates the case and hands it to an assessor.</p>
+      <div class="factor">
+        <div class="fig">Scattered</div>
+        <h3>Evidence arrives in pieces.</h3>
+        <p>Phone photos, voice memos, handwritten notes, planning files and old reports, retyped at a desk days later.</p>
+        <cite>Architecture practice preparing BCAs, Sept 2026</cite>
       </div>
-      <div class="scrub-scene">
-        <svg class="scene" id="scene" viewBox="0 0 640 400" role="img" aria-labelledby="scene-title">
-          <title id="scene-title">A sketch of the current step, drawn on as the pin moves</title>
-
-          <!-- 01 open the case: the day's list on a clipboard -->
-          <g class="st st1">
-            <path class="ink dr d11" pathLength="1" d="M150 78 L488 73 L494 344 L156 349 Z"/>
-            <path class="ink dr d11" pathLength="1" d="M286 76 L286 50 L352 49 L353 75"/>
-            <g class="f12"><text class="t m" x="172" y="118">PRACTICE WORK LIST</text></g>
-            <path class="ink2 dr d12" pathLength="1" d="M172 132 L470 128"/>
-            <path class="ink dr d12" pathLength="1" d="M186 200 L186 178 L208 158 L230 178 L230 200 Z"/>
-            <g class="f12">
-              <text class="t" x="252" y="180">DEMO-BCA-002</text>
-              <text class="u m" x="252" y="202">Incomplete synthetic case</text>
-            </g>
-            <path class="ink2 dr d13" pathLength="1" d="M172 224 L470 220"/>
-            <g class="f13"><path class="fill soft" d="M176 236 L474 232 L476 310 L178 314 Z"/></g>
-            <path class="ink dr d13" pathLength="1" d="M186 290 L186 268 L208 248 L230 268 L230 290 Z"/>
-            <g class="f13">
-              <text class="t a" x="252" y="270">DEMO-BCA-001</text>
-              <text class="u" x="252" y="292">12 Example View, County Donegal</text>
-            </g>
-            <g class="f14">
-              <rect class="fill amber" x="350" y="320" width="98" height="22"/>
-              <text class="t" x="358" y="335">ASSIGNED</text>
-            </g>
-          </g>
-
-          <!-- 02 prepare: the homeowner's old paperwork fills the blank fields -->
-          <g class="st st2">
-            <g class="f23"><path class="fill grey" d="M64 146 L156 132 L178 274 L86 288 Z"/></g>
-            <path class="ink dr d21" pathLength="1" d="M60 140 L152 126 L174 268 L82 282 Z"/>
-            <path class="ink2 dr d21" pathLength="1" d="M76 166 L146 156 M79 188 L149 178 M82 210 L134 202"/>
-            <path class="ink dr d21" pathLength="1" d="M46 196 L136 184 L156 316 L66 328 Z"/>
-            <path class="ink2 dr d22" pathLength="1" d="M62 222 L130 212 M65 244 L133 234 M68 266 L118 258"/>
-            <g class="f22"><text class="t m" x="46" y="352">PLANNING FILE · OLD REPORT</text></g>
-            <path class="ink dr d22" pathLength="1" d="M186 224 L246 224 M232 212 L246 224 L232 236"/>
-            <path class="ink dr d22" pathLength="1" d="M272 88 L588 88 L588 336 L272 336 Z"/>
-            <g class="f23">
-              <text class="t m" x="292" y="122">YEAR BUILT</text>
-              <path class="fill soft" d="M292 134 L568 134 L568 162 L292 162 Z"/>
-              <text class="t m" x="292" y="200">FLOOR AREA</text>
-              <path class="fill soft" d="M292 212 L568 212 L568 240 L292 240 Z"/>
-              <text class="t m" x="292" y="278">CONSTRUCTION</text>
-              <path class="fill soft" d="M292 290 L568 290 L568 318 L292 318 Z"/>
-            </g>
-            <g class="f24">
-              <text class="u" x="302" y="154">2006</text>
-              <text class="u" x="302" y="232">142 m&#178;</text>
-              <text class="u" x="302" y="310">Cavity wall, rendered</text>
-              <rect class="fill amber" x="272" y="352" width="212" height="22"/>
-              <text class="t" x="280" y="367">SOURCE · PLANNING.PDF</text>
-            </g>
-          </g>
-
-          <!-- 03 capture: the house, the crack, the tablet with no signal -->
-          <g class="st st3">
-            <path class="ink dr d31" pathLength="1" d="M36 334 C 140 331, 300 336, 420 333 S 590 330, 606 333"/>
-            <g class="f33">
-              <path class="fill grey" d="M100 224 L166 156 L334 154 L390 222 Z" transform="translate(5,4)"/>
-              <path class="fill soft" d="M376 218 L424 142 L474 200 L474 302 L376 322 Z" transform="translate(6,3)"/>
-              <path class="fill soft" d="M152 254 L190 253 L191 320 L153 321 Z" transform="translate(3,3)"/>
-            </g>
-            <path class="ink dr d31" pathLength="1" d="M110 216 L109 322 L371 320 L372 214"/>
-            <path class="ink dr d31" pathLength="1" d="M96 219 L160 150 L330 148 L387 216 L96 219"/>
-            <path class="ink dr d32" pathLength="1" d="M372 214 L420 138 L471 196 L470 300 L371 320"/>
-            <path class="ink dr d32" pathLength="1" d="M330 148 L420 138"/>
-            <path class="ink2 dr d32" pathLength="1" d="M114 220 L113 318 M100 222 L162 154 L328 152 M376 218 L422 143 L468 198"/>
-            <path class="ink dr d32" pathLength="1" d="M204 168 L204 132 L226 131 L226 164"/>
-            <path class="ink dr d32" pathLength="1" d="M152 320 L152 254 L190 253 L191 320"/>
-            <path class="ink dr d32" pathLength="1" d="M222 242 L272 241 L273 282 L222 283 Z M247 242 L247 282 M222 262 L273 262"/>
-            <path class="ink dr d32" pathLength="1" d="M302 241 L352 240 L353 281 L302 282 Z M327 241 L327 281 M302 261 L353 261"/>
-            <path class="crack dr d33" pathLength="1" d="M446 206 l3 12 l-6 10 l7 15 l-4 12 l6 11 l-3 15 l4 8"/>
-            <g class="f33"><text class="t m" x="96" y="360">LEFT GABLE · 2 PHOTOS · NO SIGNAL</text></g>
-            <g class="r34">
-              <g class="f34"><path class="fill grey" d="M492 248 L616 248 L616 376 L492 376 Z"/></g>
-              <path class="ink dr d34" pathLength="1" d="M486 246 L610 244 L612 370 L488 372 Z"/>
-              <path class="ink2 dr d34" pathLength="1" d="M496 256 L601 255 L602 345 L497 346 Z"/>
-              <path class="ink dr d34" pathLength="1" d="M520 320 L520 290 L548 262 L578 292 L578 320"/>
-              <path class="crack dr d34" pathLength="1" d="M556 288 l2 8 l-4 7 l4 9 l-2 8"/>
-              <g class="f34">
-                <rect class="fill amber" x="518" y="352" width="66" height="18"/>
-                <text class="t" x="524" y="365">QUEUED</text>
-              </g>
-            </g>
-          </g>
-
-          <!-- 04 correct: your value stands, the machine's waits beside it -->
-          <g class="st st4">
-            <path class="ink dr d41" pathLength="1" d="M100 58 L470 54 L476 348 L106 352 Z"/>
-            <path class="ink2 dr d41" pathLength="1" d="M124 118 L452 115"/>
-            <g class="f42"><rect class="fill amber" x="246" y="82" width="26" height="26"/></g>
-            <g class="f42">
-              <text class="t m" x="128" y="102">A</text><text class="t m" x="168" y="102">B</text>
-              <text class="t m" x="208" y="102">C</text><text class="t" x="252" y="102">E</text>
-              <text class="t m" x="290" y="102">F</text><text class="t m" x="330" y="102">G</text>
-              <text class="t m" x="370" y="102">H</text>
-            </g>
-            <g class="f42"><text class="t m" x="124" y="156">WIDEST CRACK, LEFT GABLE</text></g>
-            <path class="ink dr d42" pathLength="1" d="M124 168 L330 166 L331 206 L125 208 Z"/>
-            <g class="f43">
-              <text class="u" x="138" y="192">2 mm</text>
-              <rect class="fill amber" x="182" y="174" width="3" height="24"/>
-              <text class="t m" x="348" y="192">TYPED BY YOU</text>
-              <rect class="fill amber" x="124" y="224" width="150" height="22"/>
-              <text class="t" x="132" y="239">YOUR VALUE KEPT</text>
-            </g>
-            <g class="r44">
-              <path class="ink dr d44" pathLength="1" d="M124 266 L392 263 L394 336 L126 339 Z"/>
-              <g class="f44">
-                <text class="t a" x="140" y="296">ALTERNATIVE · 3 MM</text>
-                <text class="u m" x="140" y="320">Filed beside it. Never applied.</text>
-              </g>
-            </g>
-          </g>
-
-          <!-- 05 freeze: version 1 is stamped and never moves again -->
-          <g class="st st5">
-            <g class="f52"><path class="fill grey" d="M144 108 L316 106 L320 344 L148 346 Z"/></g>
-            <path class="ink dr d51" pathLength="1" d="M138 102 L310 100 L314 338 L142 340 Z"/>
-            <path class="ink2 dr d51" pathLength="1" d="M158 140 L290 138 M158 166 L290 164 M158 192 L250 190"/>
-            <path class="ink dr d52" pathLength="1" d="M192 254 a34 34 0 1 1 68 0 a34 34 0 1 1 -68 0"/>
-            <path class="ink2 dr d52" pathLength="1" d="M200 254 a26 26 0 1 1 52 0 a26 26 0 1 1 -52 0"/>
-            <g class="f53">
-              <text class="t a" x="212" y="260">V1</text>
-              <text class="t m" x="152" y="320">FINGERPRINT 80F9…DCA3</text>
-              <rect class="fill amber" x="146" y="360" width="164" height="22"/>
-              <text class="t" x="154" y="375">NEVER CHANGES</text>
-            </g>
-            <g class="r54">
-              <g class="f54"><path class="fill grey" d="M366 84 L534 82 L536 308 L368 310 Z"/></g>
-              <path class="ink dr d54" pathLength="1" d="M362 80 L530 78 L532 304 L364 306 Z"/>
-              <path class="ink2 dr d54" pathLength="1" d="M382 116 L510 114 M382 142 L510 140 M382 168 L472 166"/>
-              <g class="f54"><text class="t" x="382" y="264">VERSION 2</text><text class="u m" x="382" y="288">Edit again, get a new file</text></g>
-            </g>
-          </g>
-
-          <!-- 06 hand over: one case, three hands -->
-          <g class="st st6">
-            <g class="f62"><path class="fill soft" d="M64 168 L228 166 L230 314 L66 316 Z"/></g>
-            <path class="ink dr d61" pathLength="1" d="M58 162 L120 162 L134 142 L222 141 L224 308 L60 310 Z"/>
-            <g class="f62">
-              <text class="t" x="76" y="200">DEMO-BCA-001</text>
-              <text class="u m" x="76" y="226">12 Example View</text>
-            </g>
-            <path class="ink dr d62" pathLength="1" d="M240 218 L300 130 M290 136 L300 130 L302 142"/>
-            <path class="ink dr d62" pathLength="1" d="M240 232 L300 232 M290 222 L300 232 L290 242"/>
-            <path class="ink dr d62" pathLength="1" d="M240 246 L300 334 M290 328 L300 334 L302 322"/>
-            <path class="ink dr d63" pathLength="1" d="M318 92 L426 92 L426 156 L318 156 Z M318 92 L372 130 L426 92"/>
-            <path class="ink dr d63" pathLength="1" d="M318 196 L400 196 L400 276 L318 276 Z"/>
-            <path class="ink2 dr d63" pathLength="1" d="M332 218 L386 218 M332 236 L386 236 M332 254 L368 254"/>
-            <path class="ink dr d63" pathLength="1" d="M318 306 L360 288 L410 302 L410 356 L360 374 L318 356 Z M318 306 L360 322 L410 302 M360 322 L360 374"/>
-            <g class="f64">
-              <text class="t" x="450" y="118">HOMEOWNER</text>
-              <text class="u m" x="450" y="142">One-time link</text>
-              <text class="t" x="450" y="230">COUNCIL</text>
-              <text class="u m" x="450" y="254">The same PDF</text>
-              <text class="t" x="450" y="330">NEXT ENGINEER</text>
-              <text class="u m" x="450" y="354">The case and evidence</text>
-            </g>
-          </g>
-        </svg>
-      </div>
-      <div class="scrub-track">
-        <div class="scrub-ticks" aria-hidden="true"></div>
-        <input class="scrub-range" id="scrub" type="range" min="0" max="1000" value="83" step="1" aria-label="Walk through the six steps" aria-valuetext="Step 1 of 6: Open the case.">
-        <ol class="scrub-marks" aria-label="Steps">
-          <li><button type="button" data-stage="0" aria-current="step">01<small>08:40</small></button></li>
-          <li><button type="button" data-stage="1">02<small>08:55</small></button></li>
-          <li><button type="button" data-stage="2">03<small>10:30</small></button></li>
-          <li><button type="button" data-stage="3">04<small>12:10</small></button></li>
-          <li><button type="button" data-stage="4">05<small>12:40</small></button></li>
-          <li><button type="button" data-stage="5">06<small>12:55</small></button></li>
-        </ol>
-        <p class="scrub-hint"><span>One typical visit.</span><span><b>19:00</b> · home. Nothing left to write.</span></p>
+      <div class="factor hl">
+        <div class="fig">11<small>of 19</small></div>
+        <h3>Gaps restart the loop.</h3>
+        <p>In one council's audit, 11 of the 19 slowest applications were incomplete.</p>
+        <cite>Donegal County Council audit, Sept 2025</cite>
       </div>
     </div>
   </div>
@@ -1297,122 +579,161 @@ border-bottom:1px solid var(--line);
 <section id="how">
   <div class="wrap">
     <div class="head">
-      <div class="label">The app</div>
-      <h2>Prepare. Capture. Correct. Freeze.</h2>
-      <p>What the software will and will not do at each step. The clock above is the same morning, hour by hour.</p>
+      <div class="label">How it works</div>
+      <h2 class="scrub-title"><span class="on">Prepare.</span> <span>Capture.</span> <span>Correct.</span> <span>Freeze.</span></h2>
+      <p>Drag the pin through one visit.</p>
     </div>
-    <div class="steps four">
-      <div class="step-card">
-        <div class="num">01</div>
-        <h3>Prepare from what exists.</h3>
-        <p>Every field the planning file and the old report can fill, filled, each one labelled with the document it came from.</p>
+    <div class="scrub">
+      <div class="scrub-copy" aria-live="polite">
+        <div class="num"><span id="scrub-num">01</span> · <span id="scrub-where">At the practice</span></div>
+        <h3 id="scrub-label">Start from what exists.</h3>
+        <p id="scrub-caption">Upload the planning file and old reports. The AI reads them and fills the blank fields, each showing the document it came from.</p>
       </div>
-      <div class="step-card">
-        <div class="num">02</div>
-        <h3>Capture at the house.</h3>
-        <p>The tablet saves first and uploads later. No coverage needed at the house, and nothing waits on a signal.</p>
+      <div class="scrub-scene">
+        <img class="on" src="img/app-evidence-documents.jpg" width="1440" height="1000" alt="Documents: a synthetic homeowner PDF uploaded and processed, with the original kept.">
+        <img src="img/app-evidence-site.jpg" width="1440" height="1000" loading="lazy" alt="Site observation: a front-wall photo, the voice note written out, and a labelled AI suggestion.">
+        <img src="img/app-review-narrative.jpg" width="1440" height="1000" loading="lazy" alt="The draft editor beside the report preview, marked local draft, not submitted.">
+        <img src="img/app-report-versions.jpg" width="1440" height="1000" loading="lazy" alt="Saved versions: version 1 frozen and ready, with its PDF download.">
       </div>
-      <div class="step-card">
-        <div class="num">03</div>
-        <h3>Correct the draft.</h3>
-        <p>Anything the assessor types stays. A rerun files its own value beside it as an alternative, never over it.</p>
-      </div>
-      <div class="step-card">
-        <div class="num">04</div>
-        <h3>Freeze and share.</h3>
-        <p>Version 1 is a PDF that never changes, the same file next year. Edit it and you get version 2.</p>
+      <div class="scrub-track">
+        <div class="scrub-ticks" aria-hidden="true"></div>
+        <input class="scrub-range" id="scrub" type="range" min="0" max="1000" value="125" step="1" aria-label="Walk through the four steps" aria-valuetext="Step 1 of 4: Start from what exists.">
+        <ol class="scrub-marks" aria-label="Steps">
+          <li><button type="button" data-stage="0" aria-current="step">01 · PREPARE</button></li>
+          <li><button type="button" data-stage="1">02 · CAPTURE</button></li>
+          <li><button type="button" data-stage="2">03 · CORRECT</button></li>
+          <li><button type="button" data-stage="3">04 · FREEZE</button></li>
+        </ol>
       </div>
     </div>
   </div>
 </section>
 
-<section id="ai">
+<section id="trace" class="dark">
   <div class="wrap">
     <div class="head">
-      <div class="label">The AI</div>
-      <h2>The model proposes. The assessor signs.</h2>
+      <div class="label">The difference</div>
+      <h2>Not a black box. Every line traces back.</h2>
+      <p>Paste documents into a chatbot and you still have to check every answer. Releve breaks each source into small facts, and every line of the report points to the fact it came from.</p>
     </div>
-    <div class="steps">
-      <div class="step-card">
-        <div class="num">IT PROPOSES</div>
-        <h3>Every suggestion shows its source.</h3>
-        <p>"Year built: 2006, from planning.pdf." "Vertical crack near the corner, from your voice note." No value appears without one.</p>
+    <ul class="ai-does">
+      <li>Reads PDFs</li>
+      <li>Transcribes voice notes</li>
+      <li>Pulls out facts with page references</li>
+      <li>Drafts the narrative</li>
+      <li>Answers questions with citations</li>
+    </ul>
+    <div class="trace" id="trace-demo">
+      <svg class="trace-links" aria-hidden="true"><path id="tl-a"/><path id="tl-b"/><circle id="tl-c1" r="3"/><circle id="tl-c2" r="3"/><circle id="tl-c3" r="3"/><circle id="tl-c4" r="3"/></svg>
+      <div class="trace-col">
+        <div class="k"><b>01</b>SOURCES</div>
+        <div class="doc">
+          <div class="fn"><span>planning.pdf</span><span>page 3</span></div>
+          <span class="ln">Planning ref. 06/41287</span>
+          <span class="ln t" data-t="0">Date of completion: 2006</span>
+          <span class="ln t" data-t="1">Floor area: 142 m²</span>
+          <span class="ln">Walls: cavity, rendered</span>
+        </div>
+        <div class="voice">
+          <div class="fn"><span>voice note · front gable</span><span>0:42</span></div>
+          <svg class="wave" viewBox="0 0 200 28" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <span class="quote" data-t="2">“…a vertical crack on the left gable, running down from the eaves.”</span>
+        </div>
       </div>
-      <div class="step-card">
-        <div class="num">YOU DECIDE</div>
-        <h3>It never overwrites a person.</h3>
-        <p>A blank field takes the suggestion. A field you typed keeps your value. Run it again as often as you like.</p>
+      <div class="gutter" aria-hidden="true">extract</div>
+      <div class="trace-col">
+        <div class="k"><b>02</b>FACTS</div>
+        <button type="button" class="fact" data-t="0" aria-pressed="false">Year built: 2006<small>planning.pdf · p.3</small></button>
+        <button type="button" class="fact" data-t="1" aria-pressed="false">Floor area: 142 m²<small>planning.pdf · p.3</small></button>
+        <button type="button" class="fact" data-t="2" aria-pressed="false">Vertical crack, left gable<small>voice note · 0:42</small></button>
       </div>
-      <div class="step-card">
-        <div class="num">YOU SIGN</div>
-        <h3>Nothing is signed by a machine.</h3>
-        <p>The declaration is empty until the assessor fills it. The PDF says "draft" until they say otherwise.</p>
+      <div class="gutter" aria-hidden="true">draft</div>
+      <div class="trace-col">
+        <div class="k"><b>03</b>REPORT</div>
+        <div class="rep">
+          <div class="fn"><span>Section B · Building information</span></div>
+          <button type="button" class="row" data-t="0" aria-pressed="false"><span>Year built: 2006</span><span class="src">planning.pdf ↗</span></button>
+          <button type="button" class="row" data-t="1" aria-pressed="false"><span>Floor area: 142 m²</span><span class="src">planning.pdf ↗</span></button>
+          <button type="button" class="row" data-t="2" aria-pressed="false"><span>Crack, left gable</span><span class="src">voice note ↗</span></button>
+        </div>
       </div>
+      <div class="traceback">Hover or click any line to trace it back to its source</div>
     </div>
-    <p class="pipe-note">The hard part was never the model. It is holding a legal report structure, a source for every value, and a version that cannot change after it is sent. Swap the model out and that scaffolding is what remains.</p>
-    <p class="onestat"><b>404</b> <span>what a practice not on the case gets</span></p>
-    <p class="pipe-note">A case is visible to the people put on it and nobody else. A share is one named version, and revoking it closes the file.</p>
+    <p class="stand-in"><span class="tag">Prototype</span>The AI here is a labelled stand-in; a live model is connected but not yet tested on real documents. Swap the model and the traceable structure stays.</p>
   </div>
 </section>
-
 
 <section id="buyer">
   <div class="wrap">
     <div class="head">
-      <div class="label">Who pays</div>
-      <h2>The assessment is already paid work. We sell to the people doing it.</h2>
-      <p>Somebody already pays a competent person to write every one of these reports. We are selling a shorter week to the practice that carries the cost of the long one.</p>
+      <div class="label">Who it's for</div>
+      <h2>Built for the practice that writes the report.</h2>
+      <p>We can't fix the whole scheme, so we picked one step and one user: the professional who writes the assessment. That work is already paid for; Releve gives back the write-up time.</p>
     </div>
-    <div class="steps">
-      <div class="step-card">
-        <div class="num">BUYS IT</div>
-        <h3>The engineering practice.</h3>
-        <p>They carry the write-up: a morning at the house costs them the rest of the week at a desk.</p>
-      </div>
-      <div class="step-card">
-        <div class="num">WANTS IT</div>
-        <h3>The lender and the insurer.</h3>
-        <p>A frozen, dated, sourced report is what they need to price a house they currently cannot. They never buy it. They ask for it.</p>
-      </div>
-      <div class="step-card">
-        <div class="num">OUTLASTS IT</div>
-        <h3>The standard, not the scheme.</h3>
-        <p>Grant schemes end. Assessment does not, and defective concrete block is not the only defect with a standard behind it.</p>
-      </div>
+    <div class="flow">
+      <div class="node"><div class="num">ADDS TO IT</div><h3>The homeowner</h3><p>Uploads what is missing through a one-time link. No account.</p></div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 44 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M0 7h42M35 1l7 6-7 6"/></svg>documents</div>
+      <div class="node buyer"><div class="num">BUYS IT</div><h3>The engineering or architecture practice</h3><p>A subscription per assessor, so a busy week costs nothing extra.</p></div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 44 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M0 7h42M35 1l7 6-7 6"/></svg>frozen PDF</div>
+      <div class="node"><div class="num">RECEIVES IT</div><h3>The council</h3><p>Gets the same PDF it gets today. No new portal to learn.</p></div>
     </div>
-    <ul class="points strip">
-      <li>No new budget to find</li>
-      <li>Per assessor, not per house, when it is priced</li>
-      <li>No portal for the council or the lab to learn</li>
-    </ul>
+    <figure class="flow-line">
+      <img src="img/flow-line.png" width="2172" height="250" loading="lazy" alt="One unbroken pen line running left to right: a crack in a wall becomes handwriting, then the ruled lines of a report, then an amber signature.">
+    </figure>
+  </div>
+</section>
+
+<section id="scale">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">How it scales</div>
+      <h2>This is the starting point.</h2>
+      <p>Evidence in, a source for every value, a signature, a version that never changes. That engine fits any report a professional has to sign, so a new report type is a new template, not a new product.</p>
+    </div>
+    <div class="ladder">
+      <div class="rung now" style="--k:0"><div class="num">NOW</div><h3>DCB assessments</h3><p>The Building Condition Assessment every grant needs.</p></div>
+      <div class="rung" style="--k:1"><div class="num">NEXT</div><h3>The rest of the scheme</h3><p>Works plans, payment claims and completion packs, plus the new social homes scheme.</p></div>
+      <div class="rung" style="--k:2"><div class="num">THEN</div><h3>Other site reports</h3><p>Condition surveys, snagging, installation, building control and fire safety.</p></div>
+      <div class="rung star" style="--k:3"><img class="drop-star" src="img/north-star.png" alt="" aria-hidden="true"><div class="num">NORTH STAR</div><h3>Traceable AI extraction</h3><p>Any evidence-heavy report, compliance included, where every fact has to be checkable.</p></div>
+    </div>
+    <p class="source-note">Each new report type still needs testing with real users. Success in DCB doesn't prove demand elsewhere.</p>
   </div>
 </section>
 
 <section id="status">
   <div class="wrap">
     <div class="head">
-      <div class="label">Status on 11 September 2026</div>
+      <div class="label">Where we are · built in two weeks</div>
       <h2>What is built, and what is next.</h2>
     </div>
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>Part</th><th>State</th></tr></thead>
-        <tbody>
-          <tr><td>Cases, work list, who has what</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Old documents fill the blank fields, with sources</td><td class="s built"><i></i>Built, stand-in AI</td></tr>
-          <tr><td>Photos and voice notes at the house, offline</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Report editor with live preview</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Frozen PDF versions</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Homeowner links, document requests, shares</td><td class="s built"><i></i>Built</td></tr>
-          <tr><td>Hand the case to the next engineer, with lab results</td><td class="s built"><i></i>Built, synthetic lab</td></tr>
-          <tr><td>Live AI model</td><td class="s part"><i></i>Wired, untested</td></tr>
-          <tr><td>Real tablet in a real field</td><td class="s part"><i></i>Not yet run</td></tr>
-          <tr><td>Read by a practising I.S. 465 assessor</td><td class="s part"><i></i>Not yet</td></tr>
-          <tr><td>Irish-language report and interface</td><td class="s next"><i></i>Next</td></tr>
-          <tr><td>Council channel</td><td class="s next"><i></i>Next</td></tr>
-          <tr><td>Lab channel</td><td class="s next"><i></i>Next</td></tr>
-        </tbody>
-      </table>
+    <div class="tally">
+      <div class="tally-k"><b>7 built</b><span>6 to go</span></div>
+      <div class="tally-bar" aria-hidden="true"><span class="done"></span><span class="rest"></span></div>
+    </div>
+    <div class="status-grid">
+      <div class="status-col built">
+        <h3>Built <small>Checked 10 Sep 2026</small></h3>
+        <ul>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Cases, work list, assignment</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Documents fill fields, with sources <span>· stand-in AI</span></div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Photos and voice notes on site, offline</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Report editor with live preview</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Frozen PDF versions</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Homeowner links and shares</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Handover with lab results <span>· synthetic lab</span></div></li>
+        </ul>
+      </div>
+      <div class="status-col next">
+        <h3>Not yet</h3>
+        <ul>
+          <li><i class="box" aria-hidden="true"></i><div>Live AI on real documents</div></li>
+          <li><i class="box" aria-hidden="true"></i><div>A real tablet on site</div></li>
+          <li><i class="box" aria-hidden="true"></i><div>A paying practice <span>· price untested</span></div></li>
+          <li><i class="box" aria-hidden="true"></i><div>Read by a practising assessor</div></li>
+          <li><i class="box" aria-hidden="true"></i><div>Irish-language version <span>· next</span></div></li>
+          <li><i class="box" aria-hidden="true"></i><div>Council and lab channels <span>· next</span></div></li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
@@ -1420,65 +741,55 @@ border-bottom:1px solid var(--line);
 <footer>
   <div class="wrap">
     <div class="cta">
-      <h2>Written at the house. Seen by everyone.</h2>
-      <a class="btn primary" href="#walkthrough">Drag through it
+      <h2>Drafted at the house. Traced to the source.</h2>
+      <a class="btn primary" href="#how">See how it works
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
     </div>
     <div class="meta">
-      <span>Releve · Crintus &amp; Co</span>
-      <span>Prototype for the TechIreland National AI Challenge 2026</span>
-      <span>Follows the I.S. 465:2026 report structure. The competent person signs it. Not a formal assessment.</span>
-      <span>Every house on this page is synthetic.</span>
+      <span>Releve (rel-uh-VAY): French for a survey reading · Crintus &amp; Co</span>
+      <span>TechIreland National AI Challenge 2026</span>
     </div>
   </div>
 </footer>
-
 <script>
 (function () {
-  // [number, clock, place, title, caption]. The clock is one plausible visit.
+  // [number, place, title, caption]
   var stages = [
-    ['01', '08:40', 'At the practice', 'Open the case.', 'The practice opens it and puts an assessor on it. A practice not on the case gets a 404.'],
-    ['02', '08:55', 'At the practice', 'Prepare from what exists.', 'The planning file and the old report go in. Blank fields fill themselves, each showing its source.'],
-    ['03', '10:30', 'At the house, no signal', 'Capture at the house.', 'Photos and voice notes save to the tablet first and upload when there is signal.'],
-    ['04', '12:10', 'At the house, in the van', 'Correct the draft.', 'The report is already written. Fix what is wrong; nothing you type is overwritten.'],
-    ['05', '12:40', 'At the house, in the van', 'Freeze a version.', 'Version 1 becomes a PDF that never changes. Edit again and you get version 2.'],
-    ['06', '12:55', 'Before the drive home', 'Share and hand over.', 'One link to the homeowner, the same PDF to the council, the case to the next engineer.']
+    ['01', 'At the practice', 'Start from what exists.', 'Upload the planning file and old reports. The AI reads them and fills the blank fields, each showing the document it came from.'],
+    ['02', 'At the house', 'Capture at the house.', 'Photos and voice notes on a tablet. The AI writes your dictation up as a finding, tied to the wall you were standing at.'],
+    ['03', 'In the van', 'Correct the draft.', 'The AI has drafted the report before you sit down. Fix what is wrong; anything you type is never overwritten.'],
+    ['04', 'Before the drive home', 'Freeze and share.', 'Version 1 becomes a fingerprinted PDF that never changes. Edit again and you get version 2.']
   ];
   var range = document.getElementById('scrub');
-  var scene = document.getElementById('scene');
-  if (!range || !scene) return;
+  if (!range) return;
   var num = document.getElementById('scrub-num');
-  var label = document.getElementById('scrub-label');
-  var clock = document.getElementById('scrub-time');
+  var words = Array.prototype.slice.call(document.querySelectorAll('.scrub-title span'));
   var where = document.getElementById('scrub-where');
+  var label = document.getElementById('scrub-label');
   var caption = document.getElementById('scrub-caption');
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.scrub-scene img'));
   var marks = Array.prototype.slice.call(document.querySelectorAll('.scrub-marks button'));
-  var N = stages.length, MAX = 1000, DURATION = 6000;
-  var anims = scene.getAnimations ? scene.getAnimations({ subtree: true }) : [];
-  var current = -1, settling = null;
+  var N = stages.length, MAX = 1000, current = -1, settling = null;
 
   function stageAt(t) { return Math.min(N - 1, Math.floor(t * N)); }
   function midpoint(k) { return (k + 0.5) / N; }
 
   function render(t) {
-    var time = t * DURATION;
-    for (var i = 0; i < anims.length; i++) { anims[i].pause(); anims[i].currentTime = time; }
     var k = stageAt(t);
-    scene.setAttribute('data-stage', k);
-    if (k !== current) {
-      current = k;
-      num.textContent = stages[k][0];
-      clock.textContent = stages[k][1];
-      where.textContent = stages[k][2];
-      label.textContent = stages[k][3];
-      caption.textContent = stages[k][4];
-      range.setAttribute('aria-valuetext', 'Step ' + (k + 1) + ' of ' + N + ', ' + stages[k][1] + ': ' + stages[k][3]);
-      marks.forEach(function (b, i) { if (i === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
-    }
+    if (k === current) return;
+    current = k;
+    num.textContent = stages[k][0];
+    where.textContent = stages[k][1];
+    label.textContent = stages[k][2];
+    caption.textContent = stages[k][3];
+    range.setAttribute('aria-valuetext', 'Step ' + (k + 1) + ' of ' + N + ': ' + stages[k][2]);
+    shots.forEach(function (img, i) { img.classList.toggle('on', i === k); });
+    words.forEach(function (w, i) { w.classList.toggle('done', i < k); w.classList.toggle('on', i === k); });
+    marks.forEach(function (b, i) { if (i === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
   }
 
-  // Ease the pin to a stage midpoint so it never rests mid-crossfade.
+  // Ease the pin to the middle of a step so it never rests on a boundary.
   function settle(target) {
     if (settling) cancelAnimationFrame(settling);
     var from = range.value / MAX, start = null, ms = 260;
@@ -1488,7 +799,7 @@ border-bottom:1px solid var(--line);
       var t = from + (target - from) * e;
       range.value = Math.round(t * MAX);
       render(t);
-      if (p < 1) settling = requestAnimationFrame(step); else settling = null;
+      settling = p < 1 ? requestAnimationFrame(step) : null;
     }
     settling = requestAnimationFrame(step);
   }
@@ -1497,7 +808,7 @@ border-bottom:1px solid var(--line);
     if (settling) { cancelAnimationFrame(settling); settling = null; }
     render(range.value / MAX);
   });
-  // Release with mouse or finger snaps; keyboard steps whole stages instead.
+  // Releasing a drag snaps to the step; the keyboard moves a whole step at a time.
   range.addEventListener('pointerup', function () { settle(midpoint(stageAt(range.value / MAX))); });
   range.addEventListener('keydown', function (e) {
     var k = stageAt(range.value / MAX), to = null;
@@ -1513,69 +824,131 @@ border-bottom:1px solid var(--line);
     b.addEventListener('click', function () { settle(midpoint(+b.getAttribute('data-stage'))); range.focus({ preventScroll: true }); });
   });
 
+  // The words in the heading jump to their step too.
+  words.forEach(function (w, i) {
+    w.addEventListener('click', function () { settle(midpoint(i)); });
+  });
+
   render(range.value / MAX);
 })();
-
-// The correction in the problem headline. Runs once, when the line is well
-// inside the viewport, and is never replayed: a judge should see it happen,
-// not see it flicker every time the page is scrolled back. The class lands on
-// the headline itself, because the headline is what the new word shakes.
+</script>
+<script>
+// The trace demo: hover, click or tab to any line and its fact and source light up, joined by
+// connector lines. Left alone and on screen, it steps through the three lines by itself.
 (function () {
-  var fix = document.querySelector('#problem h2.fix');
-  if (!fix) return;
-  // Measure both words so the line does not sit open waiting for the new one.
-  // The old word is out of flow, so the slot would otherwise always be as wide
-  // as the word that has not arrived yet. offsetWidth, not the bounding box:
-  // the new word is set a degree or two off square and its box is wider than
-  // it is. Measured again once the webfont has loaded, because the first
-  // measurement happens in the fallback face and is wrong by a good 20px.
-  var swap = fix.querySelector('.swap');
-  var was = fix.querySelector('.was');
-  var now = fix.querySelector('.now');
-  var rub = fix.querySelector('.rub path');
-  // How long the struck line is once it is on the glass, in screen pixels.
-  // The stroke does not scale with the box, so the browser lays the dash out
-  // in screen space, while the path is drawn in a 120x14 viewBox stretched to
-  // whatever the word is wide. The two only agree at about 1:1, which is why
-  // a fixed dash left the line part-drawn on a wide screen and looked right on
-  // a phone. Walk the curve and add up the chords after the transform.
-  function lineLength(path) {
-    var m = path.getScreenCTM();
-    if (!m) return 0;
-    var len = path.getTotalLength(), n = 48, sum = 0, prev = null, i, p;
-    for (i = 0; i <= n; i++) {
-      p = path.getPointAtLength(len * i / n).matrixTransform(m);
-      if (prev) sum += Math.hypot(p.x - prev.x, p.y - prev.y);
-      prev = p;
+  var root = document.getElementById('trace-demo');
+  if (!root) return;
+  var svg = root.querySelector('.trace-links');
+  var pathA = svg.querySelector('#tl-a'), pathB = svg.querySelector('#tl-b');
+  var dots = ['#tl-c1', '#tl-c2', '#tl-c3', '#tl-c4'].map(function (id) { return svg.querySelector(id); });
+  var items = Array.prototype.slice.call(root.querySelectorAll('[data-t]'));
+  var N = 3, current = 0, paused = false, visible = false;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // A small, fixed waveform for the voice-note card.
+  var wave = root.querySelector('.wave');
+  if (wave) {
+    var bars = '';
+    for (var i = 0; i < 48; i++) {
+      var h = 4 + Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.37)) * 20;
+      bars += '<rect x="' + (i * 4.2).toFixed(1) + '" y="' + (14 - h / 2).toFixed(1) + '" width="2.2" height="' + h.toFixed(1) + '" rx="1"/>';
     }
-    return sum;
+    wave.innerHTML = bars;
   }
-  function measure() {
-    if (!swap || !was || !now) return;
-    swap.style.setProperty('--w0', was.offsetWidth + 'px');
-    swap.style.setProperty('--w1', now.offsetWidth + 'px');
-    if (!rub) return;
-    // Chords cut the corners, so pad: short by a pixel and the tail of the
-    // line shows before the hand gets there.
-    var d = lineLength(rub);
-    if (d) swap.style.setProperty('--rub', (d * 1.02 + 2).toFixed(1) + 'px');
+
+  function curve(x1, y1, x2, y2) {
+    var m = (x1 + x2) / 2;
+    return 'M' + x1 + ' ' + y1 + ' C' + m + ' ' + y1 + ' ' + m + ' ' + y2 + ' ' + x2 + ' ' + y2;
   }
-  measure();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
-  window.addEventListener('resize', measure);
-  if (swap) swap.addEventListener('animationend', function (e) {
-    // Once the slot has opened, hand the width back to the text.
-    if (e.animationName === 'slot') swap.style.width = 'auto';
-  });
-  if (!('IntersectionObserver' in window)) { fix.classList.add('on'); return; }
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (!e.isIntersecting) return;
-      fix.classList.add('on');
-      io.disconnect();
+  function place(dot, x, y) { dot.setAttribute('cx', x); dot.setAttribute('cy', y); }
+
+  function draw() {
+    if (getComputedStyle(svg).display === 'none') return;
+    var box = root.getBoundingClientRect();
+    var src = root.querySelector('.doc [data-t="' + current + '"], .voice [data-t="' + current + '"]');
+    var fact = root.querySelector('.fact[data-t="' + current + '"]');
+    var row = root.querySelector('.row[data-t="' + current + '"]');
+    var card = src.closest('.doc, .voice').getBoundingClientRect();
+    var s = src.getBoundingClientRect(), f = fact.getBoundingClientRect();
+    var r = row.getBoundingClientRect(), rep = row.closest('.rep').getBoundingClientRect();
+    var x1 = card.right - box.left, y1 = s.top + s.height / 2 - box.top;
+    var x2 = f.left - box.left, x3 = f.right - box.left, y2 = f.top + f.height / 2 - box.top;
+    var x4 = rep.left - box.left, y4 = r.top + r.height / 2 - box.top;
+    pathA.setAttribute('d', curve(x1, y1, x2, y2));
+    pathB.setAttribute('d', curve(x3, y2, x4, y4));
+    place(dots[0], x1, y1); place(dots[1], x2, y2); place(dots[2], x3, y2); place(dots[3], x4, y4);
+  }
+
+  function show(t) {
+    current = t;
+    items.forEach(function (el) {
+      var on = +el.getAttribute('data-t') === t;
+      el.classList.toggle('on', on);
+      if (el.tagName === 'BUTTON') el.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
-  }, { threshold: 0.9 });
-  io.observe(fix);
+    draw();
+  }
+
+  items.forEach(function (el) {
+    var t = +el.getAttribute('data-t');
+    function take() { paused = true; show(t); }
+    el.addEventListener('mouseenter', take);
+    el.addEventListener('focus', take);
+    el.addEventListener('click', take);
+  });
+  root.addEventListener('mouseleave', function () { paused = false; });
+  root.addEventListener('focusout', function (e) { if (!root.contains(e.relatedTarget)) paused = false; });
+
+  if (!reduce) {
+    setInterval(function () { if (!paused && visible) show((current + 1) % N); }, 3200);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; }, { threshold: 0.4 }).observe(root);
+    } else {
+      visible = true;
+    }
+  }
+  window.addEventListener('resize', draw);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+  show(0);
+})();
+</script>
+<script>
+// The who-it's-for cards arrive as the section lands, and replay if you scroll back to it.
+(function () {
+  var flow = document.querySelector('.flow');
+  if (!flow || !('IntersectionObserver' in window)) { if (flow) flow.classList.add('in'); return; }
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.intersectionRatio > 0.4) flow.classList.add('in');
+      else if (e.intersectionRatio === 0) flow.classList.remove('in');
+    });
+  }, { threshold: [0, 0.4] }).observe(flow);
+})();
+</script>
+<script>
+// The scaling steps animate once the section is on screen, and replay if you come back to it.
+(function () {
+  var ladder = document.querySelector('.ladder');
+  if (!ladder || !('IntersectionObserver' in window)) { if (ladder) ladder.classList.add('in'); return; }
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.intersectionRatio > 0.4) ladder.classList.add('in');
+      else if (e.intersectionRatio === 0) ladder.classList.remove('in');
+    });
+  }, { threshold: [0, 0.4] }).observe(ladder);
+})();
+</script>
+<script>
+// The status section ticks its built items in, and draws its tally bar, once it is on screen.
+(function () {
+  var status = document.getElementById('status');
+  if (!status || !('IntersectionObserver' in window)) { if (status) status.classList.add('in'); return; }
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.intersectionRatio > 0.35) status.classList.add('in');
+      else if (e.intersectionRatio === 0) status.classList.remove('in');
+    });
+  }, { threshold: [0, 0.35] }).observe(status);
 })();
 </script>
 </body>
