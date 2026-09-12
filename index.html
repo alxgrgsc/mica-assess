@@ -191,10 +191,13 @@ border-bottom:1px solid var(--line);
   .progress-bar{display:flex;gap:2px;height:clamp(52px,6.5vh,76px)}
   .p{display:flex;align-items:center;min-width:0;padding:0 14px}
   .p b{font-family:var(--mono);font-size:clamp(16px,1.7vw,24px);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .p.done{flex:0 0 5.7%;justify-content:center;padding:0 6px;border-radius:4px 0 0 4px;background:var(--ground);color:var(--text)}
-  .p.applied{flex:0 0 32.2%;justify-content:flex-end;background:var(--accent);color:var(--accent-ink)}
+  .p.done{position:relative;flex:0 0 2.71%;min-width:6px;padding:0;border-radius:4px 0 0 4px;background:var(--ground);color:var(--text)}
+  /* 542 is too thin a slice to letter inside, so its label hangs beneath on a tick */
+  .p.done b{position:absolute;top:calc(100% + 10px);left:0;color:var(--ground);white-space:nowrap}
+  .p.done::after{content:"";position:absolute;top:100%;left:0;width:1px;height:8px;background:rgba(255,254,242,.5)}
+  .p.applied{flex:0 0 15.28%;justify-content:flex-end;background:var(--accent);color:var(--accent-ink)}
   .p.left{flex:1 1 auto;justify-content:flex-end;border-radius:0 4px 4px 0;background:rgba(255,254,242,.13);color:var(--ground)}
-  .progress-key{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:16px;font-size:clamp(15px,1.3vw,17px);color:rgba(255,254,242,.85)}
+  .progress-key{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:38px;font-size:clamp(15px,1.3vw,17px);color:rgba(255,254,242,.85)}
   .progress-key span{display:flex;align-items:center;gap:9px}
   .progress-key .sw{width:10px;height:10px;flex:0 0 auto;border-radius:2px;background:var(--ground)}
   .progress-key .sw.applied{background:var(--accent)}
@@ -208,15 +211,15 @@ border-bottom:1px solid var(--line);
   /* the trace: sources -> facts -> report, top-aligned, with live connector lines drawn between
      whichever line is active. It cycles on its own until someone hovers, clicks or tabs into it. */
   /* what the AI actually does, said plainly before the guardrails */
-  .ai-does{display:flex;flex-wrap:wrap;gap:8px 10px;margin:0 0 clamp(16px,2.6vh,28px);padding:0;list-style:none}
-  .ai-does li{padding:7px 11px;border:1px solid rgba(252,170,45,.5);color:var(--accent);
+  .ai-does{display:flex;flex-wrap:wrap;gap:8px 10px;margin:0 0 clamp(10px,1.8vh,26px);padding:0;list-style:none}
+  .ai-does li{padding:clamp(5px,1vh,7px) 11px;border:1px solid rgba(252,170,45,.5);color:var(--accent);
     font-family:var(--mono);font-size:clamp(11px,1vw,12.5px);letter-spacing:.08em;text-transform:uppercase}
   .trace{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr) 72px minmax(0,1fr);align-items:start}
-  .trace-col{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px}
+  .trace-col{position:relative;z-index:1;display:flex;flex-direction:column;gap:clamp(7px,1.2vh,10px)}
   .trace-col .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:rgba(255,254,242,.72);margin-bottom:4px}
   .trace-col .k b{color:var(--accent);font-weight:500;margin-right:8px}
   .gutter{padding-top:1px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,254,242,.6);text-align:center}
-  .doc,.rep,.voice{background:var(--ground);color:var(--text);padding:16px 18px 18px}
+  .doc,.rep,.voice{background:var(--ground);color:var(--text);padding:clamp(11px,1.9vh,16px) 18px clamp(12px,2vh,18px)}
   .doc .fn,.rep .fn,.voice .fn{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px}
   .doc{font-size:13.5px;line-height:1.75}
   .doc .ln{display:block;color:rgba(25,25,24,.45);padding:0 6px;margin:0 -6px;transition:background .25s,box-shadow .25s}
@@ -225,7 +228,7 @@ border-bottom:1px solid var(--line);
   .voice .quote{display:block;font-size:13.5px;line-height:1.6;color:var(--text);padding:2px 6px;margin:0 -6px;cursor:pointer;transition:background .25s,box-shadow .25s}
   .doc .ln.on,.voice .quote.on{background:var(--accent-soft);box-shadow:inset 2px 0 0 var(--accent)}
   .fact{all:unset;box-sizing:border-box;display:block;width:100%;text-align:left;cursor:pointer;border:1px solid rgba(255,254,242,.22);
-    padding:11px 13px;font-size:14.5px;color:var(--ground);transition:border-color .25s,background .25s}
+    padding:clamp(8px,1.5vh,11px) 13px;font-size:14.5px;color:var(--ground);transition:border-color .25s,background .25s}
   .fact small{display:block;font-family:var(--mono);font-size:10.5px;color:rgba(255,254,242,.66);margin-top:3px;letter-spacing:.04em}
   .fact:hover{border-color:rgba(255,254,242,.45)}
   .fact.on{border-color:var(--accent);background:rgba(252,170,45,.12)}
@@ -253,6 +256,19 @@ border-bottom:1px solid var(--line);
   .stand-in{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:clamp(16px,2.8vh,28px);max-width:none;font-size:15px;color:rgba(255,254,242,.85)}
   .stand-in .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--accent);color:var(--accent)}
 
+  /* on a short window the trace has a lot to hold, so it steps down a size */
+  @media (max-height:820px){
+    .ai-does{margin-bottom:10px}
+    .ai-does li{padding:4px 9px;font-size:10.5px}
+    #trace .head p{font-size:16px}
+    .doc{font-size:12.5px;line-height:1.6}
+    .voice .quote{font-size:12.5px}
+    .fact{font-size:13.5px}
+    .fact small{font-size:10px}
+    .rep .row{font-size:13px;padding:8px}
+    .traceback{margin-top:10px}
+    .stand-in{margin-top:12px;font-size:14px}
+  }
   /* who it's for: documents flow in, the report flows out, the practice in the middle pays.
      The parts arrive in order as the section lands, and the buyer card drops in last. */
   .flow > *{opacity:0;transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
@@ -308,7 +324,7 @@ border-bottom:1px solid var(--line);
     40%{box-shadow:0 0 0 3px rgba(252,170,45,.9)}
     100%{box-shadow:0 0 0 2px rgba(252,170,45,.55)}}
   .ladder.in > .rung.star{animation:star-land 1.1s ease 2.75s forwards}
-  .drop-star{position:absolute;top:clamp(-116px,-9vw,-74px);right:clamp(-58px,-4.4vw,-30px);z-index:-1;
+  .drop-star{position:absolute;top:clamp(-116px,-9vw,-74px);right:clamp(-58px,-4.4vw,-30px);z-index:2;
     width:clamp(124px,11.5vw,196px);height:auto;opacity:0}
   @keyframes star-drop{
     0%{opacity:0;transform:translateY(-120px) rotate(-14deg) scale(.8)}
@@ -458,7 +474,7 @@ border-bottom:1px solid var(--line);
       <div class="label accent">TechIreland National AI Challenge 2026 · Prototype</div>
       <p class="name"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><b>Releve</b></p>
       <h1>Your defective block assessments,<br> <span class="fix">drafted before you leave the site.</span></h1>
-      <p class="lede">The Building Condition Assessment every application to the Defective Concrete Blocks Grant Scheme needs. The visit takes a morning; the write-up can take two weeks. <b>Releve's AI reads the homeowner's paperwork, your site photos and your voice notes, and drafts the report on site.</b></p>
+      <p class="lede">Every application to the Defective Concrete Blocks Grant Scheme needs a Building Condition Assessment. The visit takes a morning; writing it up can take two weeks. <b>Releve's AI reads the homeowner's paperwork, your site photos and your voice notes, and drafts the report on site.</b></p>
       <div class="actions">
         <a class="btn primary" href="#how">See how it works
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
@@ -480,9 +496,9 @@ border-bottom:1px solid var(--line);
     </div>
     <div class="scale-facts">
       <div>
-        <b>~9,500</b>
-        <span class="t">Homes affected</span>
-        <p>Could reach 20,000. The CCMA put it at 9,500 in February; research presented in June suggests the higher figure.</p>
+        <b>20,000</b>
+        <span class="t">Homes may be affected</span>
+        <p>Petrolab's survey of 48 estates, presented to the Oireachtas in June 2026. It excludes social housing, businesses and duplexes. Councils have counted 9,500 so far.</p>
       </div>
       <div>
         <b>9</b>
@@ -490,26 +506,26 @@ border-bottom:1px solid var(--line);
         <p><i>6 in full, parts of 3</i>Carlow, Clare, Donegal, Limerick, Mayo and Sligo, plus parts of Fingal, Meath and Wexford.</p>
       </div>
       <div>
-        <b>~3,000</b>
-        <span class="t">Affected outside Donegal</span>
-        <p>6,500 Donegal, 1,100 Mayo, 860 Clare, 700 Limerick, 300+ Sligo. Roughly one in three.</p>
+        <b>8,000</b>
+        <span class="t">Of them outside Donegal</span>
+        <p>Petrolab projects 12,000 in Donegal, 4,500 in Clare, 2,500 in Limerick and 1,000 in Mayo. Two in five are elsewhere.</p>
       </div>
     </div>
     <figure class="progress" role="img" aria-label="Of about 9,500 affected homes, 3,598 have applied to the scheme and 542 have been remediated.">
-      <figcaption class="k">How far the scheme has got</figcaption>
+      <figcaption class="k">How far the scheme has got, against the 20,000 estimate</figcaption>
       <div class="progress-bar">
         <span class="p done"><b>542</b></span>
         <span class="p applied"><b>3,598</b></span>
-        <span class="p left"><b>~9,500</b></span>
+        <span class="p left"><b>20,000</b></span>
       </div>
       <div class="progress-key">
         <span><i class="sw done" aria-hidden="true"></i>542 homes remediated</span>
         <span><i class="sw applied" aria-hidden="true"></i>3,598 applications received</span>
-        <span><i class="sw left" aria-hidden="true"></i>~9,500 homes affected</span>
+        <span><i class="sw left" aria-hidden="true"></i>Up to 20,000 may be affected · 9,500 counted so far</span>
       </div>
       <div class="progress-foot"><span>€361m spent since 2020</span><span>To 30 June 2026</span></div>
     </figure>
-    <p class="source-note">Dept. of Housing scheme statistics to 30 June 2026 · CCMA to the Oireachtas, February 2026 · RTÉ News, June 2026</p>
+    <p class="source-note">Petrolab analysis presented at Leinster House, June 2026 (RTÉ News) · CCMA to the Oireachtas Housing Committee, 2026 · Dept. of Housing scheme statistics to 30 June 2026</p>
   </div>
 </section>
 
@@ -539,10 +555,10 @@ border-bottom:1px solid var(--line);
     </div>
     <div class="factors">
       <div class="factor">
-        <div class="fig">20,000</div>
-        <h3>Homes that may be affected.</h3>
-        <p>Research presented to TDs and senators in June 2026 suggests the 9,500 figure could rise this far.</p>
-        <cite>RTÉ News, June 2026</cite>
+        <div class="fig">3,598</div>
+        <h3>Applications so far.</h3>
+        <p>Every one of them needed a signed assessment before it could be made, and thousands of homes have yet to apply.</p>
+        <cite>Dept. of Housing, to 30 June 2026</cite>
       </div>
       <div class="factor">
         <div class="fig">Scattered</div>
