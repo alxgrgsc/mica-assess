@@ -213,7 +213,8 @@ border-bottom:1px solid var(--line);
   /* what the AI actually does, said plainly before the guardrails */
   .ai-does{display:flex;flex-wrap:wrap;gap:8px 10px;margin:0 0 clamp(10px,1.8vh,26px);padding:0;list-style:none}
   .ai-does li{padding:clamp(5px,1vh,7px) 11px;border:1px solid rgba(252,170,45,.5);color:var(--accent);
-    font-family:var(--mono);font-size:clamp(11px,1vw,12.5px);letter-spacing:.08em;text-transform:uppercase}
+    font-family:var(--mono);font-size:clamp(11px,1vw,12.5px);letter-spacing:.08em;text-transform:uppercase;
+    cursor:default;user-select:none;-webkit-user-select:none}
   .trace{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr) 72px minmax(0,1fr);align-items:start}
   .trace-col{position:relative;z-index:1;display:flex;flex-direction:column;gap:clamp(7px,1.2vh,10px)}
   .trace-col .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:rgba(255,254,242,.72);margin-bottom:4px}
@@ -254,7 +255,7 @@ border-bottom:1px solid var(--line);
   @media (prefers-reduced-motion:reduce){.trace-links path{animation:none}}
   /* the prototype caveat as a tag and one line, not a paragraph */
   .stand-in{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:clamp(16px,2.8vh,28px);max-width:none;font-size:15px;color:rgba(255,254,242,.85)}
-  .stand-in .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--accent);color:var(--accent)}
+  .stand-in .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--accent);color:var(--accent);cursor:default;user-select:none;-webkit-user-select:none}
 
   /* on a short window the trace has a lot to hold, so it steps down a size */
   @media (max-height:820px){
