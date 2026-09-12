@@ -36,7 +36,13 @@
     --wrap:1280px;
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;scroll-snap-type:y proximity;scroll-padding-top:60px}
+  /* Snapping is a nicety: off for short windows, where a full-screen section would crop,
+     and off when the reader has asked for reduced motion. */
+  @media (max-height:700px){html{scroll-snap-type:none}}
+  /* on a phone the stacked sections are taller than the screen, so snapping would fight the reader */
+  @media (max-width:880px){html{scroll-snap-type:none}section,.hero{min-height:0}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;scroll-snap-type:none}}
   body{
     margin:0;background:var(--ground);color:var(--text);
     font-family:var(--sans);line-height:1.5;
@@ -55,8 +61,8 @@
   .label.done{color:var(--done)}
   h1,h2,h3{margin:0;font-family:var(--sans);font-weight:400;letter-spacing:-.045em;line-height:1.1}
   h1{font-size:clamp(36px,5.6vw,64px)}
-  h2{font-size:clamp(28px,4vw,46px);max-width:20ch}
-  h3{font-size:20px;line-height:1.3;letter-spacing:-.02em}
+  h2{font-size:clamp(30px,4.4vw,58px);max-width:20ch}
+  h3{font-size:clamp(20px,1.7vw,23px);line-height:1.3;letter-spacing:-.02em}
   .lede{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:56ch}
   .lede b{color:var(--text);font-weight:500}
   .hero .lede b{display:block;margin-top:12px}
@@ -93,11 +99,13 @@ border-bottom:1px solid var(--line);
   @media (max-width:720px){nav .links a.txt{display:none}.brand span{display:none}nav .btn{padding:10px 14px}}
 
   /* ---- hero ---- */
-  .hero{padding:clamp(56px,9vw,120px) 0 clamp(48px,7vw,96px);border-bottom:1px solid var(--line)}
+  .hero{display:flex;align-items:center;min-height:100vh;min-height:100svh;scroll-snap-align:start;
+    padding:clamp(40px,6vh,110px) 0 clamp(36px,5vh,90px);border-bottom:1px solid var(--line)}
+  .hero > .wrap{width:100%}
   .hero .wrap{max-width:1440px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(24px,3vw,48px);align-items:center}
   @media (max-width:1180px){.hero .wrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
   @media (max-width:880px){.hero .wrap{grid-template-columns:1fr}}
-  .hero .copy{display:flex;flex-direction:column;gap:22px}
+  .hero .copy{display:flex;flex-direction:column;gap:clamp(14px,2.4vh,22px)}
   .hero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
   .hero .fine{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.02em}
   .hero .fine i{color:var(--done);font-style:normal}
@@ -113,15 +121,11 @@ border-bottom:1px solid var(--line);
   .source-note{margin-top:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;line-height:1.6;color:var(--muted);max-width:80ch}
 
   /* ---- sections ---- */
-  section{padding:clamp(56px,7vw,96px) 0;border-bottom:1px solid var(--line)}
-  section .head{display:flex;flex-direction:column;gap:14px;margin-bottom:clamp(28px,4vw,48px)}
-  section .head p{color:var(--muted);max-width:56ch;font-size:clamp(16.5px,1.5vw,19px)}
-
-  /* hero: the scale of the problem, straight under the headline */
-  .scale{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:clamp(22px,4vw,48px);padding-top:18px;border-top:1px solid var(--line)}
-  .scale b{display:block;font-size:clamp(28px,3vw,38px);font-weight:500;letter-spacing:-.04em;line-height:1.05;font-variant-numeric:tabular-nums}
-  .scale span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-  .scale-src{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--muted);margin-top:-12px}
+  section{display:flex;align-items:center;min-height:100vh;min-height:100svh;scroll-snap-align:start;
+    padding:clamp(36px,5vh,80px) 0;border-bottom:1px solid var(--line)}
+  section > .wrap{width:100%}
+  section .head{display:flex;flex-direction:column;gap:clamp(10px,1.6vh,14px);margin-bottom:clamp(18px,3.4vh,44px)}
+  section .head p{color:var(--muted);max-width:56ch;font-size:clamp(17px,1.7vw,22px)}
 
   /* bottleneck: the split bar. Visit and write-up at their real proportions (about half a working
      day against about ten). Fills checked with the dataviz palette validator: #a36404 / #e8a13a pass
@@ -137,7 +141,7 @@ border-bottom:1px solid var(--line);
   .seg.desk::after{left:auto;right:0}
   .seg:hover::after{opacity:1}
   /* each label reads as a sentence: "The site visit takes a morning." / "The write-up takes ~2 weeks." */
-  .split-labels{display:flex;justify-content:space-between;gap:12px 24px;margin-top:14px}
+  .split-labels{display:flex;justify-content:space-between;gap:12px 24px;margin-top:clamp(10px,1.8vh,14px)}
   .split-labels > div{display:flex;align-items:center;gap:10px;font-size:clamp(16px,1.5vw,20px);letter-spacing:-.01em;color:var(--text)}
   .split-labels b{color:var(--text);font-weight:600}
   .split-labels .sw{width:10px;height:10px;flex:0 0 auto;border-radius:2px;background:#a36404}
@@ -146,13 +150,13 @@ border-bottom:1px solid var(--line);
 
   /* the hourglass sits beside the heading and the time line; paper keyed out like the hero cottage */
   /* hourglass on the left, so the section doesn't mirror the hero's picture-on-the-right */
-  .bn-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.8fr);gap:clamp(24px,4vw,64px);align-items:center;margin-bottom:clamp(36px,5vw,56px)}
+  .bn-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.8fr);gap:clamp(24px,4vw,64px);align-items:center;margin-bottom:clamp(24px,4vh,56px)}
   .bn-art{order:-1;margin:0;justify-self:center;width:100%;max-width:310px}
-  .bn-art img{display:block;width:100%;height:auto}
+  .bn-art img{display:block;width:100%;height:auto;max-height:42vh;object-fit:contain}
   @media (max-width:880px){.bn-top{grid-template-columns:1fr}.bn-art{order:0;max-width:240px}}
 
   /* short factor cards: a big figure on a rule, its source underneath */
-  .factors{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(28px,3.5vw,44px) clamp(20px,3vw,40px)}
+  .factors{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vh,44px) clamp(20px,3vw,40px)}
   @media (max-width:980px){.factors{grid-template-columns:repeat(2,1fr)}}
   @media (max-width:560px){.factors{grid-template-columns:1fr}}
   .factor{border-top:2px solid var(--text);padding-top:16px;display:flex;flex-direction:column;gap:10px}
@@ -160,7 +164,7 @@ border-bottom:1px solid var(--line);
   .factor .fig{font-size:clamp(40px,4.6vw,58px);letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
   .factor .fig small{font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:.04em;margin-left:8px}
   .factor.hl .fig{color:var(--accent-deep)}
-  .factor p{color:var(--muted);font-size:15px}
+  .factor p{color:var(--muted);font-size:clamp(15px,1.3vw,17px)}
   .factor cite{margin-top:auto;padding-top:4px;font-family:var(--mono);font-size:10.5px;font-style:normal;letter-spacing:.04em;color:var(--muted)}
 
   .pipe-note{margin-top:28px;color:var(--muted);max-width:66ch;font-size:clamp(16px,1.4vw,18px)}
@@ -172,8 +176,41 @@ border-bottom:1px solid var(--line);
   .dark .head p{color:rgba(255,254,242,.85)}
   .dark .pipe-note{color:rgba(255,254,242,.82)}
   .dark .pipe-note b{color:var(--ground)}
+  /* the scale: a black band of figures, then one bar of the same measure at three stages
+     (remediated, applied, affected) as a light-to-dark ramp with a number on each part */
+  #reach .head{margin-bottom:clamp(16px,2.6vh,34px)}
+  .scale-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.6vh,44px) clamp(22px,3vw,44px);padding-top:clamp(16px,2.6vh,24px);border-top:1px solid rgba(255,254,242,.2)}
+  @media (max-width:880px){.scale-facts{grid-template-columns:1fr}}
+  .scale-facts > div{display:flex;flex-direction:column;gap:8px}
+  .scale-facts b{font-family:var(--mono);font-size:clamp(38px,4.2vw,58px);font-weight:500;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+  .scale-facts .t{font-family:var(--mono);font-size:clamp(12px,1.1vw,14px);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,254,242,.75)}
+  .scale-facts p{font-size:clamp(16px,1.4vw,18px);line-height:1.55;color:rgba(255,254,242,.75);max-width:36ch}
+  .scale-facts i{display:block;font-style:normal;font-family:var(--mono);font-size:clamp(13px,1.15vw,15px);letter-spacing:.06em;color:var(--accent);margin-bottom:6px}
+  .progress{margin:clamp(24px,4vh,60px) 0 0}
+  .progress .k{font-family:var(--mono);font-size:clamp(12px,1.05vw,13px);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .progress-bar{display:flex;gap:2px;height:clamp(52px,6.5vh,76px)}
+  .p{display:flex;align-items:center;min-width:0;padding:0 14px}
+  .p b{font-family:var(--mono);font-size:clamp(16px,1.7vw,24px);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .p.done{flex:0 0 5.7%;justify-content:center;padding:0 6px;border-radius:4px 0 0 4px;background:var(--ground);color:var(--text)}
+  .p.applied{flex:0 0 32.2%;justify-content:flex-end;background:var(--accent);color:var(--accent-ink)}
+  .p.left{flex:1 1 auto;justify-content:flex-end;border-radius:0 4px 4px 0;background:rgba(255,254,242,.13);color:var(--ground)}
+  .progress-key{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:16px;font-size:clamp(15px,1.3vw,17px);color:rgba(255,254,242,.85)}
+  .progress-key span{display:flex;align-items:center;gap:9px}
+  .progress-key .sw{width:10px;height:10px;flex:0 0 auto;border-radius:2px;background:var(--ground)}
+  .progress-key .sw.applied{background:var(--accent)}
+  .progress-key .sw.left{background:rgba(255,254,242,.3)}
+  .progress-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;margin-top:14px;
+    font-family:var(--mono);font-size:clamp(11.5px,1vw,12.5px);letter-spacing:.06em;text-transform:uppercase;color:rgba(255,254,242,.65)}
+  #reach .source-note{margin-top:clamp(16px,2.4vh,26px);color:rgba(255,254,242,.65)}
+  /* on a phone the numbers no longer fit inside the bar; the key underneath carries them */
+  @media (max-width:700px){.p b{display:none}.progress-key{gap:8px 20px;font-size:14px}}
+
   /* the trace: sources -> facts -> report, top-aligned, with live connector lines drawn between
      whichever line is active. It cycles on its own until someone hovers, clicks or tabs into it. */
+  /* what the AI actually does, said plainly before the guardrails */
+  .ai-does{display:flex;flex-wrap:wrap;gap:8px 10px;margin:0 0 clamp(16px,2.6vh,28px);padding:0;list-style:none}
+  .ai-does li{padding:7px 11px;border:1px solid rgba(252,170,45,.5);color:var(--accent);
+    font-family:var(--mono);font-size:clamp(11px,1vw,12.5px);letter-spacing:.08em;text-transform:uppercase}
   .trace{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr) 72px minmax(0,1fr);align-items:start}
   .trace-col{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px}
   .trace-col .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:rgba(255,254,242,.72);margin-bottom:4px}
@@ -203,7 +240,7 @@ border-bottom:1px solid var(--line);
   .trace-links path{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-dasharray:4 4;animation:trace-flow 1s linear infinite}
   .trace-links circle{fill:var(--accent)}
   @keyframes trace-flow{to{stroke-dashoffset:-16}}
-  .traceback{grid-column:1 / -1;display:flex;align-items:center;gap:14px;margin-top:22px;font-family:var(--mono);font-size:11px;
+  .traceback{grid-column:1 / -1;display:flex;align-items:center;gap:14px;margin-top:clamp(14px,2.4vh,22px);font-family:var(--mono);font-size:11px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
   .traceback::before,.traceback::after{content:"";flex:1;border-top:1.5px dashed var(--accent)}
   @media (max-width:880px){
@@ -212,48 +249,38 @@ border-bottom:1px solid var(--line);
     .traceback{white-space:normal;text-align:center}
   }
   @media (prefers-reduced-motion:reduce){.trace-links path{animation:none}}
-  /* chatbot vs Releve: the same answer twice. One comes out of a literal black box with nothing
-     attached; the other carries its source. */
-  .versus{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,2vw,24px);margin-top:clamp(40px,5vw,64px);align-items:stretch}
-  @media (max-width:760px){.versus{grid-template-columns:1fr}}
-  .vs{display:flex;flex-direction:column;gap:14px;padding:24px 24px 20px}
-  .vs .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em}
-  .vs.bot{background:#0c0c0b;border:1px solid rgba(255,254,242,.14)}
-  .vs.bot .k{color:rgba(255,254,242,.75)}
-  .vs.us{background:var(--ground);color:var(--text)}
-  .vs.us .k{color:var(--accent-deep)}
-  .vs .fn{font-family:var(--mono);font-size:11px;color:var(--muted)}
-  .vs .ask{align-self:flex-end;max-width:85%;padding:9px 13px;border-radius:12px 12px 2px 12px;background:rgba(255,254,242,.13);color:var(--ground);font-size:14px}
-  .vs .bubble{align-self:flex-start;max-width:85%;padding:11px 14px;border-radius:12px 12px 12px 2px;background:rgba(255,254,242,.06);
-    border:1px solid rgba(255,254,242,.18);color:var(--ground);font-size:15.5px}
-  .vs .line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 12px;background:var(--accent-soft);box-shadow:inset 2px 0 0 var(--accent);font-size:15.5px}
-  .vs .chip{font-family:var(--mono);font-size:11px;color:var(--accent-deep);white-space:nowrap}
-  .vs .line span:first-child{white-space:nowrap}
-  .vs .verdict{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500}
-  .vs .verdict i{display:grid;place-items:center;flex:0 0 auto;width:22px;height:22px;border-radius:50%;font-style:normal;font-family:var(--mono);font-size:12px}
-  .vs.bot .verdict{color:var(--ground)}
-  .vs.bot .verdict i{border:1.5px solid rgba(255,254,242,.55);color:rgba(255,254,242,.85)}
-  .vs.us .verdict i{background:var(--accent);color:var(--accent-ink)}
-  .vs ul{list-style:none;margin:auto 0 0;padding:4px 0 0}
-  .vs li{display:grid;grid-template-columns:10px 1fr;gap:12px;padding:9px 0;border-top:1px solid;font-size:14.5px}
-  .vs.bot li{border-color:rgba(255,254,242,.12);color:rgba(255,254,242,.85)}
-  .vs.bot li::before{content:"";width:9px;height:1.5px;margin-top:11px;background:rgba(255,254,242,.5)}
-  .vs.us li{border-color:var(--line)}
-  .vs.us li::before{content:"";width:9px;height:9px;margin-top:7px;background:var(--accent)}
   /* the prototype caveat as a tag and one line, not a paragraph */
-  .stand-in{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:28px;max-width:none;font-size:15px;color:rgba(255,254,242,.85)}
+  .stand-in{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:clamp(16px,2.8vh,28px);max-width:none;font-size:15px;color:rgba(255,254,242,.85)}
   .stand-in .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border:1px solid var(--accent);color:var(--accent)}
 
-  /* who pays: documents flow in, the report flows out, the practice in the middle pays */
+  /* who it's for: documents flow in, the report flows out, the practice in the middle pays.
+     The parts arrive in order as the section lands, and the buyer card drops in last. */
+  .flow > *{opacity:0;transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
+  .flow > *:nth-child(1){transform:translateX(-28px)}
+  .flow > *:nth-child(5){transform:translateX(28px)}
+  .flow > .arrow{transform:scale(.92)}
+  .flow > .node.buyer{transform:translateY(-52px) rotate(-1.5deg)}
+  .flow.in > *{opacity:1;transform:none}
+  .flow.in > *:nth-child(1){transition-delay:.05s}
+  .flow.in > *:nth-child(5){transition-delay:.25s}
+  .flow.in > .arrow:nth-child(2){transition-delay:.5s}
+  .flow.in > .arrow:nth-child(4){transition-delay:.62s}
+  .flow.in > .node.buyer{transform:none;transition:opacity .3s ease .78s,transform .6s cubic-bezier(.34,1.4,.64,1) .78s}
+  @media (prefers-reduced-motion:reduce){.flow > *{opacity:1;transform:none;transition:none}}
+  /* one pen line under the cards: crack, handwriting, report rules, signature */
+  .flow-line{margin:clamp(12px,2.2vh,26px) 0 0;opacity:0;transition:opacity .7s ease 1.15s}
+  .flow.in ~ .flow-line{opacity:1}
+  .flow-line img{display:block;width:100%;height:auto}
+  @media (prefers-reduced-motion:reduce){.flow-line{opacity:1;transition:none}}
   .flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.15fr) auto minmax(0,1fr);align-items:stretch}
-  .node{border:1px solid var(--line-2);padding:24px 22px 26px;display:flex;flex-direction:column;gap:10px}
-  .node .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
-  .node p{color:var(--muted);font-size:15px}
+  .node{border:1px solid var(--line-2);padding:clamp(24px,3.4vh,38px) clamp(22px,2vw,30px);display:flex;flex-direction:column;gap:10px}
+  .node .num{font-family:var(--mono);font-size:clamp(11px,1vw,13px);letter-spacing:.14em;color:var(--accent-deep)}
+  .node p{color:var(--muted);font-size:clamp(16px,1.4vw,18px)}
   .node.buyer{background:var(--accent);border-color:var(--accent)}
   .node.buyer .num,.node.buyer p{color:var(--accent-ink)}
   .node.buyer h3{font-weight:500}
   .arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 12px;
-    font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+    font-family:var(--mono);font-size:clamp(11px,1vw,12.5px);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
   .arrow svg{width:44px;height:14px;color:var(--text)}
   @media (max-width:880px){
     .flow{grid-template-columns:1fr}
@@ -261,14 +288,47 @@ border-bottom:1px solid var(--line);
     .arrow svg{transform:rotate(90deg);width:28px}
   }
 
-  /* how it scales: rising steps, the north star in ink */
+  /* how it scales: the steps rise in turn, an amber sweep runs along them, and the star drops
+     onto the north star as it lands. All of it waits until the section is on screen. */
+  .ladder > .rung{opacity:0;transform:translateY(16px) scale(.96);
+    transition:opacity .5s ease,transform .55s cubic-bezier(.2,.7,.3,1)}
+  .ladder.in > .rung{opacity:1;transform:none}
+  .ladder.in > .rung:nth-child(1){transition-delay:.05s}
+  .ladder.in > .rung:nth-child(2){transition-delay:.22s}
+  .ladder.in > .rung:nth-child(3){transition-delay:.39s}
+  .ladder.in > .rung:nth-child(4){transition-delay:.56s}
+  @keyframes rung-lit{
+    0%,100%{background:var(--ground);border-color:var(--line-2)}
+    35%,60%{background:var(--accent-soft);border-color:var(--accent)}}
+  .ladder.in > .rung:nth-child(1){animation:rung-lit 1.6s ease .8s}
+  .ladder.in > .rung:nth-child(2){animation:rung-lit 1.6s ease 1.35s}
+  .ladder.in > .rung:nth-child(3){animation:rung-lit 1.6s ease 1.9s}
+  @keyframes star-land{
+    0%{box-shadow:0 0 0 0 rgba(252,170,45,0)}
+    40%{box-shadow:0 0 0 3px rgba(252,170,45,.9)}
+    100%{box-shadow:0 0 0 2px rgba(252,170,45,.55)}}
+  .ladder.in > .rung.star{animation:star-land 1.1s ease 2.75s forwards}
+  .drop-star{position:absolute;top:clamp(-116px,-9vw,-74px);right:clamp(-58px,-4.4vw,-30px);z-index:-1;
+    width:clamp(124px,11.5vw,196px);height:auto;opacity:0}
+  @keyframes star-drop{
+    0%{opacity:0;transform:translateY(-120px) rotate(-14deg) scale(.8)}
+    45%{opacity:1}
+    70%{transform:translateY(6px) rotate(4deg) scale(1.04)}
+    100%{opacity:1;transform:none}}
+  .ladder.in > .rung.star .drop-star{animation:star-drop 1.15s cubic-bezier(.3,.9,.4,1) 2.5s forwards}
+  @media (prefers-reduced-motion:reduce){
+    .ladder > .rung{opacity:1;transform:none;transition:none;animation:none!important}
+    .drop-star{opacity:1;animation:none!important}
+  }
+  /* the star hangs past the card, so this section clips its edges instead of scrolling sideways */
+  #scale{overflow-x:clip}
   .ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:end}
   @media (max-width:880px){.ladder{grid-template-columns:repeat(2,1fr)}}
   @media (max-width:560px){.ladder{grid-template-columns:1fr}}
-  .rung{border:1px solid var(--line-2);padding:22px 20px 24px;display:flex;flex-direction:column;gap:10px;min-height:calc(180px + var(--k) * 44px)}
+  .rung{position:relative;border:1px solid var(--line-2);padding:clamp(22px,3vh,34px) clamp(20px,1.8vw,28px);display:flex;flex-direction:column;gap:10px;min-height:calc(200px + var(--k) * 52px)}
   @media (max-width:880px){.rung{min-height:0}}
-  .rung .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--accent-deep)}
-  .rung p{color:var(--muted);font-size:15px}
+  .rung .num{font-family:var(--mono);font-size:clamp(11px,1vw,13px);letter-spacing:.14em;color:var(--accent-deep)}
+  .rung p{color:var(--muted);font-size:clamp(16px,1.4vw,18px)}
   .rung.now{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
   .rung.star{background:var(--text);color:var(--ground);border-color:var(--text)}
   .rung.star .num{color:var(--accent)}
@@ -282,15 +342,50 @@ border-bottom:1px solid var(--line);
   .status-col h3{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px}
   .status-col h3 small{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
   .status-col ul{list-style:none;margin:0;padding:0}
-  .status-col li{display:grid;grid-template-columns:10px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);font-size:15.5px}
-  .status-col li::before{content:"";width:10px;height:10px;margin-top:7px;background:var(--accent)}
-  .status-col.next li::before{background:none;border:1.5px solid var(--line-2)}
+  .status-col li{display:grid;grid-template-columns:20px 1fr;gap:14px;padding:clamp(8px,1.4vh,12px) 0;border-bottom:1px solid var(--line);font-size:clamp(15.5px,1.35vw,18px)}
   .status-col li span{color:var(--muted)}
+  .status-col .box{width:19px;height:19px;margin-top:3px;border-radius:3px;display:grid;place-items:center}
+  .status-col.next .box{border:1.5px solid var(--line-2)}
+  .status-col.next li{color:var(--muted)}
+  /* the built items tick in one after another once the section is on screen */
+  .status-col.built .box{background:var(--accent);opacity:0;transform:scale(.4);
+    transition:opacity .25s ease,transform .35s cubic-bezier(.34,1.5,.64,1)}
+  .status-col.built .box svg{width:12px;height:12px;fill:none;stroke:var(--accent-ink);stroke-width:2.4;
+    stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:17;stroke-dashoffset:17;transition:stroke-dashoffset .3s ease}
+  #status.in .status-col.built .box{opacity:1;transform:none}
+  #status.in .status-col.built .box svg{stroke-dashoffset:0}
+  #status.in .status-col.built li:nth-child(1) .box{transition-delay:.15s}
+  #status.in .status-col.built li:nth-child(1) .box svg{transition-delay:.33s}
+  #status.in .status-col.built li:nth-child(2) .box{transition-delay:.28s}
+  #status.in .status-col.built li:nth-child(2) .box svg{transition-delay:.46s}
+  #status.in .status-col.built li:nth-child(3) .box{transition-delay:.41s}
+  #status.in .status-col.built li:nth-child(3) .box svg{transition-delay:.59s}
+  #status.in .status-col.built li:nth-child(4) .box{transition-delay:.54s}
+  #status.in .status-col.built li:nth-child(4) .box svg{transition-delay:.72s}
+  #status.in .status-col.built li:nth-child(5) .box{transition-delay:.67s}
+  #status.in .status-col.built li:nth-child(5) .box svg{transition-delay:.85s}
+  #status.in .status-col.built li:nth-child(6) .box{transition-delay:.8s}
+  #status.in .status-col.built li:nth-child(6) .box svg{transition-delay:.98s}
+  #status.in .status-col.built li:nth-child(7) .box{transition-delay:.93s}
+  #status.in .status-col.built li:nth-child(7) .box svg{transition-delay:1.11s}
+  /* how much of it exists, before anyone reads a row */
+  .tally{display:flex;flex-direction:column;gap:10px;margin-bottom:clamp(18px,3vh,34px)}
+  .tally-k{display:flex;align-items:baseline;gap:16px;font-family:var(--mono);font-size:clamp(12.5px,1.15vw,15px);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .tally-k b{font-family:var(--sans);font-size:clamp(28px,3vw,42px);font-weight:500;letter-spacing:-.03em;color:var(--text);text-transform:none}
+  .tally-bar{display:flex;gap:2px;height:10px}
+  .tally-bar span{display:block;border-radius:2px}
+  .tally-bar .done{flex:0 0 53.8%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform 1s cubic-bezier(.2,.7,.3,1) .1s}
+  .tally-bar .rest{flex:1 1 auto;background:var(--line)}
+  #status.in .tally-bar .done{transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .status-col.built .box,.status-col.built .box svg{opacity:1;transform:none;stroke-dashoffset:0;transition:none}
+    .tally-bar .done{transform:none;transition:none}
+  }
 
   /* how it works: drag the pin, the screen and caption follow. Brought back from the original walkthrough. */
-  .scrub{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:28px clamp(32px,4vw,56px);align-items:center}
+  .scrub{display:grid;grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);gap:clamp(16px,2.6vh,28px) clamp(32px,4vw,56px);align-items:center}
   @media (max-width:880px){.scrub{grid-template-columns:1fr}}
-  .scrub-copy{display:flex;flex-direction:column;gap:12px;min-height:190px}
+  .scrub-copy{display:flex;flex-direction:column;gap:12px;min-height:clamp(120px,18vh,170px)}
   .scrub-copy .num{font-family:var(--mono);font-size:clamp(13px,1.1vw,15px);font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep)}
   /* the heading follows the slider: every step in ink, the current one in brown */
   #how .head{align-items:center;text-align:center;margin-bottom:clamp(24px,3.5vw,40px)}
@@ -300,8 +395,9 @@ border-bottom:1px solid var(--line);
   .scrub-title span.done{color:var(--text)}
   .scrub-title span.on{color:var(--accent-deep)}
   .scrub-copy h3{font-size:clamp(24px,2.6vw,34px);letter-spacing:-.03em;max-width:18ch}
-  .scrub-copy p{color:var(--muted);font-size:16px;max-width:40ch}
-  .scrub-scene{position:relative;aspect-ratio:1440/1000;border:1px solid var(--line-2);background:var(--surface);overflow:hidden}
+  .scrub-copy p{color:var(--muted);font-size:clamp(16px,1.4vw,19px);max-width:40ch}
+  .scrub-scene{position:relative;aspect-ratio:1440/1000;height:min(52vh,600px);width:auto;max-width:100%;justify-self:end;
+    border:1px solid var(--line-2);background:var(--surface);overflow:hidden}
   .scrub-scene img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s ease}
   .scrub-scene img.on{opacity:1}
   .scrub-track{grid-column:1 / -1;position:relative;margin-top:8px;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -327,15 +423,15 @@ border-bottom:1px solid var(--line);
   .scrub-marks button:hover{color:var(--text)}
   .scrub-marks button[aria-current]{color:var(--accent-deep)}
   .scrub-marks button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-  .scrub-hint{margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--muted);
-    display:flex;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
   @media (prefers-reduced-motion:reduce){.scrub-scene img{transition:none}}
 
   /* ---- footer ---- */
-  footer{padding:clamp(48px,6vw,80px) 0 40px}
-  footer .cta{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;padding-bottom:40px;border-bottom:1px solid var(--line);margin-bottom:28px}
-  footer .cta h2{max-width:none}
-  footer .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--muted)}
+  /* the footer closes the page in ink, kept tight so it does not read as another screen */
+  footer{background:var(--text);color:var(--ground);padding:clamp(34px,5vh,60px) 0 clamp(22px,3vh,34px)}
+  footer .cta{display:flex;flex-wrap:wrap;gap:20px 28px;align-items:center;justify-content:space-between;
+    padding-bottom:clamp(22px,3vh,32px);border-bottom:1px solid rgba(255,254,242,.2);margin-bottom:clamp(16px,2.4vh,24px)}
+  footer .cta h2{max-width:none;font-size:clamp(26px,3.4vw,44px)}
+  footer .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:rgba(255,254,242,.62)}
 
 </style>
 </head>
@@ -347,7 +443,7 @@ border-bottom:1px solid var(--line);
       <a class="txt" href="#problem">The bottleneck</a>
       <a class="txt" href="#how">How it works</a>
       <a class="txt" href="#trace">Traceable</a>
-      <a class="txt" href="#buyer">Who pays</a>
+      <a class="txt" href="#buyer">Who it's for</a>
       <a class="txt" href="#scale">How it scales</a>
       <a class="btn primary" href="#how">See it working
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
@@ -362,13 +458,7 @@ border-bottom:1px solid var(--line);
       <div class="label accent">TechIreland National AI Challenge 2026 · Prototype</div>
       <p class="name"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="square" aria-hidden="true"><path d="M10 20h44"/><path d="M32 52V28"/><path d="M17 52 32 28l15 24"/></svg><b>Releve</b></p>
       <h1>Your defective block assessments,<br> <span class="fix">drafted before you leave the site.</span></h1>
-      <p class="lede">The Building Condition Assessment every application to the Defective Concrete Blocks Grant Scheme needs. The visit takes a morning; the write-up can take two weeks. <b>Releve builds the draft on site from your photos, voice notes and the homeowner's paperwork.</b></p>
-      <div class="scale">
-        <div><b>9,500</b><span>Homes affected</span></div>
-        <div><b>3,598</b><span>Applications so far</span></div>
-        <div><b>542</b><span>Homes fixed</span></div>
-      </div>
-      <p class="scale-src">CCMA to the Oireachtas, 2026 · Dept. of Housing, to June 2026</p>
+      <p class="lede">The Building Condition Assessment every application to the Defective Concrete Blocks Grant Scheme needs. The visit takes a morning; the write-up can take two weeks. <b>Releve's AI reads the homeowner's paperwork, your site photos and your voice notes, and drafts the report on site.</b></p>
       <div class="actions">
         <a class="btn primary" href="#how">See how it works
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
@@ -381,6 +471,47 @@ border-bottom:1px solid var(--line);
     </figure>
   </div>
 </header>
+
+<section id="reach" class="dark">
+  <div class="wrap">
+    <div class="head">
+      <div class="label">The scale</div>
+      <h2>This is not a Donegal problem.</h2>
+    </div>
+    <div class="scale-facts">
+      <div>
+        <b>~9,500</b>
+        <span class="t">Homes affected</span>
+        <p>Could reach 20,000. The CCMA put it at 9,500 in February; research presented in June suggests the higher figure.</p>
+      </div>
+      <div>
+        <b>9</b>
+        <span class="t">Counties in the scheme</span>
+        <p><i>6 in full, parts of 3</i>Carlow, Clare, Donegal, Limerick, Mayo and Sligo, plus parts of Fingal, Meath and Wexford.</p>
+      </div>
+      <div>
+        <b>~3,000</b>
+        <span class="t">Affected outside Donegal</span>
+        <p>6,500 Donegal, 1,100 Mayo, 860 Clare, 700 Limerick, 300+ Sligo. Roughly one in three.</p>
+      </div>
+    </div>
+    <figure class="progress" role="img" aria-label="Of about 9,500 affected homes, 3,598 have applied to the scheme and 542 have been remediated.">
+      <figcaption class="k">How far the scheme has got</figcaption>
+      <div class="progress-bar">
+        <span class="p done"><b>542</b></span>
+        <span class="p applied"><b>3,598</b></span>
+        <span class="p left"><b>~9,500</b></span>
+      </div>
+      <div class="progress-key">
+        <span><i class="sw done" aria-hidden="true"></i>542 homes remediated</span>
+        <span><i class="sw applied" aria-hidden="true"></i>3,598 applications received</span>
+        <span><i class="sw left" aria-hidden="true"></i>~9,500 homes affected</span>
+      </div>
+      <div class="progress-foot"><span>€361m spent since 2020</span><span>To 30 June 2026</span></div>
+    </figure>
+    <p class="source-note">Dept. of Housing scheme statistics to 30 June 2026 · CCMA to the Oireachtas, February 2026 · RTÉ News, June 2026</p>
+  </div>
+</section>
 
 <section id="problem">
   <div class="wrap">
@@ -426,7 +557,6 @@ border-bottom:1px solid var(--line);
         <cite>Donegal County Council audit, Sept 2025</cite>
       </div>
     </div>
-    <p class="source-note">What software can't fix: lab testing capacity, funding and contractors. Releve focuses on the report every application needs.</p>
   </div>
 </section>
 
@@ -441,7 +571,7 @@ border-bottom:1px solid var(--line);
       <div class="scrub-copy" aria-live="polite">
         <div class="num"><span id="scrub-num">01</span> · <span id="scrub-where">At the practice</span></div>
         <h3 id="scrub-label">Start from what exists.</h3>
-        <p id="scrub-caption">Upload the planning file and old reports. Blank fields fill in, each showing the document it came from.</p>
+        <p id="scrub-caption">Upload the planning file and old reports. The AI reads them and fills the blank fields, each showing the document it came from.</p>
       </div>
       <div class="scrub-scene">
         <img class="on" src="img/app-evidence-documents.jpg" width="1440" height="1000" alt="Documents: a synthetic homeowner PDF uploaded and processed, with the original kept.">
@@ -458,7 +588,6 @@ border-bottom:1px solid var(--line);
           <li><button type="button" data-stage="2">03 · CORRECT</button></li>
           <li><button type="button" data-stage="3">04 · FREEZE</button></li>
         </ol>
-        <p class="scrub-hint"><span>One illustrative visit, on a made-up house.</span><span>Drag the pin, click a step, or use the arrow keys.</span></p>
       </div>
     </div>
   </div>
@@ -471,6 +600,13 @@ border-bottom:1px solid var(--line);
       <h2>Not a black box. Every line traces back.</h2>
       <p>Paste documents into a chatbot and you still have to check every answer. Releve breaks each source into small facts, and every line of the report points to the fact it came from.</p>
     </div>
+    <ul class="ai-does">
+      <li>Reads PDFs</li>
+      <li>Transcribes voice notes</li>
+      <li>Pulls out facts with page references</li>
+      <li>Drafts the narrative</li>
+      <li>Answers questions with citations</li>
+    </ul>
     <div class="trace" id="trace-demo">
       <svg class="trace-links" aria-hidden="true"><path id="tl-a"/><path id="tl-b"/><circle id="tl-c1" r="3"/><circle id="tl-c2" r="3"/><circle id="tl-c3" r="3"/><circle id="tl-c4" r="3"/></svg>
       <div class="trace-col">
@@ -507,28 +643,6 @@ border-bottom:1px solid var(--line);
       </div>
       <div class="traceback">Hover or click any line to trace it back to its source</div>
     </div>
-    <div class="versus">
-      <div class="vs bot">
-        <div class="k">A CHATBOT</div>
-        <div class="ask">When was the house built?</div>
-        <div class="bubble">The house was built in 2006.</div>
-        <div class="verdict"><i aria-hidden="true">?</i>No source. You check it by hand.</div>
-        <ul>
-          <li>Answers can change each time you ask</li>
-          <li>No record of what it changed</li>
-        </ul>
-      </div>
-      <div class="vs us">
-        <div class="k">RELEVE</div>
-        <div class="fn">Section B · Building information</div>
-        <div class="line"><span>Year built: 2006</span><span class="chip">planning.pdf · p.3 ↗</span></div>
-        <div class="verdict"><i aria-hidden="true">✓</i>Source attached. Check it in one click.</div>
-        <ul>
-          <li>Your edits are never overwritten</li>
-          <li>A frozen version, and only the professional signs</li>
-        </ul>
-      </div>
-    </div>
     <p class="stand-in"><span class="tag">Prototype</span>The AI here is a labelled stand-in; a live model is connected but not yet tested on real documents. Swap the model and the traceable structure stays.</p>
   </div>
 </section>
@@ -536,9 +650,9 @@ border-bottom:1px solid var(--line);
 <section id="buyer">
   <div class="wrap">
     <div class="head">
-      <div class="label">Who pays</div>
-      <h2>The practice that writes the report.</h2>
-      <p>Every assessment is already paid professional work. Releve sells time back to the practice that carries the write-up.</p>
+      <div class="label">Who it's for</div>
+      <h2>Built for the practice that writes the report.</h2>
+      <p>We can't fix the whole scheme, so we picked one step and one user: the professional who writes the assessment. That work is already paid for; Releve gives back the write-up time.</p>
     </div>
     <div class="flow">
       <div class="node"><div class="num">ADDS TO IT</div><h3>The homeowner</h3><p>Uploads what is missing through a one-time link. No account.</p></div>
@@ -547,7 +661,9 @@ border-bottom:1px solid var(--line);
       <div class="arrow" aria-hidden="true"><svg viewBox="0 0 44 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M0 7h42M35 1l7 6-7 6"/></svg>frozen PDF</div>
       <div class="node"><div class="num">RECEIVES IT</div><h3>The council</h3><p>Gets the same PDF it gets today. No new portal to learn.</p></div>
     </div>
-    <p class="pipe-note">Pricing is a hypothesis. No practice has paid for Releve yet.</p>
+    <figure class="flow-line">
+      <img src="img/flow-line.png" width="2172" height="250" loading="lazy" alt="One unbroken pen line running left to right: a crack in a wall becomes handwriting, then the ruled lines of a report, then an amber signature.">
+    </figure>
   </div>
 </section>
 
@@ -555,14 +671,14 @@ border-bottom:1px solid var(--line);
   <div class="wrap">
     <div class="head">
       <div class="label">How it scales</div>
-      <h2>One engine. Any report a professional signs.</h2>
-      <p>Evidence in, a source for every value, a professional signs, the version is frozen. A new report type is a new template, not a new product.</p>
+      <h2>This is the starting point.</h2>
+      <p>Evidence in, a source for every value, a signature, a version that never changes. That engine fits any report a professional has to sign, so a new report type is a new template, not a new product.</p>
     </div>
     <div class="ladder">
       <div class="rung now" style="--k:0"><div class="num">NOW</div><h3>DCB assessments</h3><p>The Building Condition Assessment every grant needs.</p></div>
       <div class="rung" style="--k:1"><div class="num">NEXT</div><h3>The rest of the scheme</h3><p>Works plans, payment claims and completion packs, plus the new social homes scheme.</p></div>
       <div class="rung" style="--k:2"><div class="num">THEN</div><h3>Other site reports</h3><p>Condition surveys, snagging, installation, building control and fire safety.</p></div>
-      <div class="rung star" style="--k:3"><div class="num">NORTH STAR</div><h3>Traceable AI extraction</h3><p>Any evidence-heavy report, compliance included, where every fact has to be checkable.</p></div>
+      <div class="rung star" style="--k:3"><img class="drop-star" src="img/north-star.png" alt="" aria-hidden="true"><div class="num">NORTH STAR</div><h3>Traceable AI extraction</h3><p>Any evidence-heavy report, compliance included, where every fact has to be checkable.</p></div>
     </div>
     <p class="source-note">Each new report type still needs testing with real users. Success in DCB doesn't prove demand elsewhere.</p>
   </div>
@@ -574,31 +690,35 @@ border-bottom:1px solid var(--line);
       <div class="label">Where we are · built in two weeks</div>
       <h2>What is built, and what is next.</h2>
     </div>
+    <div class="tally">
+      <div class="tally-k"><b>7 built</b><span>6 to go</span></div>
+      <div class="tally-bar" aria-hidden="true"><span class="done"></span><span class="rest"></span></div>
+    </div>
     <div class="status-grid">
-      <div class="status-col">
-        <h3>Built</h3>
+      <div class="status-col built">
+        <h3>Built <small>Checked 10 Sep 2026</small></h3>
         <ul>
-          <li><div>Cases, work list and case assignment</div></li>
-          <li><div>Old documents fill blank fields, with sources <span>· stand-in AI</span></div></li>
-          <li><div>Photos and voice notes at the house, offline</div></li>
-          <li><div>Report editor with live preview</div></li>
-          <li><div>Frozen PDF versions</div></li>
-          <li><div>Homeowner links, document requests and shares</div></li>
-          <li><div>Hand the case to the next engineer, with lab results <span>· synthetic lab</span></div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Cases, work list, assignment</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Documents fill fields, with sources <span>· stand-in AI</span></div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Photos and voice notes on site, offline</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Report editor with live preview</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Frozen PDF versions</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Homeowner links and shares</div></li>
+          <li><i class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.2 8.6l3.1 3.1L12.8 5"/></svg></i><div>Handover with lab results <span>· synthetic lab</span></div></li>
         </ul>
       </div>
       <div class="status-col next">
         <h3>Not yet</h3>
         <ul>
-          <li><div>Live AI model <span>· connected, not tested on real documents</span></div></li>
-          <li><div>A real tablet at a real site</div></li>
-          <li><div>Review by a practising assessor</div></li>
-          <li><div>Irish-language report and interface <span>· next</span></div></li>
-          <li><div>Council and lab channels <span>· next</span></div></li>
+          <li><i class="box" aria-hidden="true"></i><div>Live AI on real documents</div></li>
+          <li><i class="box" aria-hidden="true"></i><div>A real tablet on site</div></li>
+          <li><i class="box" aria-hidden="true"></i><div>A paying practice <span>· price untested</span></div></li>
+          <li><i class="box" aria-hidden="true"></i><div>Read by a practising assessor</div></li>
+          <li><i class="box" aria-hidden="true"></i><div>Irish-language version <span>· next</span></div></li>
+          <li><i class="box" aria-hidden="true"></i><div>Council and lab channels <span>· next</span></div></li>
         </ul>
       </div>
     </div>
-    <p class="pipe-note">The next real test is one practice running one live case. Before any real case material, data-protection controls and a documented data-flow assessment come first.</p>
   </div>
 </section>
 
@@ -613,7 +733,6 @@ border-bottom:1px solid var(--line);
     <div class="meta">
       <span>Releve (rel-uh-VAY): French for a survey reading · Crintus &amp; Co</span>
       <span>TechIreland National AI Challenge 2026</span>
-      <span>Every house on this page is synthetic. Not a formal assessment.</span>
     </div>
   </div>
 </footer>
@@ -621,9 +740,9 @@ border-bottom:1px solid var(--line);
 (function () {
   // [number, place, title, caption]
   var stages = [
-    ['01', 'At the practice', 'Start from what exists.', 'Upload the planning file and old reports. Blank fields fill in, each showing the document it came from.'],
-    ['02', 'At the house', 'Capture at the house.', 'Photos and voice notes on a tablet. Saved on the device, uploaded when there is signal.'],
-    ['03', 'In the van', 'Correct the draft.', 'The report is drafted before you sit down. Anything you type is never overwritten.'],
+    ['01', 'At the practice', 'Start from what exists.', 'Upload the planning file and old reports. The AI reads them and fills the blank fields, each showing the document it came from.'],
+    ['02', 'At the house', 'Capture at the house.', 'Photos and voice notes on a tablet. The AI writes your dictation up as a finding, tied to the wall you were standing at.'],
+    ['03', 'In the van', 'Correct the draft.', 'The AI has drafted the report before you sit down. Fix what is wrong; anything you type is never overwritten.'],
     ['04', 'Before the drive home', 'Freeze and share.', 'Version 1 becomes a fingerprinted PDF that never changes. Edit again and you get version 2.']
   ];
   var range = document.getElementById('scrub');
@@ -775,6 +894,45 @@ border-bottom:1px solid var(--line);
   window.addEventListener('resize', draw);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
   show(0);
+})();
+</script>
+<script>
+// The who-it's-for cards arrive as the section lands, and replay if you scroll back to it.
+(function () {
+  var flow = document.querySelector('.flow');
+  if (!flow || !('IntersectionObserver' in window)) { if (flow) flow.classList.add('in'); return; }
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.intersectionRatio > 0.4) flow.classList.add('in');
+      else if (e.intersectionRatio === 0) flow.classList.remove('in');
+    });
+  }, { threshold: [0, 0.4] }).observe(flow);
+})();
+</script>
+<script>
+// The scaling steps animate once the section is on screen, and replay if you come back to it.
+(function () {
+  var ladder = document.querySelector('.ladder');
+  if (!ladder || !('IntersectionObserver' in window)) { if (ladder) ladder.classList.add('in'); return; }
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.intersectionRatio > 0.4) ladder.classList.add('in');
+      else if (e.intersectionRatio === 0) ladder.classList.remove('in');
+    });
+  }, { threshold: [0, 0.4] }).observe(ladder);
+})();
+</script>
+<script>
+// The status section ticks its built items in, and draws its tally bar, once it is on screen.
+(function () {
+  var status = document.getElementById('status');
+  if (!status || !('IntersectionObserver' in window)) { if (status) status.classList.add('in'); return; }
+  new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.intersectionRatio > 0.35) status.classList.add('in');
+      else if (e.intersectionRatio === 0) status.classList.remove('in');
+    });
+  }, { threshold: [0, 0.35] }).observe(status);
 })();
 </script>
 </body>
